@@ -46,4 +46,9 @@ Install via Nuget:
 
 https://www.nuget.org/packages/Terminal.Gui.Elmish/0.1.0
 
+```
+dotnet add package Terminal.Gui.Elmish
+```
 
+
+A lot of Thanks to Miguel de Icaza. Nice Project!.
