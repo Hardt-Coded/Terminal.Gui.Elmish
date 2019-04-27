@@ -13,7 +13,7 @@ Program.mkConsoleProgram init update view
 
 Some fable-elmish DSL:
 ```
-yield window [
+ window [
             Styles [
                 Pos (AbsPos 0,AbsPos 1)
                 Dim (Fill,Fill)
