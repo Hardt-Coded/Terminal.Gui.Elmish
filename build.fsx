@@ -384,7 +384,7 @@ Target.create "All" ignore
   ==> "Restore"
   ==> "Build"
   ==> "CopyBinaries"
-  ==> "GenerateDocs"
+  //==> "GenerateDocs" // doesn work
   ==> "NuGet"
   ==> "All"
 

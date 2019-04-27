@@ -5,7 +5,7 @@ init:
 build_script:
   - cmd: build.cmd All
 test: off
-version: 0.0.1.{build}
+version: 0.1.0.{build}
 artifacts:
   - path: bin
     name: bin
