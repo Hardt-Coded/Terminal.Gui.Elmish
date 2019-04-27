@@ -129,7 +129,7 @@ let view (model:Model) (dispatch:Msg -> unit)=
                         Pos (AbsPos 1, AbsPos 4)
                         Dim (AbsDim 20,AbsDim 1)
                     ]
-                    Text model.Text
+                    Value model.Text
                     OnChanged (fun t -> dispatch (ChangeText t))
                 ]
 
