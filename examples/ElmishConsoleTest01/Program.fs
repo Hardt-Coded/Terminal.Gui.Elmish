@@ -99,13 +99,14 @@ let view (model:Model) (dispatch:Msg -> unit)=
                 Pos (AbsPos 0,AbsPos 1)
                 Dim (Fill,Fill)
             ]
-            Title "Demo 1"
+            Title "Console Elmish"
         ] [
             window [
                 Styles [
                     Pos (PercentPos 20.0,PercentPos 10.0)
                     Dim (PercentDim 30.0,AbsDim 15)
                 ]
+                Title "Demo 1"
             ] [
                 button [
                     Styles [

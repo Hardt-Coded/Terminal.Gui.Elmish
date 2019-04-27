@@ -33,11 +33,11 @@ let project = "Terminal.Gui.Elmish"
 
 // Short summary of the project
 // (used as description in AssemblyInfo and as a short summary for NuGet package)
-let summary = "An elmish wrapper around Miguel de Icaza's \"Gui.cs\" https://github.com/migueldeicaza/gui.cs including a fable like view DSL."
+let summary = "An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including a fable like view DSL."
 
 // Longer description of the project
 // (used as a description for NuGet package; line breaks are automatically cleaned up)
-let description = "An elmish wrapper around Miguel de Icaza's \"Gui.cs\" https://github.com/migueldeicaza/gui.cs including a fable like view DSL."
+let description = "An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including a fable like view DSL."
 
 // List of author names (for NuGet package)
 let author = "Daniel Hardt"
@@ -225,7 +225,7 @@ let githubLink = sprintf "https://github.com/%s/%s" github_release_user gitName
 let info =
   [ "project-name", "Terminal.Gui.Elmish"
     "project-author", "Daniel Hardt"
-    "project-summary", "An elmish wrapper around Miguel de Icaza's \"Gui.cs\" https://github.com/migueldeicaza/gui.cs including a fable like view DSL."
+    "project-summary", "An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including a fable like view DSL."
     "project-github", githubLink
     "project-nuget", "http://nuget.org/packages/Terminal.Gui.Elmish" ]
 

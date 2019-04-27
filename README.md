@@ -13,37 +13,32 @@ Program.mkConsoleProgram init update view
 
 Some fable-elmish DSL:
 ```
- window [
-            Styles [
-                Pos (AbsPos 0,AbsPos 1)
-                Dim (Fill,Fill)
-            ]
-            Title "Demo 1"
-        ] [
-            window [
-                Styles [
-                    Pos (PercentPos 20.0,PercentPos 10.0)
-                    Dim (PercentDim 30.0,AbsDim 15)
-                ]
-            ] [
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 1)
-                    ]
-                    Text "Counter Up"
-                    OnClicked (fun () -> dispatch Inc)                    
-                ] 
 
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 2)
-                    ]
-                    Text "Counter Down"
-                    OnClicked (fun () -> dispatch Dec)                    
-                ] 
+window [
+    Styles [
+        Pos (PercentPos 20.0,PercentPos 10.0)
+        Dim (PercentDim 30.0,AbsDim 15)
+    ]
+	Title "Demo 1"
+] [
+    button [
+        Styles [
+            Pos (AbsPos 1, AbsPos 1)
+        ]
+        Text "Counter Up"
+        OnClicked (fun () -> dispatch Inc)                    
+    ] 
+
+    button [
+        Styles [
+            Pos (AbsPos 1, AbsPos 2)
+        ]
+        Text "Counter Down"
+        OnClicked (fun () -> dispatch Dec)                    
+    ] 
 
                 
-            ]
+]
 
 ```
 
