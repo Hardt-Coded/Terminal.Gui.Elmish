@@ -42,3 +42,8 @@ window [
 
 ```
 
+Install via Nuget:
+
+https://www.nuget.org/packages/Terminal.Gui.Elmish/0.1.0
+
+
