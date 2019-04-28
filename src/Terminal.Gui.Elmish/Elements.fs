@@ -15,7 +15,7 @@ module StyleHelpers =
     type Position =
         | AbsPos of int
         | PercentPos of float
-        | Center
+        | CenterPos
 
     type Dimension =
         | Fill
@@ -23,9 +23,32 @@ module StyleHelpers =
         | AbsDim of int
         | PercentDim of float
 
+    type TextAlignment =
+        | Left 
+        | Right
+        | Centered
+        | Justified
+
+    type ColorScheme =
+        | Normal
+        | Focus
+        | HotNormal
+        | HotFocus
+
+    type ScrollBar =
+        | NoBars
+        | HorizontalBar
+        | VerticalBar
+        | BothBars
+
     type Style =
         | Pos of x:Position * y:Position
         | Dim of width:Dimension * height:Dimension
+        | TextAlignment of TextAlignment
+        | TextColorScheme of ColorScheme
+        | Colors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
+        
+        
 
     type Prop<'TValue> =
         | Styles of Style list
@@ -36,6 +59,9 @@ module StyleHelpers =
         | OnClicked of (unit -> unit)
         | Items of ('TValue * string) list
         | Frame of Rect
+        | ScrollBar of ScrollBar
+        | Secret
+        
 
     
     let private convDim (dim:Dimension) =
@@ -49,8 +75,17 @@ module StyleHelpers =
         match dim with
         | Position.AbsPos i -> Pos.At(i)
         | Position.PercentPos p -> Pos.Percent(p |> float32)
-        | Position.Center -> Pos.Center()
+        | Position.CenterPos -> Pos.Center()
     
+    let addTextAlignmentToLabel (label:Label) (alignment:TextAlignment) =
+        match alignment with
+        | Left -> label.TextAlignment <- Terminal.Gui.TextAlignment.Left
+        | Right -> label.TextAlignment <- Terminal.Gui.TextAlignment.Right
+        | Centered -> label.TextAlignment <- Terminal.Gui.TextAlignment.Centered
+        | Justified -> label.TextAlignment <- Terminal.Gui.TextAlignment.Justified
+
+    
+
     let addStyleToView (view:View) (style:Style) =
         match style with
         | Pos (x,y) ->
@@ -59,6 +94,38 @@ module StyleHelpers =
         | Dim (width,height) ->
             view.Width <- width |> convDim
             view.Height <- height |> convDim
+        | TextAlignment alignment ->
+            match view with
+            | :? Label as label ->                
+                alignment |> addTextAlignmentToLabel label
+            | _ -> 
+                ()
+        | TextColorScheme color ->
+            let colorScheme =
+                let s = 
+                    if Application.Current<> null then
+                        Application.Current.ColorScheme
+                    else
+                        Terminal.Gui.ColorScheme()
+                match color with
+                | Normal -> s.Normal
+                | Focus -> s.Focus
+                | HotNormal -> s.HotNormal
+                | HotFocus -> s.HotFocus
+            match view with
+            | :? Label as label ->                
+                label.TextColor <- colorScheme
+            | _ -> 
+                ()
+        | Colors (fg,bg) ->
+            let color = Terminal.Gui.Attribute.Make(fg,bg)
+            match view with
+            | :? Label as label ->                
+                label.TextColor <- color
+            | _ -> 
+                ()
+            
+            
     
     let addStyles (styles:Style list) (view:View)=
         styles
@@ -119,6 +186,17 @@ module StyleHelpers =
         |> List.tryFind (fun i -> match i with | Items _ -> true | _ -> false)
         |> Option.map (fun i -> match i with | Items t -> t | _ -> failwith "What?No!Never should this happen!")
         |> Option.defaultValue []
+
+    let getScrollBarFromProps (props:Prop<'TValue> list) = 
+        props
+        |> List.tryFind (fun i -> match i with | ScrollBar _ -> true | _ -> false)
+        |> Option.map (fun i -> match i with | ScrollBar t -> t | _ -> failwith "What?No!Never should this happen!")
+        |> Option.defaultValue NoBars
+
+    let hasSecretInProps (props:Prop<'TValue> list) = 
+        props
+        |> List.exists (fun i -> match i with | Secret _ -> true | _ -> false)
+        
         
        
 
@@ -189,6 +267,10 @@ module Elements =
         | Some changed ->
             t.Changed.AddHandler(fun o _ -> changed (((o:?>TextField).Text).ToString()))        
         | None -> ()
+
+        let secret = hasSecretInProps props
+        t.Secret <- secret
+
         t
         |> addPossibleStylesFromProps props
 
@@ -338,11 +420,25 @@ module Elements =
     
     let scrollView (props:Prop<'TValue> list) (subViews:View list) =
         let frame = tryGetFrameFromProps props
+        let bars = getScrollBarFromProps props
+        
         match frame with
         | None ->
             failwith "Scrollview need a Frame Prop"
         | Some frame ->
             let sv = ScrollView(frame)
+
+            match bars with
+            | NoBars ->
+                ()
+            | HorizontalBar ->
+                sv.ShowHorizontalScrollIndicator <- true
+            | VerticalBar ->
+                sv.ShowVerticalScrollIndicator <- true
+            | BothBars ->
+                sv.ShowHorizontalScrollIndicator <- true
+                sv.ShowVerticalScrollIndicator <- true
+
             subViews |> List.iter (fun i -> sv.Add(i))
             sv
             |> addPossibleStylesFromProps props
