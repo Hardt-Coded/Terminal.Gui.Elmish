@@ -3,4 +3,4 @@
 #### 0.1.1 - Sonntag, 28. April 2019
 * better example app
 * file dialog integration
-* remove emlish dependency, because of need modifications
+* remove elmish dependency, because of need modifications
