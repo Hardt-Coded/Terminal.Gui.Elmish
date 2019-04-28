@@ -7,7 +7,7 @@ An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldei
 Usage:
 ```fs
 Program.mkProgram init update view  
-    |> Program.run
+|> Program.run
     
 ```
 
