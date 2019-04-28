@@ -6,9 +6,9 @@ An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldei
 
 Usage:
 ```fs
-Program.mkConsoleProgram init update view  
+Program.mkProgram init update view  
     |> Program.run
-
+    
 ```
 
 Some fable-elmish DSL:
