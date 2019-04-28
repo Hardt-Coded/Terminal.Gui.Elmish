@@ -214,7 +214,7 @@ module Elements =
 
 
     let page (subViews:View list) =
-        let top = Toplevel.Create()
+        let top = Toplevel.Create()        
         subViews |> List.iter (fun v -> top.Add(v))
         let state = Application.Begin(top)  
         state
@@ -442,6 +442,45 @@ module Elements =
             subViews |> List.iter (fun i -> sv.Add(i))
             sv
             |> addPossibleStylesFromProps props
+
+
+
+    let fileDialog title prompt nameFieldLabel message =
+        let dia = FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
+        Application.Run(dia)
+        dia.FilePath |> string
+
+    let openDialog title message =
+        let dia = OpenDialog(title |> ustr,message |> ustr)                
+        Application.Run(dia)
+        let file = 
+            dia.FilePath
+            |> Option.ofObj 
+            |> Option.map string
+            |> Option.bind (fun s ->
+                if String.IsNullOrEmpty(s) then None 
+                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+            )
+        file
+        
+            
+        
+        
+        
+
+    let saveDialog title message =
+        let dia = SaveDialog(title |> ustr,message |> ustr)        
+        Application.Run(dia)
+        let file = 
+            dia.FilePath
+            |> Option.ofObj 
+            |> Option.map string
+            |> Option.bind (fun s ->
+                if String.IsNullOrEmpty(s) then None 
+                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+            )
+        file
+            
 
     
 
