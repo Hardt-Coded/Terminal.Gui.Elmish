@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Start.fs" />
+    <Compile Include="Counter.fs" />
+    <Compile Include="TextFields.fs" />
+    <Compile Include="RadioCheck.fs" />
+    <Compile Include="App.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Terminal.Gui.Elmish\Terminal.Gui.Elmish.fsproj" />
+  </ItemGroup>
+
+</Project>
