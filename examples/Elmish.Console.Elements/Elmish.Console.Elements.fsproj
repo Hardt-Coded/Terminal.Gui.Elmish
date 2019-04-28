@@ -10,6 +10,7 @@
     <Compile Include="Counter.fs" />
     <Compile Include="TextFields.fs" />
     <Compile Include="RadioCheck.fs" />
+    <Compile Include="TextView.fs" />
     <Compile Include="App.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

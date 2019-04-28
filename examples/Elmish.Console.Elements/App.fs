@@ -1,6 +1,5 @@
 ﻿module App
 
-open Elmish
 open Terminal.Gui.Elmish
 
 type Pages = 
@@ -8,6 +7,7 @@ type Pages =
     | Counter
     | TextFields
     | RadioCheck
+    | TextView
 
 type Model = {
     Page: Pages
@@ -15,6 +15,7 @@ type Model = {
     CounterModel:Counter.Model option
     TextFieldsModel:TextFields.Model option
     RadioCheckModel:RadioCheck.Model option
+    TextViewModel:TextView.Model option
 }
 
 
@@ -24,6 +25,7 @@ type Msg =
     | CounterMsg of Counter.Msg
     | TextFieldsMsg of TextFields.Msg
     | RadioCheckMsg of RadioCheck.Msg
+    | TextViewMsg of TextView.Msg
 
 
 let init () =
@@ -32,6 +34,7 @@ let init () =
         CounterModel = None
         TextFieldsModel = None
         RadioCheckModel = None
+        TextViewModel = None
     }
     model, Cmd.none
 
@@ -73,6 +76,16 @@ let update (msg:Msg) (model:Model) =
             | _ ->
                 {model with Page = page}, Cmd.none
 
+        | TextView ->
+            match model.TextViewModel with
+            | None ->
+                let (m,c) = TextView.init()
+                let cmd =
+                    c |> Cmd.map (TextViewMsg)
+                {model with TextViewModel = Some m; Page = TextView}, cmd
+            | _ ->
+                {model with Page = page}, Cmd.none
+
 
 
     | CounterMsg cmsg ->
@@ -106,6 +119,16 @@ let update (msg:Msg) (model:Model) =
                 c |> Cmd.map (RadioCheckMsg)
             {model with RadioCheckModel = Some m}, cmd
 
+    | TextViewMsg tfmsg ->
+           match model.TextViewModel with
+           | None ->
+               model, Cmd.none
+           | Some tfmodel ->
+               let (m,c) = TextView.update tfmsg tfmodel
+               let cmd =
+                   c |> Cmd.map (TextViewMsg)
+               {model with TextViewModel = Some m}, cmd
+
 
 
 
@@ -120,6 +143,7 @@ let view (model:Model) (dispatch:Msg->unit) =
                 menuItem "Counter" "" (fun () -> dispatch (ChangePage Counter))
                 menuItem "TextFields" "" (fun () -> dispatch (ChangePage TextFields))
                 menuItem "Radio and Check" "" (fun () -> dispatch (ChangePage RadioCheck))
+                menuItem "Text File View" "" (fun () -> dispatch (ChangePage TextView))
             ]
         ]
 
@@ -166,6 +190,14 @@ let view (model:Model) (dispatch:Msg->unit) =
                     Text "Radio and Check"
                     OnClicked (fun () -> dispatch (ChangePage RadioCheck))
                 ] 
+
+                button [
+                    Styles [
+                        Pos (AbsPos 1, AbsPos 5)
+                    ]
+                    Text "Text File View"
+                    OnClicked (fun () -> dispatch (ChangePage TextView))
+                ] 
             ]
 
             window [
@@ -193,6 +225,11 @@ let view (model:Model) (dispatch:Msg->unit) =
                     | None -> ()
                     | Some rcmodel ->
                         yield! RadioCheck.view rcmodel (RadioCheckMsg >> dispatch)
+                | TextView ->
+                    match model.TextViewModel with
+                    | None -> ()
+                    | Some tvmodel ->
+                        yield! TextView.view tvmodel (TextViewMsg >> dispatch)
 
 
             ]

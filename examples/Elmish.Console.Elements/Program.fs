@@ -1,7 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
-open Elmish
 open Terminal.Gui.Elmish
 open App
 
@@ -10,7 +9,7 @@ open App
 let main argv =
     
 
-    Program.mkConsoleProgram init update view  
+    Program.mkProgram init update view  
     |> Program.run
 
 

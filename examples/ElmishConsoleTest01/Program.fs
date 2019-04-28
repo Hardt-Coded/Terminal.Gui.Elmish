@@ -251,7 +251,7 @@ let view (model:Model) (dispatch:Msg -> unit)=
 [<EntryPoint>]
 let main argv =
     
-    Program.mkConsoleProgram init update view  
+    Program.mkProgram init update view  
     |> Program.run
     
     0 // return an integer exit code

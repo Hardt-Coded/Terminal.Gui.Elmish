@@ -1,7 +1,7 @@
 ﻿module Counter
 
 
-open Elmish
+
 open Terminal.Gui
 open Terminal.Gui.Elmish
 

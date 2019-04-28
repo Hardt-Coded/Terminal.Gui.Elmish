@@ -1,7 +1,6 @@
 ﻿module TextFields
 
 
-open Elmish
 open Terminal.Gui
 open Terminal.Gui.Elmish
 
