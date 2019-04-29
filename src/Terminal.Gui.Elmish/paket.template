@@ -29,5 +29,5 @@ files
 	../../bin/Terminal.Gui.Elmish ==> lib
 
 dependencies
-  Terminal.Gui
+  Terminal.Gui >= 0.21.0
   

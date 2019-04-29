@@ -4,3 +4,9 @@
 * better example app
 * file dialog integration
 * remove elmish dependency, because of need modifications
+#### 0.1.2 - Montag, 29. April 2019
+* added list view, scroll view and message box examples
+* message box wrapper
+* file dialog wrapper
+* addtional Props for ScrollView
+* add Terminal.Gui dependecy to nuget
