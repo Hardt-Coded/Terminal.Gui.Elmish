@@ -31,6 +31,7 @@ let update (msg:Msg) (model:Model) =
 
 let view (model:Model) (dispatch:Msg -> unit) : View list=
     [
+        label[]
         label [
             Styles [
                 Pos (CenterPos,AbsPos 1)

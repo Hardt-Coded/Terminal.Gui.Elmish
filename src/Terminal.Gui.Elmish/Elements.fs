@@ -268,16 +268,7 @@ module Elements =
             tryGetValueFromProps props
             |> Option.defaultValue ""
         
-        let t = TextField(value |> ustr)
-        // Meh reflection to set the "used" flag to true, because
-        // with the complete redraw approache, the text field will
-        // be deleted if you try to enter something
-        let tfields = t.GetType().GetFields(BindingFlags.Instance ||| BindingFlags.NonPublic)
-        let tused = tfields |> Array.tryFind (fun e -> e.Name = "used")
-        match tused with
-        | Some tp ->
-            tp.SetValue(t,true)
-        | None -> ()
+        let t = TextField(value |> ustr,Used = true)
 
         let changed = tryGetOnChangedFromProps props
         match changed with
@@ -389,13 +380,8 @@ module Elements =
     
 
     let setCursorRadioGroup (x:int) (rg:RadioGroup) =
-        let tfields = rg.GetType().GetFields(BindingFlags.Instance ||| BindingFlags.NonPublic)
-        let tused = tfields |> Array.tryFind (fun e -> e.Name = "cursor")
-        match tused with
-        | Some tp ->
-            tp.SetValue(rg,x)
-            rg
-        | None -> rg
+        rg.Cursor <- x
+        rg
 
     let inline radioGroup (props:Prop<'TValue> list) =
         let items = getItemsFromProps props        

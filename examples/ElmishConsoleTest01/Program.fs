@@ -3,7 +3,6 @@
 open System
 
 open NStack
-open Elmish
 open Terminal.Gui.Elmish
 open System.IO
 
