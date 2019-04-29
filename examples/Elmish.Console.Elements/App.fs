@@ -8,6 +8,9 @@ type Pages =
     | TextFields
     | RadioCheck
     | TextView
+    | ListView
+    | ScrollView
+    | MessageBoxes
 
 type Model = {
     Page: Pages
@@ -16,6 +19,9 @@ type Model = {
     TextFieldsModel:TextFields.Model option
     RadioCheckModel:RadioCheck.Model option
     TextViewModel:TextView.Model option
+    ListViewModel:ListView.Model option
+    ScrollViewModel:ScrollView.Model option
+    MessageBoxesModel:MessageBoxes.Model option
 }
 
 
@@ -26,6 +32,9 @@ type Msg =
     | TextFieldsMsg of TextFields.Msg
     | RadioCheckMsg of RadioCheck.Msg
     | TextViewMsg of TextView.Msg
+    | ListViewMsg of ListView.Msg
+    | ScrollViewMsg of ScrollView.Msg
+    | MessageBoxesMsg of MessageBoxes.Msg
 
 
 let init () =
@@ -35,6 +44,9 @@ let init () =
         TextFieldsModel = None
         RadioCheckModel = None
         TextViewModel = None
+        ListViewModel = None
+        ScrollViewModel = None
+        MessageBoxesModel = None
     }
     model, Cmd.none
 
@@ -85,6 +97,33 @@ let update (msg:Msg) (model:Model) =
                 {model with TextViewModel = Some m; Page = TextView}, cmd
             | _ ->
                 {model with Page = page}, Cmd.none
+        | ListView ->
+            match model.ListViewModel with
+            | None ->
+                let (m,c) = ListView.init()
+                let cmd =
+                    c |> Cmd.map (ListViewMsg)
+                {model with ListViewModel = Some m; Page = ListView}, cmd
+            | _ ->
+                {model with Page = page}, Cmd.none
+        | ScrollView ->
+            match model.ScrollViewModel with
+            | None ->
+                let (m,c) = ScrollView.init()
+                let cmd =
+                    c |> Cmd.map (ScrollViewMsg)
+                {model with ScrollViewModel = Some m; Page = ScrollView}, cmd
+            | _ ->
+                {model with Page = page}, Cmd.none
+        | MessageBoxes ->
+            match model.ScrollViewModel with
+            | None ->
+                let (m,c) = MessageBoxes.init()
+                let cmd =
+                    c |> Cmd.map (MessageBoxesMsg)
+                {model with MessageBoxesModel = Some m; Page = MessageBoxes}, cmd
+            | _ ->
+                {model with Page = page}, Cmd.none
 
 
 
@@ -128,6 +167,33 @@ let update (msg:Msg) (model:Model) =
                let cmd =
                    c |> Cmd.map (TextViewMsg)
                {model with TextViewModel = Some m}, cmd
+    | ListViewMsg tfmsg ->
+           match model.ListViewModel with
+           | None ->
+               model, Cmd.none
+           | Some tfmodel ->
+               let (m,c) = ListView.update tfmsg tfmodel
+               let cmd =
+                   c |> Cmd.map (ListViewMsg)
+               {model with ListViewModel = Some m}, cmd
+    | ScrollViewMsg tfmsg ->
+           match model.ScrollViewModel with
+           | None ->
+               model, Cmd.none
+           | Some tfmodel ->
+               let (m,c) = ScrollView.update tfmsg tfmodel
+               let cmd =
+                   c |> Cmd.map (ScrollViewMsg)
+               {model with ScrollViewModel = Some m}, cmd
+    | MessageBoxesMsg tfmsg ->
+           match model.MessageBoxesModel with
+           | None ->
+               model, Cmd.none
+           | Some tfmodel ->
+               let (m,c) = MessageBoxes.update tfmsg tfmodel
+               let cmd =
+                   c |> Cmd.map (MessageBoxesMsg)
+               {model with MessageBoxesModel = Some m}, cmd
 
 
 
@@ -144,6 +210,9 @@ let view (model:Model) (dispatch:Msg->unit) =
                 menuItem "TextFields" "" (fun () -> dispatch (ChangePage TextFields))
                 menuItem "Radio and Check" "" (fun () -> dispatch (ChangePage RadioCheck))
                 menuItem "Text File View" "" (fun () -> dispatch (ChangePage TextView))
+                menuItem "List View" "" (fun () -> dispatch (ChangePage ListView))
+                menuItem "Scroll View" "" (fun () -> dispatch (ChangePage ScrollView))
+                menuItem "Message Boxes" "" (fun () -> dispatch (ChangePage MessageBoxes))
             ]
         ]
 
@@ -198,6 +267,28 @@ let view (model:Model) (dispatch:Msg->unit) =
                     Text "Text File View"
                     OnClicked (fun () -> dispatch (ChangePage TextView))
                 ] 
+
+                button [
+                    Styles [
+                        Pos (AbsPos 1, AbsPos 6)
+                    ]
+                    Text "List View"
+                    OnClicked (fun () -> dispatch (ChangePage ListView))
+                ]                
+                button [
+                    Styles [
+                        Pos (AbsPos 1, AbsPos 7)
+                    ]
+                    Text "Scroll View"
+                    OnClicked (fun () -> dispatch (ChangePage ScrollView))
+                ] 
+                button [
+                    Styles [
+                        Pos (AbsPos 1, AbsPos 8)
+                    ]
+                    Text "Message Boxes"
+                    OnClicked (fun () -> dispatch (ChangePage MessageBoxes))
+                ] 
             ]
 
             window [
@@ -230,6 +321,21 @@ let view (model:Model) (dispatch:Msg->unit) =
                     | None -> ()
                     | Some tvmodel ->
                         yield! TextView.view tvmodel (TextViewMsg >> dispatch)
+                | ListView ->
+                    match model.ListViewModel with
+                    | None -> ()
+                    | Some tvmodel ->
+                        yield! ListView.view tvmodel (ListViewMsg >> dispatch)
+                | ScrollView ->
+                    match model.ScrollViewModel with
+                    | None -> ()
+                    | Some svmodel ->
+                        yield! ScrollView.view svmodel (ScrollViewMsg >> dispatch)
+                | MessageBoxes ->
+                    match model.MessageBoxesModel with
+                    | None -> ()
+                    | Some svmodel ->
+                        yield! MessageBoxes.view svmodel (MessageBoxesMsg >> dispatch)
 
 
             ]
