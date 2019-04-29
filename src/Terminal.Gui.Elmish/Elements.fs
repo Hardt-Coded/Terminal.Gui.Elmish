@@ -58,9 +58,15 @@ module StyleHelpers =
         | OnChanged of ('TValue -> unit)
         | OnClicked of (unit -> unit)
         | Items of ('TValue * string) list
-        | Frame of Rect
-        | ScrollBar of ScrollBar
         | Secret
+        // Scrollbar Stuff
+        | ScrollContentSize of int * int
+        | ScrollOffset of int * int
+        | ScrollBar of ScrollBar
+        | Frame of (int * int * int * int)
+
+        
+
         
 
     
@@ -192,6 +198,17 @@ module StyleHelpers =
         |> List.tryFind (fun i -> match i with | ScrollBar _ -> true | _ -> false)
         |> Option.map (fun i -> match i with | ScrollBar t -> t | _ -> failwith "What?No!Never should this happen!")
         |> Option.defaultValue NoBars
+
+    let getScrollContentSizeFromProps (props:Prop<'TValue> list) = 
+        props
+        |> List.tryFind (fun i -> match i with | ScrollContentSize _ -> true | _ -> false)
+        |> Option.map (fun i -> match i with | ScrollContentSize (w,h) -> (w,h) | _ -> failwith "What?No!Never should this happen!")
+
+    let getScrollOffsetFromProps (props:Prop<'TValue> list) = 
+        props
+        |> List.tryFind (fun i -> match i with | ScrollOffset _ -> true | _ -> false)
+        |> Option.map (fun i -> match i with | ScrollOffset (w,h) -> (w,h) | _ -> failwith "What?No!Never should this happen!")
+        
 
     let hasSecretInProps (props:Prop<'TValue> list) = 
         props
@@ -420,14 +437,16 @@ module Elements =
     
     let scrollView (props:Prop<'TValue> list) (subViews:View list) =
         let frame = tryGetFrameFromProps props
-        let bars = getScrollBarFromProps props
+        
+        
         
         match frame with
         | None ->
             failwith "Scrollview need a Frame Prop"
-        | Some frame ->
-            let sv = ScrollView(frame)
-
+        | Some (x,y,w,h) ->
+            let sv = ScrollView(Rect(x,y,w,h))
+            // Scroll bars
+            let bars = getScrollBarFromProps props
             match bars with
             | NoBars ->
                 ()
@@ -439,6 +458,22 @@ module Elements =
                 sv.ShowHorizontalScrollIndicator <- true
                 sv.ShowVerticalScrollIndicator <- true
 
+            // ContentSize
+            let contentSize = getScrollContentSizeFromProps props
+            match contentSize with
+            | None -> ()
+            | Some (w,h) ->
+                sv.ContentSize <- Size(w,h)
+
+            // Offset
+            let offset = getScrollOffsetFromProps props
+            match offset with
+            | None -> ()
+            | Some (x,y) ->
+                sv.ContentOffset <- Point(x,y)
+
+            
+
             subViews |> List.iter (fun i -> sv.Add(i))
             sv
             |> addPossibleStylesFromProps props
@@ -448,7 +483,15 @@ module Elements =
     let fileDialog title prompt nameFieldLabel message =
         let dia = FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
         Application.Run(dia)
-        dia.FilePath |> string
+        let file = 
+            dia.FilePath
+            |> Option.ofObj 
+            |> Option.map string
+            |> Option.bind (fun s ->
+                if String.IsNullOrEmpty(s) then None 
+                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+            )
+        file
 
     let openDialog title message =
         let dia = OpenDialog(title |> ustr,message |> ustr)                
@@ -472,7 +515,7 @@ module Elements =
         let dia = SaveDialog(title |> ustr,message |> ustr)        
         Application.Run(dia)
         let file = 
-            dia.FilePath
+            dia.FileName
             |> Option.ofObj 
             |> Option.map string
             |> Option.bind (fun s ->
@@ -480,6 +523,19 @@ module Elements =
                 else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
             )
         file
+
+
+    let messageBox width height title text (buttons:string list) =
+        let result = MessageBox.Query(width,height,title,text,buttons |> List.toArray)
+        match buttons with
+        | [] -> ""
+        | _ -> buttons.[result]
+
+    let errorBox width height title text (buttons:string list) =
+        let result = MessageBox.Query(width,height,title,text,buttons |> List.toArray)
+        match buttons with
+        | [] -> ""
+        | _ -> buttons.[result]
             
 
     

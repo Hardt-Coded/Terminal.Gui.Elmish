@@ -23,7 +23,6 @@
     <Compile Include="ElmishImplementation\ring.fs" />
     <Compile Include="ElmishImplementation\program.fs" />
     <Compile Include="Elements.fs" />
-    <Compile Include="Program.fs" />
     <None Include="paket.references" />
     <None Include="paket.template" />
   </ItemGroup>

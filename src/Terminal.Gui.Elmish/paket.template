@@ -27,3 +27,7 @@ description
 
 files
 	../../bin/Terminal.Gui.Elmish ==> lib
+
+dependencies
+  Terminal.Gui
+  
