@@ -518,7 +518,7 @@ module Elements =
         | _ -> buttons.[result]
 
     let errorBox width height title text (buttons:string list) =
-        let result = MessageBox.Query(width,height,title,text,buttons |> List.toArray)
+        let result = MessageBox.ErrorQuery(width,height,title,text,buttons |> List.toArray)
         match buttons with
         | [] -> ""
         | _ -> buttons.[result]
