@@ -250,14 +250,14 @@ Target.create "ReferenceDocs" (fun _ ->
             DirectoryInfo.getSubDirectories <| DirectoryInfo bin
             |> Array.collect (fun d ->
                 let name, dInfo =
-                    let net45Bin =
-                        DirectoryInfo.getSubDirectories d |> Array.filter(fun x -> x.FullName.ToLower().Contains("net45"))
-                    let net47Bin =
-                        DirectoryInfo.getSubDirectories d |> Array.filter(fun x -> x.FullName.ToLower().Contains("net47"))
-                    if net45Bin.Length > 0 then
-                        d.Name, net45Bin.[0]
+                    let net46Bin =
+                        DirectoryInfo.getSubDirectories d |> Array.filter(fun x -> x.FullName.ToLower().Contains("net46"))
+                    let netCoreBin =
+                        DirectoryInfo.getSubDirectories d |> Array.filter(fun x -> x.FullName.ToLower().Contains("netcore"))
+                    if net46Bin.Length > 0 then
+                        d.Name, net46Bin.[0]
                     else
-                        d.Name, net47Bin.[0]
+                        d.Name, netCoreBin.[0]
 
                 dInfo.GetFiles()
                 |> Array.filter (fun x ->
@@ -384,14 +384,14 @@ Target.create "All" ignore
   ==> "Restore"
   ==> "Build"
   ==> "CopyBinaries"
-  //==> "GenerateDocs" // doesn work
+  ==> "GenerateDocs" 
   ==> "NuGet"
   ==> "All"
 
-"CleanDocs"
-  ==>"Docs"
-  ==> "ReferenceDocs"
-  ==> "GenerateDocs"
+//"CleanDocs"
+//  ==>"Docs"
+//  ==> "ReferenceDocs"
+//  ==> "GenerateDocs"
 
 "Clean"
   ==> "Release"
