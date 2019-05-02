@@ -77,6 +77,41 @@ let update (msg:Msg) (model:Model) =
         {model with CheckBoxChecked = b}, Cmd.none
 
 
+let lab x y text =
+    label [
+        Styles [ 
+            Pos (AbsPos x,AbsPos y)
+            Dim (Fill,Fill)
+            TextAlignment Centered
+        ]
+        Text text
+    ] 
+
+let logo = """
+
+                                             
+                     *((  //.                      
+                   *((((  ////.                    
+                 /((((((  ///////.                 
+               /((((((((  /////////.               
+             *(((((((((/  ,//////////.             
+           *(((((((((/      ,//////////.           
+         *(((((((((/   *      ,//////////.         
+       /(((((((((*   /((        ,//////////*       
+     /(((((((((*   /((((          ,//////////*     
+   *(((((((((/   /((((((            ,//////////,   
+    ((((((((((*   /(((((            //////////*    
+      ((((((((((*   /(((          //////////*      
+        /(((((((((/   /(       .//////////,        
+          ((((((((((/        .//////////*          
+            ((((((((((*    .//////////,            
+              ((((((((((  //////////,              
+                ((((((((  ////////,                
+                  ((((((  //////.                  
+                    /(((  ////.                    
+                      ((  //.                      
+"""
+
 let view (model:Model) (dispatch:Msg -> unit)=
     page [
         
@@ -87,7 +122,7 @@ let view (model:Model) (dispatch:Msg -> unit)=
         |])
 
         yield menuBar [
-            menuBarItem "_Muh" [
+            menuBarItem "Terminal.Gui.Elmish" [
                 menuItem "MenuItem_1" "" (fun () -> dispatch (MenuItemSelected "MenuItem1"))
                 menuItem "MenuItem_2" "" (fun () -> dispatch (MenuItemSelected "MenuItem2"))
             ]
@@ -98,149 +133,156 @@ let view (model:Model) (dispatch:Msg -> unit)=
                 Pos (AbsPos 0,AbsPos 1)
                 Dim (Fill,Fill)
             ]
-            Title "Console Elmish"
+            Title "Terminal/Console Elmish"
         ] [
-            window [
-                Styles [
-                    Pos (PercentPos 20.0,PercentPos 10.0)
-                    Dim (PercentDim 30.0,AbsDim 15)
-                ]
-                Title "Demo 1"
-            ] [
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 1)
-                    ]
-                    Text "Counter Up"
-                    OnClicked (fun () -> dispatch Inc)                    
-                ] 
+            
+            yield! logo.Split(Environment.NewLine)
+            |> Seq.mapi(fun i t -> lab 0 (i + 2) t)
+            |> Seq.map (fun e -> e :> Terminal.Gui.View)
 
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 2)
-                    ]
-                    Text "Counter Down"
-                    OnClicked (fun () -> dispatch Dec)                    
-                ] 
+            
+            
+            //window [
+            //    Styles [
+            //        Pos (PercentPos 20.0,PercentPos 10.0)
+            //        Dim (PercentDim 30.0,AbsDim 15)
+            //    ]
+            //    Title "Demo 1"
+            //] [
+            //    button [
+            //        Styles [
+            //            Pos (AbsPos 1, AbsPos 1)
+            //        ]
+            //        Text "Counter Up"
+            //        OnClicked (fun () -> dispatch Inc)                    
+            //    ] 
 
-                textField [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 4)
-                        Dim (AbsDim 20,AbsDim 1)
-                    ]
-                    Value model.Text
-                    OnChanged (fun t -> dispatch (ChangeText t))
-                ]
+            //    button [
+            //        Styles [
+            //            Pos (AbsPos 1, AbsPos 2)
+            //        ]
+            //        Text "Counter Down"
+            //        OnClicked (fun () -> dispatch Dec)                    
+            //    ] 
 
-                frameView [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 5)
-                        Dim (AbsDim 20,AbsDim 4)
-                    ]
-                    Text "FrameView w Text"
-                ] [
-                    textView [
-                        Text "bla bla\r\nmuh!\r\nTest\r\nJuchuuu\r\nLorem ipsum\r\n Was?"
-                    ]
-                ]
-            ]
+            //    textField [
+            //        Styles [
+            //            Pos (AbsPos 1, AbsPos 4)
+            //            Dim (AbsDim 20,AbsDim 1)
+            //        ]
+            //        Value model.Text
+            //        OnChanged (fun t -> dispatch (ChangeText t))
+            //    ]
 
-            window [
-                Styles [
-                    Pos (PercentPos 55.0,PercentPos 10.0)
-                    Dim (AbsDim 40,AbsDim 35)
-                ]
-                Title "Demo 2"
-            ] [
-                frameView [
-                    Styles [
-                        Pos (AbsPos 1,AbsPos 1)
-                        Dim (AbsDim 36,AbsDim 4)
-                    ]
-                    Text "FrameView with HexView inside"
-                ] [
-                    hexView [] ms
-                ]
+            //    frameView [
+            //        Styles [
+            //            Pos (AbsPos 1, AbsPos 5)
+            //            Dim (AbsDim 20,AbsDim 4)
+            //        ]
+            //        Text "FrameView w Text"
+            //    ] [
+            //        textView [
+            //            Text "bla bla\r\nmuh!\r\nTest\r\nJuchuuu\r\nLorem ipsum\r\n Was?"
+            //        ]
+            //    ]
+            //]
 
-                frameView [
-                    Styles [
-                        Pos (AbsPos 1,AbsPos 6)
-                        Dim (AbsDim 36,AbsDim 6)
-                    ]
-                    Text "FrameView with List inside"                    
-                ] [
-                    listView [
-                        Items model.ListItems
-                        Value model.SelectedListItem
-                        OnChanged (fun i -> dispatch (ListChanged i))
-                    ]                    
-                ]
+            //window [
+            //    Styles [
+            //        Pos (PercentPos 55.0,PercentPos 10.0)
+            //        Dim (AbsDim 40,AbsDim 35)
+            //    ]
+            //    Title "Demo 2"
+            //] [
+            //    frameView [
+            //        Styles [
+            //            Pos (AbsPos 1,AbsPos 1)
+            //            Dim (AbsDim 36,AbsDim 4)
+            //        ]
+            //        Text "FrameView with HexView inside"
+            //    ] [
+            //        hexView [] ms
+            //    ]
 
-                radioGroup [
-                    Styles [
-                        Pos (AbsPos 1,AbsPos 13)
-                    ]
-                    Items model.RadioItems
-                    Value model.SelectedRadioItem
-                    OnChanged (fun i -> dispatch (RadioChanged i))
-                ] 
+            //    frameView [
+            //        Styles [
+            //            Pos (AbsPos 1,AbsPos 6)
+            //            Dim (AbsDim 36,AbsDim 6)
+            //        ]
+            //        Text "FrameView with List inside"                    
+            //    ] [
+            //        listView [
+            //            Items model.ListItems
+            //            Value model.SelectedListItem
+            //            OnChanged (fun i -> dispatch (ListChanged i))
+            //        ]                    
+            //    ]
 
-                checkBox [
-                    Styles [
-                        Pos (AbsPos 1,AbsPos 17)
-                    ]
-                    Text "Yes or No?"
-                    Value model.CheckBoxChecked
-                    OnChanged (fun v -> dispatch (CheckBoxChanged v))
-                ]
+            //    radioGroup [
+            //        Styles [
+            //            Pos (AbsPos 1,AbsPos 13)
+            //        ]
+            //        Items model.RadioItems
+            //        Value model.SelectedRadioItem
+            //        OnChanged (fun i -> dispatch (RadioChanged i))
+            //    ] 
 
-                progressBar [
-                    Styles [
-                        Pos (AbsPos 1,AbsPos 19)
-                        Dim (AbsDim 40,AbsDim 2)
-                    ]
-                    Value 0.8
-                ]
-            ]
+            //    checkBox [
+            //        Styles [
+            //            Pos (AbsPos 1,AbsPos 17)
+            //        ]
+            //        Text "Yes or No?"
+            //        Value model.CheckBoxChecked
+            //        OnChanged (fun v -> dispatch (CheckBoxChanged v))
+            //    ]
 
-            window [
-                Styles [
-                    Pos (AbsPos 1,AbsPos 17)
-                    Dim (PercentDim 50.0,AbsDim 10)
-                ]
-                Title "Debug"
-            ] [
-                let countLabelText = sprintf "CurrentCount: %d" model.Count
-                let tfLabelText = sprintf "Textfield shows: %s" model.Text
-                let selectedMenuItem = sprintf "Last Selected MenuItem: %s" model.LastSelectedMenuItem
-                let selectedRadio = sprintf "Selected RadioItem: %A" model.SelectedRadioItem
-                let selectedList = sprintf "Selected ListItem: %A" model.SelectedListItem
-                let isCheckBoxChecked = sprintf "Is Checked: %s" (model.CheckBoxChecked.ToString())
-                yield label [
-                    Styles [ Pos (AbsPos 1,AbsPos 1) ]
-                    Text countLabelText
-                ]
-                yield label [
-                    Styles [ Pos (AbsPos 1,AbsPos 2) ]
-                    Text tfLabelText
-                ]
-                yield label [
-                    Styles [ Pos (AbsPos 1,AbsPos 3) ]
-                    Text selectedMenuItem
-                ]
-                yield label [
-                    Styles [ Pos (AbsPos 1,AbsPos 4) ]
-                    Text selectedRadio
-                ]
-                yield label [
-                    Styles [ Pos (AbsPos 1,AbsPos 5) ]
-                    Text isCheckBoxChecked
-                ]
-                yield label [
-                    Styles [ Pos (AbsPos 1,AbsPos 6) ]
-                    Text selectedList
-                ]                
-            ]
+            //    progressBar [
+            //        Styles [
+            //            Pos (AbsPos 1,AbsPos 19)
+            //            Dim (AbsDim 40,AbsDim 2)
+            //        ]
+            //        Value 0.8
+            //    ]
+            //]
+
+            //window [
+            //    Styles [
+            //        Pos (AbsPos 1,AbsPos 17)
+            //        Dim (PercentDim 50.0,AbsDim 10)
+            //    ]
+            //    Title "Debug"
+            //] [
+            //    let countLabelText = sprintf "CurrentCount: %d" model.Count
+            //    let tfLabelText = sprintf "Textfield shows: %s" model.Text
+            //    let selectedMenuItem = sprintf "Last Selected MenuItem: %s" model.LastSelectedMenuItem
+            //    let selectedRadio = sprintf "Selected RadioItem: %A" model.SelectedRadioItem
+            //    let selectedList = sprintf "Selected ListItem: %A" model.SelectedListItem
+            //    let isCheckBoxChecked = sprintf "Is Checked: %s" (model.CheckBoxChecked.ToString())
+            //    yield label [
+            //        Styles [ Pos (AbsPos 1,AbsPos 1) ]
+            //        Text countLabelText
+            //    ]
+            //    yield label [
+            //        Styles [ Pos (AbsPos 1,AbsPos 2) ]
+            //        Text tfLabelText
+            //    ]
+            //    yield label [
+            //        Styles [ Pos (AbsPos 1,AbsPos 3) ]
+            //        Text selectedMenuItem
+            //    ]
+            //    yield label [
+            //        Styles [ Pos (AbsPos 1,AbsPos 4) ]
+            //        Text selectedRadio
+            //    ]
+            //    yield label [
+            //        Styles [ Pos (AbsPos 1,AbsPos 5) ]
+            //        Text isCheckBoxChecked
+            //    ]
+            //    yield label [
+            //        Styles [ Pos (AbsPos 1,AbsPos 6) ]
+            //        Text selectedList
+            //    ]                
+            //]
         ]       
     ]
 
