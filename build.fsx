@@ -383,8 +383,10 @@ Target.create "All" ignore
   ==> "AssemblyInfo"
   ==> "Restore"
   ==> "Build"
-  ==> "CopyBinaries"
-  ==> "GenerateDocs" 
+  ==> "CopyBinaries"  
+  ==> "GenerateDocs"
+  ==> "ReferenceDocs"
+  ==> "Docs"
   ==> "NuGet"
   ==> "All"
 
