@@ -199,3 +199,13 @@ module Program =
 
     /// Start the dispatch loop with `unit` for the init() function.
     let run (program: Program<unit, 'model, 'msg, 'view>) = runWith () program
+
+
+    let quitWithErrorCode errorcode =        
+        System.Console.Clear()
+        System.Environment.Exit(errorcode)
+
+    let quit() = quitWithErrorCode 0
+        
+
+    

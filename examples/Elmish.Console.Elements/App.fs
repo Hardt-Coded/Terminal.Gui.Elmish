@@ -27,6 +27,7 @@ type Model = {
 
 type Msg = 
     | ChangePage of Pages
+    | ExitApp
 
     | CounterMsg of Counter.Msg
     | TextFieldsMsg of TextFields.Msg
@@ -126,7 +127,9 @@ let update (msg:Msg) (model:Model) =
                 {model with Page = page}, Cmd.none
 
 
-
+    | ExitApp ->
+        Program.quit()
+        model, Cmd.none
     | CounterMsg cmsg ->
         match model.CounterModel with
         | None ->
@@ -213,6 +216,7 @@ let view (model:Model) (dispatch:Msg->unit) =
                 menuItem "List View" "" (fun () -> dispatch (ChangePage ListView))
                 menuItem "Scroll View" "" (fun () -> dispatch (ChangePage ScrollView))
                 menuItem "Message Boxes" "" (fun () -> dispatch (ChangePage MessageBoxes))
+                menuItem "E_xit" "" (fun () -> dispatch (ExitApp))
             ]
         ]
 
