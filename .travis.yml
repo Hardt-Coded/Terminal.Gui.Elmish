@@ -1,35 +1,10 @@
 language: csharp
-
-sudo: false  # use the new container-based Travis infrastructure 
-
+solution: Terminal.Gui.Elmish.sln
+script:
+  - tsh_version=1.4.0-pre1
+  - msbuild /t:Restore $TRAVIS_BUILD_DIR/Terminal.Gui.Elmish.sln
+  - cd $TRAVIS_BUILD_DIR/
+  - msbuild /p:Configuration=Release Terminal.Gui.Elmish.sln
 mono: latest
-
 dotnet: 2.2.105
-
-install:
-
-  # workaround for missing .net 4.5 targing pack
-
-  - export FrameworkPathOverride=$(dirname $(which mono))/../lib/mono/4.5/
-
-before_install:
-  - chmod +x build.sh
- 
-matrix:
-  include:
-    - os: linux # Ubuntu 14.04
-      dist: xenial
-      sudo: required
-      dotnet : 2.2.105
-    - os: osx # OSX 10.12
-      osx_image: xcode9.1
-      dotnet : 2.2.105
-      dist: xenial
-      sudo: required
-
-#before_script:
-#  - dotnet tool install -g fake-cli
-#  - dotnet tool install -g paket
-      
-script: 
-  - bash ./build.sh All
+os: "osx"
