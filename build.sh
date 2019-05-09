@@ -1,15 +1,36 @@
 #!/usr/bin/env bash
-# to properly set Travis permissions: https://stackoverflow.com/questions/33820638/travis-yml-gradlew-permission-denied
-# git update-index --chmod=+x fake.sh
-# git commit -m "permission access for travis"
 
 set -eu
 set -o pipefail
 
-dotnet restore build.proj
+# liberated from https://stackoverflow.com/a/18443300/433393
+realpath() {
+  OURPWD=$PWD
+  cd "$(dirname "$1")"
+  LINK=$(readlink "$(basename "$1")")
+  while [ "$LINK" ]; do
+    cd "$(dirname "$LINK")"
+    LINK=$(readlink "$(basename "$1")")
+  done
+  REALPATH="$PWD/$(basename "$1")"
+  cd "$OURPWD"
+  echo "$REALPATH"
+}
 
-if [ ! -f build.fsx ]; then
-    fake run init.fsx
+FAKE_TOOL_PATH=$(realpath .fake)
+FAKE="$FAKE_TOOL_PATH"/fake
+
+if ! [ -e "$FAKE" ]
+then
+  dotnet tool install fake-cli --tool-path "$FAKE_TOOL_PATH"
 fi
 
-fake build $@
+PAKET_TOOL_PATH=$(realpath .paket)
+PAKET="$PAKET_TOOL_PATH"/paket
+
+if ! [ -e "$PAKET" ]
+then
+  dotnet tool install paket --tool-path "$PAKET_TOOL_PATH"
+fi
+
+FAKE_DETAILED_ERRORS=true "$FAKE" build -t "$@"
