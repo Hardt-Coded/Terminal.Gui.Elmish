@@ -2,9 +2,10 @@ language: csharp
 solution: Terminal.Gui.Elmish.sln
 script:
   - tsh_version=1.4.0-pre1
-  - msbuild /t:Restore $TRAVIS_BUILD_DIR/Terminal.Gui.Elmish.sln
+  #- msbuild /t:Restore $TRAVIS_BUILD_DIR/Terminal.Gui.Elmish.sln
   - cd $TRAVIS_BUILD_DIR/
-  - msbuild /p:Configuration=Release Terminal.Gui.Elmish.sln
-mono: latest
-dotnet: 2.2.105
+  - dotnet build Terminal.Gui.Elmish.sln
+  #- msbuild /p:Configuration=Release Terminal.Gui.Elmish.sln
+#mono: latest
+dotnet: 2.2.203
 os: "osx"
