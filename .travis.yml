@@ -4,7 +4,7 @@ sudo: false  # use the new container-based Travis infrastructure
 
 mono: latest
 
-dotnet: 2.2.203
+dotnet: 2.2.105
 
 install:
 
@@ -20,10 +20,10 @@ matrix:
     - os: linux # Ubuntu 14.04
       dist: xenial
       sudo: required
-      dotnet : 2.2.203
+      dotnet : 2.2.105
     - os: osx # OSX 10.12
       osx_image: xcode9.1
-      dotnet : 2.2.203
+      dotnet : 2.2.105
       dist: xenial
       sudo: required
 
