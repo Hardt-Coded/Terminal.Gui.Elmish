@@ -26,6 +26,10 @@ matrix:
       dotnet : 2.1.300
       dist: trusty
       sudo: required
+
+before_script:
+  - dotnet tool install -g fake-cli
+  - dotnet tool install -g paket
       
 script: 
   - ./build.sh All

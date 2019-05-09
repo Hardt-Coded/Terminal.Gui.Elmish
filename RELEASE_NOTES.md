@@ -17,3 +17,4 @@
 * Program.quit added
 * TextBox delete/backspace issue fixed - also on Miguel side fixed (Terminal.Gui 0.23)
 * CAPS LOCK Support fixed from "Kit" (added also on Miguels side)
+* min requirement for netcore to 2.0 reduced
