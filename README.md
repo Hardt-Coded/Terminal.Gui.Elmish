@@ -1,5 +1,6 @@
 # Terminal.Gui.Elmish
 
+![build] (https://travis-ci.org/DieselMeister/gui.cs.svg?branch=master)
 
 An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including a fable like view DSL.
 
