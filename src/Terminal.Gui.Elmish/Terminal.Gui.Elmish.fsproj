@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.2;net461</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
     <RootNamespace>Terminal.Gui.Elmish</RootNamespace>
     <AssemblyName>Terminal.Gui.Elmish</AssemblyName>
     <Name>Terminal.Gui.Elmish</Name>
