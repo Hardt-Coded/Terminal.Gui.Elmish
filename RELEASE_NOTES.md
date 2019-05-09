@@ -12,3 +12,8 @@
 * file dialog wrapper
 * addtional Props for ScrollView
 * add Terminal.Gui dependecy to nuget
+
+#### 0.1.3 - Thursday, 09. May 2019
+* Program.quit added
+* TextBox delete/backspace issue fixed - also on Miguel side fixed (Terminal.Gui 0.23)
+* CAPS LOCK Support fixed from "Kit" (added also on Miguels side)
