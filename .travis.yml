@@ -6,7 +6,7 @@ script:
   #- tsh_version=1.4.0-pre1
   #- msbuild /t:Restore $TRAVIS_BUILD_DIR/Terminal.Gui.Elmish.sln
   - cd $TRAVIS_BUILD_DIR/
-  - dotnet build Terminal.Gui.Elmish.sln
+  - dotnet build Terminal.Gui.Elmish.sln --framework netcoreapp2.0
   #- msbuild /p:Configuration=Release Terminal.Gui.Elmish.sln
 #mono: latest
 dotnet: 2.2.203
