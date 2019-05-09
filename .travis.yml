@@ -1,22 +1,35 @@
 language: csharp
-sudo: required
-dist: xenial
 
-dotnet: 2.2.203
-mono:
-  - latest # => "stable release"
-  - alpha
-  - beta
-  - weekly # => "latest commits"
-os:
-  - linux
+sudo: false  # use the new container-based Travis infrastructure 
 
-script:
-  - ./build.sh All
+mono: 5.12.0
 
+dotnet: 2.1.300
+
+install:
+
+  # workaround for missing .net 4.5 targing pack
+
+  - export FrameworkPathOverride=$(dirname $(which mono))/../lib/mono/4.5/
+
+before_install:
+  - chmod +x build.sh
+ 
 matrix:
-  fast_finish: true
-  allow_failures:
-    - mono: alpha
-    - mono: beta
-    - mono: weekly
+  include:
+    - os: linux # Ubuntu 14.04
+      dist: trusty
+      sudo: required
+      dotnet : 2.1.300
+    - os: osx # OSX 10.12
+      osx_image: xcode9.1
+      dotnet : 2.1.300
+      dist: trusty
+      sudo: required
+
+before_script:
+  - dotnet tool install -g fake-cli
+  - dotnet tool install -g paket
+      
+script: 
+  - bash ./build.sh All
