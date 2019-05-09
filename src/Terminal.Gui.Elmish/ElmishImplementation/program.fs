@@ -150,29 +150,14 @@ module Program =
                     try
                         let (model',cmd') = program.update msg state
 
-                        // get current Focused Elements from Termianl App
-                        let focusedElements = Application.Current |> Helpers.getFocusedElements
-
+                        let elementsBeforeUpdate = Application.Current |> Helpers.getAllElements
                         program.setState model' syncDispatch
+                        let elementsAfterUpdate = Application.Current |> Helpers.getAllElements 
 
-                        // retore the focus
-                        let elementsAfterView =
-                            Helpers.getAllElements Application.Current
-    
-                        // set last focus
-                        focusedElements 
-                        |> Seq.iter (
-                            fun e -> 
-                                let idFromLast = e.GetId()
-                                let fittingElement =
-                                    elementsAfterView |> List.tryFind (fun i -> i.GetId() = idFromLast)
-                                match fittingElement with
-                                | None -> ()
-                                | Some element ->
-                                    if element.SuperView <> null then
-                                        element.SuperView.SetFocus(element)
-                        
-                        )
+                        // restore the focus
+                        restoreFocusOnViewElements elementsBeforeUpdate elementsAfterUpdate
+                        // restore cursor pos in text fields
+                        restoreTextFieldCursorPosition elementsBeforeUpdate elementsAfterUpdate
 
                         cmd' |> Cmd.exec syncDispatch
                         state <- model'

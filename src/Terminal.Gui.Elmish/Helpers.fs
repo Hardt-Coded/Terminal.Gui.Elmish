@@ -52,3 +52,38 @@ module Helpers =
                 
             sprintf "%s%i%s%s" typeName bounds parentName titleOrText
 
+
+    let restoreTextFieldCursorPosition (elementsBeforeUpdate:View list) (elementsAfterView:View list) =        
+        elementsBeforeUpdate
+        |> List.filter (fun e -> e :? TextField)
+        |> List.map (fun e -> e :?> TextField)
+        |> List.iter (fun e ->
+            let idFromLast = e.GetId()
+            let fittingElement =
+                elementsAfterView |> List.tryFind (fun i -> i.GetId() = idFromLast)
+            match fittingElement with
+            | None -> ()
+            | Some element ->
+                if element :? TextField then
+                    let tf = element :?> TextField                    
+                    tf.CursorPosition <- e.CursorPosition
+                            
+        )
+
+
+
+    let restoreFocusOnViewElements (elementsBeforeUpdate:View list) (elementsAfterView:View list) =
+        elementsBeforeUpdate
+        |> List.filter (fun e -> e.HasFocus)                        
+        |> List.iter (
+            fun e -> 
+                let idFromLast = e.GetId()
+                let fittingElement =
+                    elementsAfterView |> List.tryFind (fun i -> i.GetId() = idFromLast)
+                match fittingElement with
+                | None -> ()
+                | Some element ->
+                    if element.SuperView <> null then
+                        element.SuperView.SetFocus(element)
+                
+        )
