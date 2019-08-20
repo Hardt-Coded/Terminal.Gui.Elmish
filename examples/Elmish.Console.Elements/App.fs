@@ -1,5 +1,6 @@
 ﻿module App
 
+open System
 open Terminal.Gui.Elmish
 
 type Pages = 
@@ -22,6 +23,7 @@ type Model = {
     ListViewModel:ListView.Model option
     ScrollViewModel:ScrollView.Model option
     MessageBoxesModel:MessageBoxes.Model option
+    CurrentLocalTime:DateTime
 }
 
 
@@ -37,6 +39,19 @@ type Msg =
     | ScrollViewMsg of ScrollView.Msg
     | MessageBoxesMsg of MessageBoxes.Msg
 
+    | UpdateTime
+
+
+let timerSubscription dispatch =
+    let rec loop () =
+        async {
+            do! Async.Sleep 1000
+            dispatch UpdateTime
+            return! loop ()
+        }
+    loop () |> Async.Start
+
+
 
 let init () =
     let model = {
@@ -48,6 +63,7 @@ let init () =
         ListViewModel = None
         ScrollViewModel = None
         MessageBoxesModel = None
+        CurrentLocalTime = DateTime.Now
     }
     model, Cmd.none
 
@@ -198,6 +214,9 @@ let update (msg:Msg) (model:Model) =
                    c |> Cmd.map (MessageBoxesMsg)
                {model with MessageBoxesModel = Some m}, cmd
 
+    | UpdateTime ->
+        {model with CurrentLocalTime = DateTime.Now}, Cmd.none
+
 
 
 
@@ -225,7 +244,7 @@ let view (model:Model) (dispatch:Msg->unit) =
                 Pos (AbsPos 0,AbsPos 1)
                 Dim (Fill,Fill)
             ]
-            Title "Elmish Console Demo"
+            Title (sprintf "Elmish Console Demo - %s" <| model.CurrentLocalTime.ToString("yyyy-MM-dd HH:mm:ss"))
         ] [
             window [
                 Styles [

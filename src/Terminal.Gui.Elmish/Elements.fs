@@ -233,8 +233,9 @@ module Elements =
     let page (subViews:View list) =
         let top = Toplevel.Create()        
         subViews |> List.iter (fun v -> top.Add(v))
-        let state = Application.Begin(top)  
-        state
+        //let state = Application.Begin(top)  
+        //state
+        top
        
 
 

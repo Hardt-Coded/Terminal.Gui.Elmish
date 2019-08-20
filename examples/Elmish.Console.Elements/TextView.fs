@@ -82,8 +82,10 @@ let view (model:Model) (dispatch:Msg -> unit) : View list=
                     Pos (AbsPos 0,AbsPos 0)
                     Dim (Fill,Fill)                    
                     Colors (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
+                   
                 ]
                 Text model.Text
+                OnChanged (fun e -> dispatch (ChangeText e))
             ]
             
         ]

@@ -13,13 +13,14 @@ namespace Terminal.Gui.Elmish
 open Terminal.Gui
 
 open Helpers
+open Terminal.Gui
 
 /// Program type captures various aspects of program behavior
 type Program<'arg, 'model, 'msg, 'view> = private {
     init : 'arg -> 'model * Cmd<'msg>
     update : 'msg -> 'model -> 'model * Cmd<'msg>
     subscribe : 'model -> Cmd<'msg>
-    view : 'model -> Dispatch<'msg> -> 'view
+    view : 'model -> Dispatch<'msg> -> Toplevel
     setState : 'model -> Dispatch<'msg> -> unit
     onError : (string*exn) -> unit
     syncDispatch: Dispatch<'msg> -> Dispatch<'msg>
@@ -33,7 +34,7 @@ module Program =
     let mkProgram 
         (init : 'arg -> 'model * Cmd<'msg>) 
         (update : 'msg -> 'model -> 'model * Cmd<'msg>)
-        (view : 'model -> Dispatch<'msg> -> 'view) =
+        (view : 'model -> Dispatch<'msg> -> Toplevel) =
         { init = init
           update = update
           view = view
@@ -46,7 +47,7 @@ module Program =
     let mkSimple 
         (init : 'arg -> 'model) 
         (update : 'msg -> 'model -> 'model)
-        (view : 'model -> Dispatch<'msg> -> 'view) =
+        (view : 'model -> Dispatch<'msg> -> Toplevel) =
         { init = init >> fun state -> state,Cmd.none
           update = fun msg -> update msg >> fun state -> state,Cmd.none
           view = view
@@ -141,7 +142,7 @@ module Program =
             else
                 
                 // stop Console Application Event Loop
-                Application.RequestStop()
+                //Application.RequestStop()
 
                 reentered <- true
                 let mutable nextMsg = Some msg
@@ -149,30 +150,42 @@ module Program =
                     let msg = nextMsg.Value
                     try
                         let (model',cmd') = program.update msg state
+                        //let elementsBeforeUpdate = Application.Current |> Helpers.getAllElements
+                        let focusedElements = Application.Current |> getFocusedElementIds
+                        let textPos = Application.Current |> getTextPositionsFromElements
+                        let textViewPos = Application.Current |> getTextViewPositionsFromElements
 
-                        let elementsBeforeUpdate = Application.Current |> Helpers.getAllElements
-                        program.setState model' syncDispatch
-                        let elementsAfterUpdate = Application.Current |> Helpers.getAllElements 
+                        let newState = program.view model' syncDispatch
+                        
+                        Application.Current.RemoveAll()
+                        Application.Current.Add(newState.Subviews |> Seq.toArray)
+                        Application.Current.LayoutSubviews()
+                        Application.Current.WillPresent ()
+                        Application.Current |> restoreFocusOnViewElementsIds focusedElements
+                        Application.Current |> restoreTextfieldPosViewElementsIds textPos
+                        Application.Current |> restoreTextViewPosViewElementsIds textViewPos
+                        Application.Current.Redraw(Application.Current.Bounds)
+                        Application.Driver.Refresh()
 
-                        // restore the focus
-                        restoreFocusOnViewElements elementsBeforeUpdate elementsAfterUpdate
-                        // restore cursor pos in text fields
-                        restoreTextFieldCursorPosition elementsBeforeUpdate elementsAfterUpdate
 
                         cmd' |> Cmd.exec syncDispatch
                         state <- model'
+                        
                     with ex ->
                         program.onError (sprintf "Unable to process the message: %A" msg, ex)
                     nextMsg <- rb.Pop()
                 reentered <- false
 
                 // Restart Termial App Event Loop
-                Application.Run(Application.Current)
+                //Application.Run(Application.Current)
 
 
         and syncDispatch = program.syncDispatch dispatch            
 
         program.setState model syncDispatch
+
+        let startState = program.view model syncDispatch        
+
         let sub = 
             try 
                 program.subscribe model 
@@ -180,7 +193,7 @@ module Program =
                 program.onError ("Unable to subscribe:", ex)
                 Cmd.none
         sub @ cmd |> Cmd.exec syncDispatch
-        Application.Run(Application.Current)
+        Application.Run(startState)
 
     /// Start the dispatch loop with `unit` for the init() function.
     let run (program: Program<unit, 'model, 'msg, 'view>) = runWith () program
