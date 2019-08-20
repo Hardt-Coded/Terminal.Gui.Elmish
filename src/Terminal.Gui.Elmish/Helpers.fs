@@ -11,20 +11,21 @@ module Helpers =
         |> Seq.collect (fun x -> x |> Seq.cast<View>)
         |> Seq.tryFind (fun x -> x.HasFocus)
 
-    let rec getAllElements (view:View) =
-        match view.Subviews |> Seq.toList with
-        | [] -> []
-        | l ->
-            l 
-            |> List.collect (
-                fun i -> 
-                    let subv = 
-                        i.Subviews 
-                        |> Seq.toList
-                        |> List.collect getAllElements
-                    
-                    i::subv
-            )
+    let getAllElements (view:View) =
+        let rec collectLoop (view:View) =
+            match view.Subviews |> Seq.toList with
+            | [] -> []
+            | l ->
+                l 
+                |> List.collect (
+                    fun i -> 
+                        let subv = 
+                            i.Subviews 
+                            |> Seq.toList
+                            |> List.collect collectLoop
+                        i::subv
+                )
+        view::(collectLoop view)
 
     let getFocusedElements (view:View) =
         getAllElements view
@@ -59,112 +60,113 @@ module Helpers =
 
 
 
-    let getFocusedElementIds (view:View) =
-        getFocusedElements view
-        |> List.map (fun i -> i.GetId())
 
-
-    let restoreFocusOnViewElementsIds ids (view:View) =
-        view
-        |> getAllElements
-        |> List.iter(fun element ->
-            if (ids |> List.exists (fun id -> id = element.GetId())) then
-                if (element.SuperView <> null) then
-                    element.SuperView.SetFocus(element)
-        )
-
-
-    let getTextPositionsFromElements (view:View) =
-        view
-        |> getAllElements
-        |> List.filter (fun e -> e :? TextField)
-        |> List.map (fun e -> e :?> TextField)
-        |> List.map (fun tf -> 
-            let id = tf.GetId()
-            (id,tf.CursorPosition)
-        )
-
-    let restoreTextfieldPosViewElementsIds (ids:(string * int) list) (view:View) =
-        let map = ids |> Map
-        view
-        |> getAllElements
-        |> List.filter (fun e -> e :? TextField)
-        |> List.map (fun e -> e :?> TextField)
-        |> List.iter(fun element ->
-            let pos =
-                map |> Map.tryFind (element.GetId())
-             
-            match pos with
-            | None -> ()
-            | Some pos ->
-                element.CursorPosition <- pos
-        )
-
-
-    let getTextViewPositionsFromElements (view:View) =
-        view
-        |> getAllElements
-        |> List.filter (fun e -> e :? TextView)
-        |> List.map (fun e -> e :?> TextView)
-        |> List.map (fun tf -> 
-            let id = tf.GetId()
-            (id,(tf.CurrentRow,tf.CurrentColumn))
-        )
-
-    let restoreTextViewPosViewElementsIds (ids:(string * (int * int)) list) (view:View) =
-        let map = ids |> Map
-        view
-        |> getAllElements
-        |> List.filter (fun e -> e :? TextView)
-        |> List.map (fun e -> e :?> TextView)
-        |> List.iter(fun element ->
-            let pos =
-                map |> Map.tryFind (element.GetId())
-             
-            match pos with
-            | None -> ()
-            | Some (row,col) ->
-                [1..row] |> List.iter (fun _ -> element.ProcessKey(KeyEvent(Key.CursorDown)) |> ignore)
-                [1..col] |> List.iter (fun _ -> element.ProcessKey(KeyEvent(Key.CursorRight)) |> ignore)
-                
-        )
+    module StateSychronizer =
         
 
-    let restoreTextFieldCursorPosition (elementsBeforeUpdate:View list) (elementsAfterView:View list) =        
-        elementsBeforeUpdate
-        |> List.filter (fun e -> e :? TextField)
-        |> List.map (fun e -> e :?> TextField)
-        |> List.iter (fun e ->
-            let idFromLast = e.GetId()
-            let fittingElement =
-                elementsAfterView |> List.tryFind (fun i -> i.GetId() = idFromLast)
-            match fittingElement with
-            | None -> ()
-            | Some element ->
-                if element :? TextField then
-                    let tf = element :?> TextField                    
-                    tf.CursorPosition <- e.CursorPosition
-                            
-        )
+        type ViewElement =
+            | TextField of id:string * cursorpos:int
+            | TextView of id:string * row:int * col:int
+            | Focused of id:string
+            | Menu of barId:string * currentselected:int
+            | NotRelevant
+            
+            
 
-
-
-    let restoreFocusOnViewElements (elementsBeforeUpdate:View list) (elementsAfterView:View list) =
-        elementsBeforeUpdate
-        |> List.filter (fun e -> e.HasFocus)                        
-        |> List.iter (
-            fun e -> 
-                let idFromLast = e.GetId()
-                let fittingElement =
-                    elementsAfterView |> List.tryFind (fun i -> i.GetId() = idFromLast)
-                match fittingElement with
-                | None -> ()
-                | Some element ->
-                    if element.SuperView <> null then
-                        element.SuperView.SetFocus(element)
-                        element.SuperView.SetNeedsDisplay()
-                        element.SetNeedsDisplay()
-
+        let getViewElementState (view:View) =
+            view
+            |> getAllElements
+            |> List.collect (fun i ->
+                let id = i.GetId()
+                let specialType =
+                    match i with
+                    | :? TextField as tf ->
+                        TextField (id,tf.CursorPosition)
+                    | :? TextView as tv ->
+                        TextView (id,tv.CurrentRow,tv.CurrentColumn)
+                    | _ when i.GetType().Name = "Menu" ->
+                        let fields = i.GetType().GetFields(System.Reflection.BindingFlags.NonPublic ||| System.Reflection.BindingFlags.Instance)
                         
+                        let barItemsField = 
+                            fields |> Array.tryFind (fun i -> i.Name = "barItems")
+                        
+                        let currentField =
+                            fields |> Array.tryFind (fun i -> i.Name = "current")
+                        
+                        match barItemsField,currentField with
+                        | Some barItemsField, Some currentField ->
+                            let barItem =
+                                barItemsField.GetValue(i) :?> MenuBarItem
+                            let currentSelected =
+                                currentField.GetValue(i) :?> int
+
+                            let bid = barItem.Title |> string
+                            Menu (bid,currentSelected)
+                        | _ ->
+                            NotRelevant
+                    | _ ->
+                        NotRelevant
                 
-        )
+                                               
+                if (i.HasFocus) then
+                    [ specialType; Focused id ]
+                else
+                    [ specialType ]
+            )
+            |> List.filter (fun i -> i <> NotRelevant)
+
+
+        let setViewElementState (states:ViewElement list) (view:View) =
+            let allElements =
+                view
+                |> getAllElements
+                |> List.map (fun i -> (i.GetId(),i))
+                |> Map
+
+            states
+            |> List.iter (fun state ->
+                match state with
+                | TextField (id,cp) ->
+                    allElements
+                    |> Map.tryFind id
+                    |> Option.iter (fun element -> (element :?> TextField).CursorPosition <- cp)
+                | TextView (id,row,col) ->
+                    allElements
+                    |> Map.tryFind id
+                    |> Option.iter (fun element -> 
+                        let tv = (element :?> TextView)
+                        [1..row] |> List.iter (fun _ -> element.ProcessKey(KeyEvent(Key.CursorDown)) |> ignore)
+                        [1..col] |> List.iter (fun _ -> element.ProcessKey(KeyEvent(Key.CursorRight)) |> ignore)
+                    )
+                | Menu (barTitle,selectedEntry) ->
+                    view
+                    |> getAllElements
+                    |> List.filter (fun i -> i :? MenuBar)
+                    |> List.map (fun i -> i :?> MenuBar)
+                    |> List.tryFind (fun i -> i.Menus |> Array.exists (fun mi -> (mi.Title |> string) =  barTitle))
+                    |> Option.iter (fun menuBar ->
+                        let barIndex =
+                            menuBar.Menus 
+                            |> Array.findIndex (fun mi -> (mi.Title |> string) =  barTitle)
+
+                        // activate menu
+                        menuBar.ProcessHotKey(KeyEvent(Key.F9)) |> ignore
+                        [1..barIndex] |> List.iter (fun _ -> menuBar.SuperView.ProcessKey(KeyEvent(Key.CursorRight)) |> ignore)
+                        [1..selectedEntry] |> List.iter (fun _ -> menuBar.SuperView.ProcessKey(KeyEvent(Key.CursorDown)) |> ignore)
+                        
+                    )
+
+
+                    
+                | Focused id ->
+                    allElements
+                    |> Map.tryFind id
+                    |> Option.iter (fun element -> if element.SuperView<> null then element.SuperView.SetFocus(element))
+                | NotRelevant ->
+                    ()
+            )
+
+
+        
+
+

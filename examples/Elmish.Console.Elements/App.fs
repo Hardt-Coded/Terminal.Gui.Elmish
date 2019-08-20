@@ -237,6 +237,11 @@ let view (model:Model) (dispatch:Msg->unit) =
                 menuItem "Message Boxes" "" (fun () -> dispatch (ChangePage MessageBoxes))
                 menuItem "E_xit" "" (fun () -> dispatch (ExitApp))
             ]
+            menuBarItem "Other Menu" [
+                menuItem "MenuItem 1" "" (fun () -> ())                
+                menuItem "MenuItem 2" "" (fun () -> ())                
+                menuItem "MenuItem 3" "" (fun () -> ())                
+            ]
         ]
 
         window [

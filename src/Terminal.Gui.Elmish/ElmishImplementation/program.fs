@@ -12,8 +12,9 @@ namespace Terminal.Gui.Elmish
 
 open Terminal.Gui
 
-open Helpers
+open Helpers.StateSychronizer
 open Terminal.Gui
+
 
 /// Program type captures various aspects of program behavior
 type Program<'arg, 'model, 'msg, 'view> = private {
@@ -150,20 +151,14 @@ module Program =
                     let msg = nextMsg.Value
                     try
                         let (model',cmd') = program.update msg state
-                        //let elementsBeforeUpdate = Application.Current |> Helpers.getAllElements
-                        let focusedElements = Application.Current |> getFocusedElementIds
-                        let textPos = Application.Current |> getTextPositionsFromElements
-                        let textViewPos = Application.Current |> getTextViewPositionsFromElements
-
+                        let toSynchViewStates = Application.Current |> getViewElementState
                         let newState = program.view model' syncDispatch
                         
                         Application.Current.RemoveAll()
                         Application.Current.Add(newState.Subviews |> Seq.toArray)
                         Application.Current.LayoutSubviews()
                         Application.Current.WillPresent ()
-                        Application.Current |> restoreFocusOnViewElementsIds focusedElements
-                        Application.Current |> restoreTextfieldPosViewElementsIds textPos
-                        Application.Current |> restoreTextViewPosViewElementsIds textViewPos
+                        Application.Current |> setViewElementState toSynchViewStates
                         Application.Current.Redraw(Application.Current.Bounds)
                         Application.Driver.Refresh()
 
@@ -175,9 +170,6 @@ module Program =
                         program.onError (sprintf "Unable to process the message: %A" msg, ex)
                     nextMsg <- rb.Pop()
                 reentered <- false
-
-                // Restart Termial App Event Loop
-                //Application.Run(Application.Current)
 
 
         and syncDispatch = program.syncDispatch dispatch            
