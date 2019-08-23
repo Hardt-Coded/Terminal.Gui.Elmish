@@ -65,11 +65,11 @@
             Program.map(...)
           </code>
           <div class="tip" id="23">
-            <strong>Signature:</strong> mapInit:((&#39;arg -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8354 -&gt; &#39;?8355 * Cmd&lt;&#39;?8356&gt;) -&gt; mapUpdate:((&#39;msg -&gt; &#39;model -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8356 -&gt; &#39;?8355 -&gt; &#39;?8355 * Cmd&lt;&#39;?8356&gt;) -&gt; mapView:((&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; &#39;view) -&gt; &#39;?8355 -&gt; Dispatch&lt;&#39;?8356&gt; -&gt; &#39;?8358) -&gt; mapSetState:((&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; unit) -&gt; &#39;?8355 -&gt; Dispatch&lt;&#39;?8356&gt; -&gt; unit) -&gt; mapSubscribe:((&#39;model -&gt; Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8355 -&gt; Cmd&lt;&#39;?8356&gt;) -&gt; program:Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;view&gt; -&gt; Program&lt;&#39;?8354,&#39;?8355,&#39;?8356,&#39;?8358&gt;<br />
+            <strong>Signature:</strong> mapInit:((&#39;arg -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8354 -&gt; &#39;?8355 * Cmd&lt;&#39;?8356&gt;) -&gt; mapUpdate:((&#39;msg -&gt; &#39;model -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8356 -&gt; &#39;?8355 -&gt; &#39;?8355 * Cmd&lt;&#39;?8356&gt;) -&gt; mapView:((&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; &#39;?8355 -&gt; Dispatch&lt;&#39;?8356&gt; -&gt; (type)) -&gt; mapSetState:((&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; unit) -&gt; &#39;?8355 -&gt; Dispatch&lt;&#39;?8356&gt; -&gt; unit) -&gt; mapSubscribe:((&#39;model -&gt; Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8355 -&gt; Cmd&lt;&#39;?8356&gt;) -&gt; program:Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;view&gt; -&gt; Program&lt;&#39;?8354,&#39;?8355,&#39;?8356,&#39;?8358&gt;<br />
                           <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8354, '?8355, '?8356, 'view, '?8358                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L119-119" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L121-121" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -89,7 +89,7 @@
                           <strong>Type parameters:</strong> 'arg, 'model, 'msg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L94-94" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L96-96" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -105,11 +105,11 @@
             Program.mkProgram init update view
           </code>
           <div class="tip" id="25">
-            <strong>Signature:</strong> init:(&#39;arg -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; update:(&#39;msg -&gt; &#39;model -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; view:(&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; &#39;view) -&gt; Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;view&gt;<br />
-                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, 'view                      </div>
+            <strong>Signature:</strong> init:(&#39;arg -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; update:(&#39;msg -&gt; &#39;model -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; view:(&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;?8299&gt;<br />
+                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8299                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L33-33" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L35-35" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -125,11 +125,11 @@
             Program.mkSimple init update view
           </code>
           <div class="tip" id="26">
-            <strong>Signature:</strong> init:(&#39;arg -&gt; &#39;model) -&gt; update:(&#39;msg -&gt; &#39;model -&gt; &#39;model) -&gt; view:(&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; &#39;view) -&gt; Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;view&gt;<br />
-                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, 'view                      </div>
+            <strong>Signature:</strong> init:(&#39;arg -&gt; &#39;model) -&gt; update:(&#39;msg -&gt; &#39;model -&gt; &#39;model) -&gt; view:(&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;?8304&gt;<br />
+                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8304                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L46-46" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L48-48" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -149,7 +149,7 @@
                                   </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L193-193" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L198-198" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -167,7 +167,7 @@
                                   </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L189-189" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L194-194" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -185,7 +185,7 @@
                           <strong>Type parameters:</strong> 'model, 'msg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L186-186" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L191-191" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -205,7 +205,7 @@
                           <strong>Type parameters:</strong> 'arg, 'model, 'msg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L132-132" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L134-134" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -227,7 +227,7 @@ program: program created with 'mkSimple' or 'mkProgram'.</p>
                           <strong>Type parameters:</strong> 'arg, 'model, 'msg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L105-105" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L107-107" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -243,11 +243,11 @@ program: program created with 'mkSimple' or 'mkProgram'.</p>
             Program.view(program)
           </code>
           <div class="tip" id="32">
-            <strong>Signature:</strong> program:Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;view&gt; -&gt; &#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; &#39;view<br />
+            <strong>Signature:</strong> program:Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;view&gt; -&gt; &#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)<br />
                           <strong>Type parameters:</strong> 'arg, 'model, 'msg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L109-109" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L111-111" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -267,7 +267,7 @@ program: program created with 'mkSimple' or 'mkProgram'.</p>
                           <strong>Type parameters:</strong> 'arg, 'model, 'msg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L67-67" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L69-69" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -287,7 +287,7 @@ program: program created with 'mkSimple' or 'mkProgram'.</p>
                           <strong>Type parameters:</strong> 'arg, 'model, 'msg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L89-89" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L91-91" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -307,7 +307,7 @@ program: program created with 'mkSimple' or 'mkProgram'.</p>
                           <strong>Type parameters:</strong> 'model, 'msg, 'arg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L99-99" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L101-101" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -327,7 +327,7 @@ program: program created with 'mkSimple' or 'mkProgram'.</p>
                           <strong>Type parameters:</strong> 'model, 'msg, 'arg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L60-60" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L62-62" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -348,7 +348,7 @@ The subscription is called once - with the initial model, but can dispatch new m
                           <strong>Type parameters:</strong> 'msg, 'arg, 'model, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L113-113" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L115-115" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -368,7 +368,7 @@ The subscription is called once - with the initial model, but can dispatch new m
                           <strong>Type parameters:</strong> 'msg, 'model, 'arg, 'view                      </div>
         </td>
         <td class="xmldoc">
-                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L84-84" class="github-link">
+                      <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L86-86" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
