@@ -21,3 +21,6 @@
 
 #### 0.1.4 - Friday, 23. August 2019
 * Subscription Support
+
+#### 0.1.5 - Sunday, 25. August 2019
+* repacking nuget, because some old dll sneaked into the last package.
