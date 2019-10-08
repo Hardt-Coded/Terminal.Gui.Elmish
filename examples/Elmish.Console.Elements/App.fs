@@ -249,7 +249,7 @@ let view (model:Model) (dispatch:Msg->unit) =
                 Pos (AbsPos 0,AbsPos 1)
                 Dim (Fill,Fill)
             ]
-            Title (sprintf "Elmish Console Demo - %s" <| model.CurrentLocalTime.ToString("yyyy-MM-dd HH:mm:ss"))
+            Title (sprintf "Elmish Console Demo - %s" <| model.CurrentLocalTime.ToString("yyyy-MM-dd HH:mm:ss.ms"))
         ] [
             window [
                 Styles [

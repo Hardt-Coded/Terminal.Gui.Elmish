@@ -14,6 +14,8 @@ open Terminal.Gui
 
 open Helpers.StateSychronizer
 open Terminal.Gui
+open System
+open System.Reflection
 
 
 /// Program type captures various aspects of program behavior
@@ -151,18 +153,20 @@ module Program =
                     let msg = nextMsg.Value
                     try
                         let (model',cmd') = program.update msg state
-                        let toSynchViewStates = Application.Current |> getViewElementState
-                        let newState = program.view model' syncDispatch
+
                         
-                        Application.Current.RemoveAll()
-                        Application.Current.Add(newState.Subviews |> Seq.toArray)
-                        Application.Current.LayoutSubviews()
-                        Application.Current.WillPresent ()
-                        Application.Current |> setViewElementState toSynchViewStates
-                        Application.Current.Redraw(Application.Current.Bounds)
-                        Application.Driver.Refresh()
 
-
+                        Application.MainLoop.Invoke(fun () ->
+                            let toSynchViewStates = Application.Top |> getViewElementState
+                            let newState = program.view model' syncDispatch
+                            Application.Top.RemoveAll()
+                            Application.Top.Add(newState.Subviews |> Seq.toArray)
+                            Application.Top.LayoutSubviews()
+                            Application.Top |> setViewElementState toSynchViewStates
+                            Application.Driver.Refresh()
+                        )
+                        let t = Application.Current.GetType() = typeof<Terminal.Gui.Dialog>
+                        
                         cmd' |> Cmd.exec syncDispatch
                         state <- model'
                         
@@ -185,7 +189,14 @@ module Program =
                 program.onError ("Unable to subscribe:", ex)
                 Cmd.none
         sub @ cmd |> Cmd.exec syncDispatch
-        Application.Run(startState)
+        
+        // some reflection to set the actual top
+        let topProp = typeof<Application>.GetProperty("Top")
+        let currentProp = typeof<Application>.GetProperty("Current")
+        currentProp.SetValue(null,startState)
+        topProp.SetValue(null,startState)
+        
+        Application.Run()
 
     /// Start the dispatch loop with `unit` for the init() function.
     let run (program: Program<unit, 'model, 'msg, 'view>) = runWith () program
