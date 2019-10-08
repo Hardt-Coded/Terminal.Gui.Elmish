@@ -24,3 +24,6 @@
 
 #### 0.1.5 - Sunday, 25. August 2019
 * repacking nuget, because some old dll sneaked into the last package.
+
+#### 0.1.6 - Tuesday, 08. Oktober 2019
+* fixing "random gibberish" issue 9

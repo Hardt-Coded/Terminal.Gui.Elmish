@@ -3,7 +3,7 @@ framework: auto-detect
 source https://api.nuget.org/v3/index.json
 
 nuget FSharp.Core >= 4.6.2
-nuget Terminal.Gui >= 0.23.0
+nuget Terminal.Gui >= 0.24.0
 nuget Argu
 
 nuget Expecto

@@ -1,3 +1,5 @@
+open Fake.IO
+
 // --------------------------------------------------------------------------------------
 // FAKE build script
 // --------------------------------------------------------------------------------------
@@ -128,7 +130,13 @@ Target.create "CopyBinaries" (fun _ ->
 let buildConfiguration = DotNet.Custom <| Environment.environVarOrDefault "configuration" configuration
 
 Target.create "Clean" (fun _ ->
-    Shell.cleanDirs ["bin"; "temp"]
+    Shell.cleanDirs [
+        "bin"
+        "temp"
+        @"src\Terminal.Gui.Elmish\bin"
+        @"src\Terminal.Gui.Elmish\obj"
+    ]
+    
 )
 
 Target.create "CleanDocs" (fun _ ->

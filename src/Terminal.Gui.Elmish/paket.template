@@ -26,8 +26,11 @@ description
     An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including a fable like view DSL.
 
 files
-	../../bin/Terminal.Gui.Elmish ==> lib
+	../../bin/Terminal.Gui.Elmish/net461/Terminal.Gui.Elmish.dll ==> lib/net461
+	../../bin/Terminal.Gui.Elmish/netcoreapp2.0/Terminal.Gui.Elmish.dll ==> lib/netcoreapp2.0
 
 dependencies
-  Terminal.Gui >= 0.23.0
+  Terminal.Gui >= 0.24.0
+  FSharp.Core >= 4.6.2
+
   

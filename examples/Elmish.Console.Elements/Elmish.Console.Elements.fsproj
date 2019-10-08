@@ -17,7 +17,11 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Terminal.Gui.Elmish\Terminal.Gui.Elmish.fsproj" />
+    <Reference Include="Terminal.Gui.Elmish">
+      <HintPath>..\..\src\Terminal.Gui.Elmish\bin\Debug\netcoreapp2.0\Terminal.Gui.Elmish.dll</HintPath>
+    </Reference>
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+  <!--<ItemGroup>
+    <PackageReference Include="Terminal.Gui.Elmish" Version="0.1.6" />
+  </ItemGroup>-->  
 </Project>
