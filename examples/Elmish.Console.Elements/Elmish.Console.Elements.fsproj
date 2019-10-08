@@ -21,7 +21,7 @@
       <HintPath>..\..\src\Terminal.Gui.Elmish\bin\Debug\netcoreapp2.0\Terminal.Gui.Elmish.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <!--<ItemGroup>
-    <PackageReference Include="Terminal.Gui.Elmish" Version="0.1.6" />
-  </ItemGroup>-->  
+  <ItemGroup>
+    <PackageReference Include="Terminal.Gui" Version="0.24.0" />
+  </ItemGroup>
 </Project>
