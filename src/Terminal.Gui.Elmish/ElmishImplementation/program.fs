@@ -165,8 +165,7 @@ module Program =
                             Application.Top |> setViewElementState toSynchViewStates
                             Application.Driver.Refresh()
                         )
-                        let t = Application.Current.GetType() = typeof<Terminal.Gui.Dialog>
-                        
+                                                
                         cmd' |> Cmd.exec syncDispatch
                         state <- model'
                         
