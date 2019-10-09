@@ -17,11 +17,9 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Terminal.Gui.Elmish">
-      <HintPath>..\..\src\Terminal.Gui.Elmish\bin\Debug\netcoreapp2.0\Terminal.Gui.Elmish.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Terminal.Gui" Version="0.24.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Terminal.Gui" Version="0.24.0" />
+    <ProjectReference Include="..\..\src\Terminal.Gui.Elmish\Terminal.Gui.Elmish.fsproj" />
   </ItemGroup>  
 </Project>
