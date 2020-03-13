@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers.fs" />
+    <Compile Include="Elements.fs" />
     <Compile Include="ElmishImplementation\cmd.fs" />
     <Compile Include="ElmishImplementation\prelude.fs" />
     <Compile Include="ElmishImplementation\ring.fs" />
     <Compile Include="ElmishImplementation\program.fs" />
-    <Compile Include="Elements.fs" />
     <None Include="paket.references" />
     <None Include="paket.template" />
   </ItemGroup>

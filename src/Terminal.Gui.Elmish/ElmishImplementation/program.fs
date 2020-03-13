@@ -18,12 +18,13 @@ open System
 open System.Reflection
 
 
+
 /// Program type captures various aspects of program behavior
 type Program<'arg, 'model, 'msg, 'view> = private {
     init : 'arg -> 'model * Cmd<'msg>
     update : 'msg -> 'model -> 'model * Cmd<'msg>
     subscribe : 'model -> Cmd<'msg>
-    view : 'model -> Dispatch<'msg> -> Toplevel
+    view : 'model -> Dispatch<'msg> -> ControlNode<obj>
     setState : 'model -> Dispatch<'msg> -> unit
     onError : (string*exn) -> unit
     syncDispatch: Dispatch<'msg> -> Dispatch<'msg>
@@ -37,7 +38,7 @@ module Program =
     let mkProgram 
         (init : 'arg -> 'model * Cmd<'msg>) 
         (update : 'msg -> 'model -> 'model * Cmd<'msg>)
-        (view : 'model -> Dispatch<'msg> -> Toplevel) =
+        (view : 'model -> Dispatch<'msg> -> ControlNode<obj>) =
         { init = init
           update = update
           view = view
@@ -50,7 +51,7 @@ module Program =
     let mkSimple 
         (init : 'arg -> 'model) 
         (update : 'msg -> 'model -> 'model)
-        (view : 'model -> Dispatch<'msg> -> Toplevel) =
+        (view : 'model -> Dispatch<'msg> -> ControlNode<obj>) =
         { init = init >> fun state -> state,Cmd.none
           update = fun msg -> update msg >> fun state -> state,Cmd.none
           view = view
@@ -138,7 +139,8 @@ module Program =
         let (model,cmd) = program.init arg
         let rb = RingBuffer 10
         let mutable reentered = false
-        let mutable state = model        
+        let mutable state = model
+        let mutable currentViewTree = Elements.EmptyRootPage
         let rec dispatch msg = 
             if reentered then
                 rb.Push msg
@@ -153,16 +155,18 @@ module Program =
                     let msg = nextMsg.Value
                     try
                         let (model',cmd') = program.update msg state
+                        let newViewTree = program.view model' syncDispatch
 
+                        updateTree currentViewTree newViewTree
                         
 
                         Application.MainLoop.Invoke(fun () ->
-                            let toSynchViewStates = Application.Top |> getViewElementState
-                            let newState = program.view model' syncDispatch
-                            Application.Top.RemoveAll()
-                            Application.Top.Add(newState.Subviews |> Seq.toArray)
-                            Application.Top.LayoutSubviews()
-                            Application.Top |> setViewElementState toSynchViewStates
+                            //let toSynchViewStates = Application.Top |> getViewElementState
+                            
+                            //Application.Top.RemoveAll()
+                            //Application.Top.Add(newState.Subviews |> Seq.toArray)
+                            //Application.Top.LayoutSubviews()
+                            //Application.Top |> setViewElementState toSynchViewStates
                             Application.Driver.Refresh()
                         )
                                                 
@@ -179,7 +183,8 @@ module Program =
 
         program.setState model syncDispatch
 
-        let startState = program.view model syncDispatch        
+        currentViewTree <- program.view model syncDispatch
+        updateTree Elements.EmptyRootPage currentViewTree
 
         let sub = 
             try 
@@ -192,8 +197,8 @@ module Program =
         // some reflection to set the actual top
         let topProp = typeof<Application>.GetProperty("Top")
         let currentProp = typeof<Application>.GetProperty("Current")
-        currentProp.SetValue(null,startState)
-        topProp.SetValue(null,startState)
+        currentProp.SetValue(null,currentViewTree.Ref)
+        topProp.SetValue(null,currentViewTree.Ref)
         
         Application.Run()
 
