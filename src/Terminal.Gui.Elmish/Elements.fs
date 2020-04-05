@@ -48,16 +48,16 @@ module StyleHelpers =
         | TextAlignment of TextAlignment
         | TextColorScheme of ColorScheme
         | Colors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
-        
-        
-    
+
+
+
     type Prop<'TValue> =
         | Styles of Style list
         | Value of ^TValue
         | Text of string
         | Title of string
-        //| OnChanged of ('TValue -> unit)
-        //| OnClicked of (unit -> unit)
+        | OnChanged of ('TValue -> unit)
+        | OnClicked of (unit -> unit)
         | Items of ('TValue * string) list
         | Secret
         // Scrollbar Stuff
@@ -66,11 +66,11 @@ module StyleHelpers =
         | ScrollBar of ScrollBar
         | Frame of (int * int * int * int)
 
-        
 
-        
 
-    
+
+
+
     let private convDim (dim:Dimension) =
         match dim with
         | Fill -> Dim.Fill()
@@ -178,15 +178,15 @@ module StyleHelpers =
         |> List.tryFind (fun i -> match i with | Frame _ -> true | _ -> false)
         |> Option.map (fun i -> match i with | Frame t -> t | _ -> failwith "What?No!Never should this happen!")
 
-    //let tryGetOnChangedFromProps (props:Prop<'TValue> list) = 
-    //    props
-    //    |> List.tryFind (fun i -> match i with | OnChanged _ -> true | _ -> false)
-    //    |> Option.map (fun i -> match i with | OnChanged t -> t | _ -> failwith "What?No!Never should this happen!")
+    let tryGetOnChangedFromProps (props:Prop<'TValue> list) = 
+        props
+        |> List.tryFind (fun i -> match i with | OnChanged _ -> true | _ -> false)
+        |> Option.map (fun i -> match i with | OnChanged t -> t | _ -> failwith "What?No!Never should this happen!")
 
-    //let tryGetOnClickedFromProps (props:Prop<'TValue> list) = 
-    //    props
-    //    |> List.tryFind (fun i -> match i with | OnClicked _ -> true | _ -> false)
-    //    |> Option.map (fun i -> match i with | OnClicked t -> t | _ -> failwith "What?No!Never should this happen!")
+    let tryGetOnClickedFromProps (props:Prop<'TValue> list) = 
+        props
+        |> List.tryFind (fun i -> match i with | OnClicked _ -> true | _ -> false)
+        |> Option.map (fun i -> match i with | OnClicked t -> t | _ -> failwith "What?No!Never should this happen!")
 
     let getItemsFromProps (props:Prop<'TValue> list) = 
         props
@@ -242,10 +242,10 @@ module Elements =
 
 
 
-    [<StructuralEquality>]
+    [<CustomEquality; NoComparison>]
     type Control<'TValue> = 
         | Nothing
-        | Page          
+        | Page
         | Window        of Prop<'TValue> list
         | Button        of Prop<'TValue> list
         | Label         of Prop<'TValue> list
@@ -258,7 +258,14 @@ module Elements =
         | ProgressBar   of Prop<'TValue> list
         | HexView       of (Prop<'TValue> list * IO.Stream)
         | ListView      of Prop<'TValue> list
-   
+
+        override x.Equals(yobj) =
+            match yobj with
+            | :? Control<'TValue> as y -> true
+            | _ -> false
+
+        override x.GetHashCode() = 0
+
 
     type Change<'T> =
         | Unchanged
@@ -278,7 +285,7 @@ module Elements =
             Parent: Node<'T> option
         }
 
-    let EmptyRootPage = 
+    let EmptyRootPage<'TValue> = 
         {
             Id = "Root"
             Value = Nothing
@@ -346,7 +353,7 @@ module Elements =
 
         let ustr (x:string) = ustring.Make(x)
 
-        let rec inline createView (node:ControlNode<'TValue>) : View =
+        let rec createView (node:ControlNode<'TValue>) : View =
             match node.Value with
             | Nothing ->
                 failwith ("the empty tree is not for creating view elements")
@@ -926,17 +933,19 @@ module Elements =
             Children = []
             Parent = None
         }
-            
-            
 
-    //let menuItem title help action = 
-    //    MenuItem(title |> ustr,help ,(fun () -> action () ))
 
-    //let menuBarItem text (items:MenuItem list) = 
-    //    MenuBarItem(text |> ustr,items |> List.toArray)
+    open ViewElements
 
-    //let menuBar (items:MenuBarItem list) = 
-    //    MenuBar (items |> List.toArray)
+
+    let menuItem title help action = 
+        MenuItem(title |> ustr,help ,(fun () -> action () ))
+
+    let menuBarItem text (items:MenuItem list) = 
+        MenuBarItem(text |> ustr,items |> List.toArray)
+
+    let menuBar (items:MenuBarItem list) = 
+        MenuBar (items |> List.toArray)
 
 
     let inline progressBar (props:Prop<float> list)  : Node<Control<float>> = 
