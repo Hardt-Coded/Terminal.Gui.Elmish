@@ -45,7 +45,7 @@ type Msg =
 let timerSubscription dispatch =
     let rec loop () =
         async {
-            do! Async.Sleep 1000
+            do! Async.Sleep 5000
             dispatch UpdateTime
             return! loop ()
         }
@@ -225,24 +225,24 @@ let update (msg:Msg) (model:Model) =
 
 let view (model:Model) (dispatch:Msg->unit) =
     page [
-        menuBar [
-            menuBarItem "Demo" [
-                menuItem "Start" "" (fun () -> dispatch (ChangePage Start))
-                menuItem "Counter" "" (fun () -> dispatch (ChangePage Counter))
-                menuItem "TextFields" "" (fun () -> dispatch (ChangePage TextFields))
-                menuItem "Radio and Check" "" (fun () -> dispatch (ChangePage RadioCheck))
-                menuItem "Text File View" "" (fun () -> dispatch (ChangePage TextView))
-                menuItem "List View" "" (fun () -> dispatch (ChangePage ListView))
-                menuItem "Scroll View" "" (fun () -> dispatch (ChangePage ScrollView))
-                menuItem "Message Boxes" "" (fun () -> dispatch (ChangePage MessageBoxes))
-                menuItem "E_xit" "" (fun () -> dispatch (ExitApp))
-            ]
-            menuBarItem "Other Menu" [
-                menuItem "MenuItem 1" "" (fun () -> ())                
-                menuItem "MenuItem 2" "" (fun () -> ())                
-                menuItem "MenuItem 3" "" (fun () -> ())                
-            ]
-        ]
+        //menuBar [
+        //    menuBarItem "Demo" [
+        //        menuItem "Start" "" (fun () -> dispatch (ChangePage Start))
+        //        menuItem "Counter" "" (fun () -> dispatch (ChangePage Counter))
+        //        menuItem "TextFields" "" (fun () -> dispatch (ChangePage TextFields))
+        //        menuItem "Radio and Check" "" (fun () -> dispatch (ChangePage RadioCheck))
+        //        menuItem "Text File View" "" (fun () -> dispatch (ChangePage TextView))
+        //        menuItem "List View" "" (fun () -> dispatch (ChangePage ListView))
+        //        menuItem "Scroll View" "" (fun () -> dispatch (ChangePage ScrollView))
+        //        menuItem "Message Boxes" "" (fun () -> dispatch (ChangePage MessageBoxes))
+        //        menuItem "E_xit" "" (fun () -> dispatch (ExitApp))
+        //    ]
+        //    menuBarItem "Other Menu" [
+        //        menuItem "MenuItem 1" "" (fun () -> ())                
+        //        menuItem "MenuItem 2" "" (fun () -> ())                
+        //        menuItem "MenuItem 3" "" (fun () -> ())                
+        //    ]
+        //]
 
         window [
             Styles [
@@ -328,7 +328,7 @@ let view (model:Model) (dispatch:Msg->unit) =
             ] [
                 match model.Page with
                 | Start ->
-                    yield! Start.view
+                    yield! Start.view model.CurrentLocalTime
                 | Counter ->
                     match model.CounterModel with
                     | None -> ()

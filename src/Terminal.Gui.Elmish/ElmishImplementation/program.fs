@@ -142,49 +142,49 @@ module Program =
         let mutable state = model
         let mutable currentViewTree = Elements.EmptyRootPage
         let rec dispatch msg = 
-            if reentered then
-                rb.Push msg
-            else
+            Application.MainLoop.Invoke(fun () ->
                 
-                // stop Console Application Event Loop
-                //Application.RequestStop()
-
-                reentered <- true
-                let mutable nextMsg = Some msg
-                while Option.isSome nextMsg do
-                    let msg = nextMsg.Value
-                    try
-                        let (model',cmd') = program.update msg state
-                        let newViewTree = program.view model' syncDispatch
-
-                        updateTree currentViewTree newViewTree
+                Diagnostics.Trace.WriteLine(msg.GetType().Name) |> ignore
+                if reentered then
+                    rb.Push msg
+                else
+                    reentered <- true
+                    let mutable nextMsg = Some msg
+                    while Option.isSome nextMsg do
+                        Diagnostics.Trace.WriteLine(msg.GetType().Name + " in while loop") |> ignore
+                        let msg = nextMsg.Value
+                        try
+                            let (model',cmd') = program.update msg state
+                            let newViewTree = program.view model' syncDispatch
+                            currentViewTree <- updateTree currentViewTree newViewTree
                         
-
-                        Application.MainLoop.Invoke(fun () ->
+                        
                             //let toSynchViewStates = Application.Top |> getViewElementState
                             
                             //Application.Top.RemoveAll()
                             //Application.Top.Add(newState.Subviews |> Seq.toArray)
-                            //Application.Top.LayoutSubviews()
+                            Application.Top.LayoutSubviews()
                             //Application.Top |> setViewElementState toSynchViewStates
                             Application.Driver.Refresh()
-                        )
+                            
                                                 
-                        cmd' |> Cmd.exec syncDispatch
-                        state <- model'
+                            cmd' |> Cmd.exec syncDispatch
+                            state <- model'
                         
-                    with ex ->
-                        program.onError (sprintf "Unable to process the message: %A" msg, ex)
-                    nextMsg <- rb.Pop()
-                reentered <- false
-
+                        with ex ->
+                            program.onError (sprintf "Unable to process the message: %A" msg, ex)
+                        nextMsg <- rb.Pop()
+                    reentered <- false
+            )
 
         and syncDispatch = program.syncDispatch dispatch            
 
         program.setState model syncDispatch
 
-        currentViewTree <- program.view model syncDispatch
-        updateTree Elements.EmptyRootPage currentViewTree
+        currentViewTree <- (program.view model syncDispatch)
+        
+        
+        currentViewTree <- initFirstTree currentViewTree
 
         let sub = 
             try 
@@ -197,8 +197,9 @@ module Program =
         // some reflection to set the actual top
         let topProp = typeof<Application>.GetProperty("Top")
         let currentProp = typeof<Application>.GetProperty("Current")
-        currentProp.SetValue(null,currentViewTree.Ref)
-        topProp.SetValue(null,currentViewTree.Ref)
+        let topLevel = currentViewTree.Ref.Value :?> Toplevel
+        currentProp.SetValue(null,topLevel)
+        topProp.SetValue(null,topLevel)
         
         Application.Run()
 

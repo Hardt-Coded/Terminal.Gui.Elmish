@@ -29,7 +29,7 @@ let update (msg:Msg) (model:Model) =
         {model with SecretText = txt}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg -> unit) : View list=
+let view (model:Model) (dispatch:Msg -> unit) : ControlNode<_> list=
     [
         label[]
         label [
@@ -56,8 +56,8 @@ let view (model:Model) (dispatch:Msg -> unit) : View list=
                 Dim (Fill,AbsDim 1)
 
             ]
-            Value model.Text
-            OnChanged (fun t -> dispatch (ChangeText t))
+            Value (model.Text :> obj)
+            OnChanged (fun t -> dispatch (ChangeText (t :?> string)))
         ]
 
         label [
@@ -74,8 +74,8 @@ let view (model:Model) (dispatch:Msg -> unit) : View list=
                 Dim (Fill,AbsDim 1)
 
             ]
-            Value model.SecretText
-            OnChanged (fun t -> dispatch (ChangeSecretText t))
+            Value (model.SecretText :> obj)
+            OnChanged (fun t -> dispatch (ChangeSecretText (t :?> string)))
             Secret
         ]
 

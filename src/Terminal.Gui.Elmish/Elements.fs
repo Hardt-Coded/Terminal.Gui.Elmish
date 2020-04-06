@@ -56,8 +56,8 @@ module StyleHelpers =
         | Value of ^TValue
         | Text of string
         | Title of string
-        //| OnChanged of ('TValue -> unit)
-        //| OnClicked of (unit -> unit)
+        | OnChanged of ('TValue -> unit)
+        | OnClicked of (unit -> unit)
         | Items of ('TValue * string) list
         | Secret
         // Scrollbar Stuff
@@ -178,15 +178,15 @@ module StyleHelpers =
         |> List.tryFind (fun i -> match i with | Frame _ -> true | _ -> false)
         |> Option.map (fun i -> match i with | Frame t -> t | _ -> failwith "What?No!Never should this happen!")
 
-    //let tryGetOnChangedFromProps (props:Prop<'TValue> list) = 
-    //    props
-    //    |> List.tryFind (fun i -> match i with | OnChanged _ -> true | _ -> false)
-    //    |> Option.map (fun i -> match i with | OnChanged t -> t | _ -> failwith "What?No!Never should this happen!")
+    let tryGetOnChangedFromProps (props:Prop<'TValue> list) = 
+        props
+        |> List.tryFind (fun i -> match i with | OnChanged _ -> true | _ -> false)
+        |> Option.map (fun i -> match i with | OnChanged t -> t | _ -> failwith "What?No!Never should this happen!")
 
-    //let tryGetOnClickedFromProps (props:Prop<'TValue> list) = 
-    //    props
-    //    |> List.tryFind (fun i -> match i with | OnClicked _ -> true | _ -> false)
-    //    |> Option.map (fun i -> match i with | OnClicked t -> t | _ -> failwith "What?No!Never should this happen!")
+    let tryGetOnClickedFromProps (props:Prop<'TValue> list) = 
+        props
+        |> List.tryFind (fun i -> match i with | OnClicked _ -> true | _ -> false)
+        |> Option.map (fun i -> match i with | OnClicked t -> t | _ -> failwith "What?No!Never should this happen!")
 
     let getItemsFromProps (props:Prop<'TValue> list) = 
         props
@@ -217,7 +217,32 @@ module StyleHelpers =
         
         
        
+    type CompareableProps<'a> = {
+        Style:Style list option
+        Title:string
+        Text:string
+        Value: 'a option
+        Frame: (int * int * int * int) option
+        Items: ('a * string) list
+        ScrollBar:ScrollBar
+        ScrollContentSize: (int * int) option
+        ScrollOffset:(int *int) option
+        IsSecret:bool
+    }
 
+    let inline getCompareableFromProps (props:Prop<'a> list) : CompareableProps<'a> =
+        {
+            Style = props |> List.tryPick (fun x -> match x with | Styles s -> Some s | _ -> None)
+            Title=getTitleFromProps props
+            Text=getTextFromProps props
+            Value=tryGetValueFromProps props
+            Frame=tryGetFrameFromProps props
+            Items=getItemsFromProps props
+            ScrollBar=getScrollBarFromProps props
+            ScrollContentSize=getScrollContentSizeFromProps props
+            ScrollOffset=getScrollOffsetFromProps props
+            IsSecret=hasSecretInProps props
+        }
     
 
 
@@ -242,7 +267,7 @@ module Elements =
 
 
 
-    [<StructuralEquality>]
+    [<ReferenceEquality>]
     type Control<'TValue> = 
         | Nothing
         | Page          
@@ -264,41 +289,69 @@ module Elements =
         | Unchanged
         | Inserted
         | Deleted
-        | Updated of 'T
+        | Updated of Control<'T>
 
 
     
     type Node<'T> = 
         {
             Id : string
-            Value : 'T
+            Element: Control<'T>
+            Value : CompareableProps<'T>
             Ref: View ref 
             Modified : Change<'T>
             Children : Node<'T> list
             Parent: Node<'T> option
         }
 
-    let EmptyRootPage = 
+    let EmptyRootPage : Node<obj> = 
         {
             Id = "Root"
-            Value = Nothing
-            Ref = ref null
-            Modified = Unchanged
+            Element = Page
+            // Set DummyProp
+            Value = getCompareableFromProps [ Value (unbox("")) ]
+            Ref = ref (Toplevel.Create() :> View)
+            Modified = Inserted
             Children = []
             Parent = None
         }
        
     
-    type ControlNode<'TValue> = Node<Control<'TValue>>
+    type ControlNode<'TValue> = Node<'TValue>
 
     module Tree =
         
 
+        let rec checkList (list1:Node<'a> list) (list2:Node<'a> list) =
+            if (list1.Length <> list2.Length) then  
+                false
+            else
+                List.zip list1 list2
+                |> List.map (fun (x,y) -> 
+                    let valueSame = x.Value = y.Value
+                    let idSame = x.Id = y.Id 
+                    let listSame =  checkList x.Children y.Children
+                    valueSame && idSame && listSame
+                )
+                |> List.exists (fun x -> not x)
+                |> not
+                
+
         /// Nodes are equal in all but Value
+        let (!=) node1 node2 =
+            let res =
+                node1.Id = node2.Id 
+                && checkList node1.Children node2.Children 
+                && node1.Value <> node2.Value
+            res
+
         let (==) node1 node2 =
-            node1.Id = node2.Id 
-            && node1.Children = node2.Children 
-            && node1.Value <> node2.Value
+            let res =
+                let idSame = node1.Id = node2.Id 
+                let listSame = checkList node1.Children node2.Children 
+                let valueSame = node1.Value = node2.Value
+                valueSame && idSame && listSame
+            res
 
         /// Combines the children of two nodes into a single list
         let combine node1 node2 =
@@ -320,18 +373,21 @@ module Elements =
                 Modified = Updated value }
 
         let rec diff (oldNodeOpt, newNodeOpt)  =
+            //Diagnostics.Trace.WriteLine("Process Diff " + (oldNodeOpt |> Option.map (fun i -> i.Id) |> Option.defaultValue "")) |> ignore
+            
             match oldNodeOpt, newNodeOpt with
             | Some oldNode, None -> delete oldNode
             | None, Some newNode -> insert newNode
-            | Some oldNode, Some newNode when oldNode = newNode -> oldNode
-            | Some oldNode, Some newNode when oldNode == newNode -> update oldNode newNode.Value
+            | Some oldNode, Some newNode when oldNode == newNode -> oldNode
+            | Some oldNode, Some newNode when oldNode != newNode -> update oldNode newNode.Element
             | Some oldNode, Some newNode ->
                 { oldNode with
-                    Modified = if oldNode.Value = newNode.Value then Unchanged else Updated newNode.Value
+                    Modified = if oldNode.Value = newNode.Value then Unchanged else Updated newNode.Element
                     Children =
                         combine oldNode newNode 
                         |> List.map diff
                         |> List.map (fun x -> {x with Parent = Some oldNode })
+                        |> List.distinctBy (fun x -> (x.Value, x.Id))
                 }
             | None, None -> failwith "Must have at least one node to compare."
 
@@ -346,12 +402,12 @@ module Elements =
 
         let ustr (x:string) = ustring.Make(x)
 
-        let rec inline createView (node:ControlNode<'TValue>) : View =
-            match node.Value with
+        let rec createView (node:ControlNode<'TValue>) : View =
+            match node.Element with
             | Nothing ->
                 failwith ("the empty tree is not for creating view elements")
             | Page ->
-                let top = Toplevel.Create()        
+                let top = Toplevel.Create()
                 node.Children |> List.iter (fun v -> top.Add(createView v))
                 top :> View
             | Window props ->
@@ -574,12 +630,15 @@ module Elements =
                 :> View
 
 
-        let rec inline updateView (view:View) (node:ControlNode<'TValue>) : View =
-            match node.Value with
+        let rec updateView (view:View) (node:ControlNode<'TValue>) : View =
+            match node.Element with
             | Nothing ->
                 failwith ("the empty tree is not for updating view elements")
             | Page ->
-                view
+                if view = null then
+                    Toplevel.Create() :> View
+                else
+                    view
             | Window props ->
                 let title = getTitleFromProps props
                 let window = view :?> Window
@@ -803,28 +862,73 @@ module Elements =
             | None ->
                 ()
             | Some parent ->
-                (!parent.Ref).Subviews.Add(!node.Ref)
+                (!parent.Ref).ChildNeedsDisplay()
+                (!parent.Ref).Add(!node.Ref)
             node
         | Deleted ->
             match node.Parent with
             | None ->
                 ()
             | Some parent ->
-                (!parent.Ref).Subviews.Remove(!node.Ref) |> ignore
+                (!parent.Ref).Remove(!node.Ref)
             node
-        | Updated newData ->
+        | Updated newElement ->
+            let newNode = {
+                node with Element = newElement
+            }
             let view = !node.Ref
-            let _ = ViewElements.updateView view node
-            node
+            newNode.Ref := ViewElements.updateView view newNode
+            (!newNode.Ref).ChildNeedsDisplay()
+            (!newNode.Ref).SetNeedsDisplay()
+
+            newNode
 
 
     let updateTree oldTree newTree =
+        Diagnostics.Trace.WriteLine("Update Tree...") |> ignore
         let treeDiff = Tree.compare oldTree newTree
+
+        
+        //let rec countTree node acc ts =
+        //    match node.Children with
+        //    | [] ->
+        //        match ts with
+        //        | [] -> acc
+        //        | head :: tail -> countTree head (acc + 1) tail
+        //    | head::tail ->
+        //        countTree head (acc + 1) tail
+        let rec countTree node i =
+            (i,node.Children)
+            ||>  List.fold (fun state item ->
+                 state + (countTree item i)         
+            )
+                
+            
+
+        let cold = countTree oldTree 1
+        let cnew = countTree newTree 1
+        let cdiff = countTree treeDiff 1
+        Diagnostics.Trace.WriteLine(sprintf "Count old: %i" cold) |> ignore
+        Diagnostics.Trace.WriteLine(sprintf "Count new: %i" cnew) |> ignore
+        Diagnostics.Trace.WriteLine(sprintf "Count diff: %i" cdiff) |> ignore
+
         let rec traverse (node:ControlNode<'a>) =
+            //Diagnostics.Trace.WriteLine("Process Node " + node.Id) |> ignore
             processNode node |> ignore
-            treeDiff.Children 
+            //Diagnostics.Trace.WriteLine("Node processed " + node.Id) |> ignore
+            node.Children 
             |> List.iter (fun c -> traverse c)
         traverse treeDiff
+        Diagnostics.Trace.WriteLine("... Tree updated") |> ignore
+        treeDiff
+
+    let initFirstTree tree =
+        let rec traverse (node:ControlNode<'a>) =
+            node.Ref := ViewElements.createView node
+            node.Children 
+            |> List.iter (fun c -> traverse c)
+        traverse tree
+        tree
             
         
 
@@ -833,99 +937,108 @@ module Elements =
 
 
 
-    let inline page (subViews:ControlNode<'TValue> list) : ControlNode<'TValue> =
+    let inline page (subViews:ControlNode<'TValue> list) : ControlNode<_> =
         {
             Id = "Root"
-            Value = Page
-            Ref = ref null
+            Value = getCompareableFromProps []
+            Element = Page
+            Ref = ref (Toplevel.Create() :> View)
             Modified = Unchanged
             Children = subViews
             Parent = None
-        }
+        } |> unbox
        
 
-    let inline window (props:Prop<'TValue> list) (subViews:ControlNode<'TValue> list) : ControlNode<'TValue> =        
+    let inline window (props:Prop<'TValue> list) (subViews:ControlNode<'TValue> list) : ControlNode<_> =        
         {
             Id = "Window"
-            Value = Control.Window props
+            Value = getCompareableFromProps props
+            Element = Control.Window props
             Ref = ref null
             Modified = Unchanged
             Children = subViews
             Parent = None
-        }
+        }|> unbox
 
 
     let inline button (props:Prop<'TValue> list) = 
         {
             Id = "Button"
-            Value = Control.Button props
+            Value = getCompareableFromProps props
+            Element = Control.Button props
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        }|> unbox
 
-    let inline label (props:Prop<'TValue> list)  : ControlNode<'TValue> =   
+    let inline label (props:Prop<'TValue> list)  : ControlNode<_> =   
         {
             Id = "Label"
-            Value = Control.Label props
+            Value = getCompareableFromProps props
+            Element = Control.Label props
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        } |> unbox
 
-    let inline textField (props:Prop<string> list)  : Node<Control<string>> =        
+    let inline textField (props:Prop<obj> list)  : ControlNode<obj> =        
         {
             Id = "TextField"
-            Value = Control.TextField props
+            Value = getCompareableFromProps props
+            Element = Control.TextField props
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        } |> unbox
 
-    let inline textView (props:Prop<'TValue> list)  : ControlNode<'TValue> =
+    let inline textView (props:Prop<'TValue> list)  : ControlNode<_> =
         {
             Id = "TextView"
-            Value = Control.TextView props
+            Value = getCompareableFromProps props
+            Element = Control.TextView props
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        }|> unbox
 
    
 
-    let inline frameView (props:Prop<'TValue> list) (subViews:ControlNode<'TValue> list) : ControlNode<'TValue> =
+    let inline frameView (props:Prop<'TValue> list) (subViews:ControlNode<'TValue> list) : ControlNode<_> =
         {
             Id = "Window"
-            Value = Control.FrameView props
+            Value = getCompareableFromProps props
+            Element = Control.FrameView props
             Ref = ref null
             Modified = Unchanged
             Children = subViews
             Parent = None
-        }
+        }|> unbox
 
-    let inline hexView (props:Prop<'TValue> list) stream  : ControlNode<'TValue> =
+    let inline hexView (props:Prop<'TValue> list) stream  : ControlNode<_> =
         {
             Id = "HexView"
-            Value = Control.HexView stream
+            Value = getCompareableFromProps props
+            Element = Control.HexView stream
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        }|> unbox
 
-    let inline listView (props:Prop<'TValue> list)  : ControlNode<'TValue> = 
+    let inline listView (props:Prop<'TValue> list)  : ControlNode<_> = 
         {
             Id = "ListView"
-            Value = Control.ListView props
+            Value = getCompareableFromProps props
+            Element = Control.ListView props
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        }|> unbox
             
             
 
@@ -939,48 +1052,52 @@ module Elements =
     //    MenuBar (items |> List.toArray)
 
 
-    let inline progressBar (props:Prop<float> list)  : Node<Control<float>> = 
+    let inline progressBar (props:Prop<float> list)  : ControlNode<_> = 
         {
             Id = "ProgressBar"
-            Value = Control.ProgressBar props
+            Value = getCompareableFromProps props
+            Element = Control.ProgressBar props
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        } |> unbox
 
 
-    let inline checkBox (props:Prop<bool> list) = 
+    let inline checkBox (props:Prop<bool> list)  : ControlNode<_> = 
         {
             Id = "CheckBox"
-            Value = Control.CheckBox props
+            Value = getCompareableFromProps props
+            Element = Control.CheckBox props
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        } |> unbox
 
 
-    let inline radioGroup (props:Prop<'TValue> list) =
+    let inline radioGroup (props:Prop<'TValue> list) : ControlNode<_> =
         {
             Id = "RadioGroup"
-            Value = Control.RadioGroup props
+            Value = getCompareableFromProps props
+            Element = Control.RadioGroup props
             Ref = ref null
             Modified = Unchanged
             Children = []
             Parent = None
-        }
+        } |> unbox
 
     
     let inline scrollView (props:Prop<'TValue> list) (subViews:ControlNode<'TValue> list) : ControlNode<'TValue> =
         {
             Id = "ScrollView"
-            Value = Control.ScrollView props
+            Value = getCompareableFromProps props
+            Element = Control.ScrollView props
             Ref = ref null
             Modified = Unchanged
             Children = subViews
             Parent = None
-        }
+        }|> unbox
 
 
 

@@ -55,7 +55,7 @@ let update (msg:Msg) (model:Model) =
         {model with Text = txt}, Cmd.none   
 
 
-let view (model:Model) (dispatch:Msg -> unit) : View list=
+let view (model:Model) (dispatch:Msg -> unit) : ControlNode<_> list=
     [
         yield label [
             Styles [

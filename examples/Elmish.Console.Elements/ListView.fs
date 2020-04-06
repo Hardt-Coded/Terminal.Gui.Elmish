@@ -42,7 +42,7 @@ let update (msg:Msg) (model:Model) =
         {model with VoteResult = vr}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg -> unit) : View list=
+let view (model:Model) (dispatch:Msg -> unit) : ControlNode<_> list=
     [
         label [
             Styles [
