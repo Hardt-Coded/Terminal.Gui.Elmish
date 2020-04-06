@@ -45,7 +45,7 @@ let update (msg:Msg) (model:Model) =
         {model with IsHappy = b}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg -> unit) : View list=
+let view (model:Model) (dispatch:Msg -> unit) : ControlNode<_> list=
     [
         label [
             Styles [
@@ -82,7 +82,7 @@ let view (model:Model) (dispatch:Msg -> unit) : View list=
                 Pos (CenterPos,AbsPos 16)               
 
             ]
-            Value model.IsHappy
+            Value model.IsHappy |> unbox
             Text "Are you happy?"
             OnChanged (fun b -> dispatch (ChangeHappy b))            
         ]

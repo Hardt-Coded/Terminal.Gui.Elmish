@@ -3,7 +3,7 @@
 open Terminal.Gui
 open Terminal.Gui.Elmish
 
-let view : View list =
+let view (model:System.DateTime) : ControlNode<obj> list =
     [
         label [
             Styles [
@@ -93,6 +93,20 @@ let view : View list =
             Text "And Colors"
         ] 
 
+
+        textField [
+            Styles [
+                Pos (AbsPos 0,AbsPos 13)
+                Dim (Fill,AbsDim 1)
+                TextAlignment Centered
+                Colors (Color.Magenta,Color.BrightYellow)
+                
+            ]
+            
+            Value (model.ToString("yyyy-MM-dd HH:mm:ss.ms") :> obj)
+            
+        ] |> unbox 
+         
     ]
     
 

@@ -57,7 +57,7 @@ let update (msg:Msg) (model:Model) =
         {model with Counter = 0}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg->unit) : View list=
+let view (model:Model) (dispatch:Msg->unit) : ControlNode<_> list=
     [
         label [
             Styles [
