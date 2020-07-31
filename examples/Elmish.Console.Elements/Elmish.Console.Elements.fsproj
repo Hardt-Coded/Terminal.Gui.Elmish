@@ -17,7 +17,7 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Terminal.Gui" Version="0.24.0" />
+    <PackageReference Include="Terminal.Gui" Version="0.81.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Terminal.Gui.Elmish\Terminal.Gui.Elmish.fsproj" />
