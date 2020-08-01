@@ -28,7 +28,9 @@
 #### 0.1.6 - Tuesday, 08. Oktober 2019
 * fixing "random gibberish" issue 9
 
-#### 0.1.7 - Uplifing to the latest Termin.Gui Version (Thanks Chet for the PR)
-* uplifing to the latest Terminal.Gui
-* move to dotnet tools (fake and paket)
-* cleanup dependencies
+#### 0.1.7 - Saturday, 01. August 2020
+* add StatusBar support
+* add Date and Time Field support
+* uplifing to the latest Terminal.Gui (Thanks Chet)
+* move to dotnet tools (Thanks Chet)
+* cleanup dependencies (Thanks Chet)
