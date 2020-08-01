@@ -17,11 +17,14 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Terminal.Gui.Elmish" Version="0.1.7" />
+  </ItemGroup>
+  <!--<ItemGroup>
     <PackageReference Include="Terminal.Gui" Version="0.81.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Terminal.Gui.Elmish\Terminal.Gui.Elmish.fsproj" />
-  </ItemGroup>
+  </ItemGroup>-->
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.7.2" />
   </ItemGroup>
