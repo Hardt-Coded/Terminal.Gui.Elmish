@@ -69,9 +69,12 @@ let gitRaw = Environment.environVarOrDefault "gitRaw" "https://raw.githubusercon
 
 let website = "/Terminal.Gui.Elmish"
 
-// --------------------------------------------------------------------------------------
-// END TODO: The rest of the file includes standard build steps
-// --------------------------------------------------------------------------------------
+
+let runDotNet cmd workingDir =
+    let result =
+        DotNet.exec (DotNet.Options.withWorkingDirectory workingDir) cmd ""
+    if result.ExitCode <> 0 then failwithf "'dotnet %s' failed in %s" cmd workingDir
+
 
 // Read additional information from the release notes document
 let release = ReleaseNotes.load "RELEASE_NOTES.md"
@@ -147,27 +150,29 @@ Target.create "CleanDocs" (fun _ ->
 // Build library & test project
 
 Target.create "Restore" (fun _ ->
-    solutionFile
-    |> DotNet.restore id
+    Path.getFullName "./" |> runDotNet "tool restore"
+    solutionFile |> DotNet.restore id
 )
 
 Target.create "Build" (fun _ ->
-    (*solutionFile
-    |> DotNet.build (fun p ->
-        { p with
-            Configuration = buildConfiguration })*)
-    let setParams (defaults:MSBuildParams) =
-        { defaults with
-            Verbosity = Some(Quiet)
-            Targets = ["Build"]
-            Properties =
-                [
-                    "Optimize", "True"
-                    "DebugSymbols", "True"
-                    "Configuration", configuration
-                ]
-         }
-    MSBuild.build setParams solutionFile
+    let cmd = sprintf "build %s --configuration Release" solutionFile
+    Path.getFullName "./" |> runDotNet cmd
+    //(*solutionFile
+    //|> DotNet.build (fun p ->
+    //    { p with
+    //        Configuration = buildConfiguration })*)
+    //let setParams (defaults:MSBuildParams) =
+    //    { defaults with
+    //        Verbosity = Some(Quiet)
+    //        Targets = ["Build"]
+    //        Properties =
+    //            [
+    //                "Optimize", "True"
+    //                "DebugSymbols", "True"
+    //                "Configuration", configuration
+    //            ]
+    //     }
+    //MSBuild.build setParams solutionFile
 )
 
 // --------------------------------------------------------------------------------------
@@ -199,18 +204,15 @@ Target.create "RunTests" (fun _ ->
 // Build a NuGet package
 
 Target.create "NuGet" (fun _ ->
-    Paket.pack(fun p ->
-        { p with
-            OutputPath = "bin"
-            Version = release.NugetVersion
-            ReleaseNotes = String.toLines release.Notes})
+    // pack --version 0.1.7 --release-notes 
+    let outputPath = Path.getFullName "./bin"
+    let cmd = sprintf "paket pack %s --version %s --release-notes \"%s\"" outputPath release.NugetVersion (String.toLines release.Notes)
+    Path.getFullName "./src/Terminal.Gui.Elmish" |> runDotNet cmd
+    
 )
 
 Target.create "PublishNuget" (fun _ ->
-    Paket.push(fun p ->
-        { p with
-            PublishUrl = "https://www.nuget.org"
-            WorkingDir = "bin" })
+    ()
 )
 
 
