@@ -1,7 +1,7 @@
 language: csharp
 sudo: required
 dist: xenial
-solution: Terminal.Gui.Elmish.sln
+#solution: Terminal.Gui.Elmish.sln
 script:
   #- tsh_version=1.4.0-pre1
   #- msbuild /t:Restore $TRAVIS_BUILD_DIR/Terminal.Gui.Elmish.sln
