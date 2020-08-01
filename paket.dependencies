@@ -1,6 +1,7 @@
 framework: auto-detect
 
 source https://api.nuget.org/v3/index.json
+storage: none
 
 nuget FSharp.Core >= 4.6.2
 nuget Terminal.Gui >= 0.24.0
@@ -10,8 +11,6 @@ nuget Expecto
 nuget Expecto.BenchmarkDotNet
 nuget Expecto.FsCheck
 nuget Expecto.VisualStudio.TestAdapter version_in_path: true
-
-clitool dotnet-fake
 
 group Formatting
 source https://api.nuget.org/v3/index.json
