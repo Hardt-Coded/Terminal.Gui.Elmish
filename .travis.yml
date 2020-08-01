@@ -11,5 +11,5 @@ script:
   #- dotnet build Terminal.Gui.Elmish.sln --framework netcoreapp2.0
   #- msbuild /p:Configuration=Release Terminal.Gui.Elmish.sln
 #mono: latest
-dotnet: 2.2.203
+dotnet: 3.1.302
 os: "linux"
