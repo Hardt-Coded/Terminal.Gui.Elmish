@@ -82,6 +82,9 @@ module StyleHelpers =
         | Position.AbsPos i -> Pos.At(i)
         | Position.PercentPos p -> Pos.Percent(p |> float32)
         | Position.CenterPos -> Pos.Center()
+
+
+
     
     let addTextAlignmentToLabel (label:Label) (alignment:TextAlignment) =
         match alignment with
@@ -208,6 +211,26 @@ module StyleHelpers =
         props
         |> List.tryFind (fun i -> match i with | ScrollOffset _ -> true | _ -> false)
         |> Option.map (fun i -> match i with | ScrollOffset (w,h) -> (w,h) | _ -> failwith "What?No!Never should this happen!")
+
+    let getAbsPosFromProps (props:Prop<'TValue> list) =
+        tryGetStylesFromProps props
+        |> Option.bind (
+            function
+            | Styles styles ->
+                styles
+                |> List.choose (fun i -> 
+                    match i with 
+                    | Pos (AbsPos x, AbsPos y) -> Some (x,y) 
+                    | Pos (_, AbsPos y) -> Some (0,y) 
+                    | Pos (AbsPos x, _) -> Some (x,0) 
+                    | _ -> None)
+                |> List.tryHead
+            | _ ->
+                Some (0,0)
+        )
+        |> Option.defaultValue (0,0)
+        
+            
         
 
     let hasSecretInProps (props:Prop<'TValue> list) = 
@@ -246,6 +269,7 @@ module Elements =
         window
         |> addPossibleStylesFromProps props
 
+
     let button (props:Prop<'TValue> list) = 
         let text = getTextFromProps props
         let b = Button(text |> ustr)
@@ -258,11 +282,13 @@ module Elements =
         b
         |> addPossibleStylesFromProps props
 
+
     let label (props:Prop<'TValue> list) =   
         let text = getTextFromProps props
         let l = Label(text |> ustr)
         l
         |> addPossibleStylesFromProps props
+
 
     let textField (props:Prop<string> list) =        
         let value = 
@@ -283,13 +309,36 @@ module Elements =
         t
         |> addPossibleStylesFromProps props
 
+
+    /// Currently in Version 0.81 of the Terminal.Gui this use a DateTime
+    /// From the time beeing, the master branch uses TimeSpan
+    let timeField (props:Prop<DateTime> list) =
+        let value = 
+            tryGetValueFromProps props
+            |> Option.defaultValue DateTime.MinValue
+
+        let (x,y) =
+            getAbsPosFromProps props
+
+        
+        
+        let t = TimeField(x,y,value)
+
+        let changed = tryGetOnChangedFromProps props
+        match changed with
+        | Some changed ->
+            t.Changed.AddHandler(fun o _ -> changed ((o:?>TimeField).Time))        
+        | None -> ()
+        
+        t
+        |> addPossibleStylesFromProps props
+
     let textView (props:Prop<'TValue> list) =
         let text = getTextFromProps props
         let t = TextView()
         t.Text <- (text|> ustr)
         t
         |> addPossibleStylesFromProps props
-
    
 
     let frameView (props:Prop<'TValue> list) (subViews:View list) =
@@ -299,9 +348,11 @@ module Elements =
         f
         |> addPossibleStylesFromProps props
 
+
     let hexView (props:Prop<'TValue> list) stream =
         HexView(stream)
         |> addPossibleStylesFromProps props
+
 
     let inline listView (props:Prop<'TValue> list) = 
         let items = getItemsFromProps props
@@ -341,17 +392,17 @@ module Elements =
             |> addSelectedChanged
             |> addPossibleStylesFromProps props
             
-            
 
     let menuItem title help action = 
         MenuItem(title |> ustr,help ,(fun () -> action () ))
 
+
     let menuBarItem text (items:MenuItem list) = 
         MenuBarItem(text |> ustr,items |> List.toArray)
 
+
     let menuBar (items:MenuBarItem list) = 
         MenuBar (items |> List.toArray)
-
 
 
     let progressBar (props:Prop<float> list) = 
@@ -362,6 +413,7 @@ module Elements =
         let pb = ProgressBar(Fraction = (value |> float32))        
         pb
         |> addPossibleStylesFromProps props
+
 
     let checkBox (props:Prop<bool> list) = 
         let isChecked = 
@@ -424,9 +476,6 @@ module Elements =
     
     let scrollView (props:Prop<'TValue> list) (subViews:View list) =
         let frame = tryGetFrameFromProps props
-        
-        
-        
         match frame with
         | None ->
             failwith "Scrollview need a Frame Prop"

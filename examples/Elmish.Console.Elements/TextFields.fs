@@ -1,22 +1,25 @@
 ﻿module TextFields
 
-
+open System
 open Terminal.Gui
 open Terminal.Gui.Elmish
 
 type Model = {
     Text:string
     SecretText:string
+    CurrentTime:DateTime
 }
 
 type Msg =
     | ChangeText of string
     | ChangeSecretText of string
+    | ChangeTime of DateTime
 
 let init () : Model * Cmd<Msg> =
     let model = {
         Text = "some Text!"
         SecretText = "Secret"
+        CurrentTime = DateTime.Now
     }
     model, Cmd.none
 
@@ -27,11 +30,15 @@ let update (msg:Msg) (model:Model) =
         {model with Text = txt}, Cmd.none
     | ChangeSecretText txt ->
         {model with SecretText = txt}, Cmd.none
+    | ChangeTime time ->
+        {model with CurrentTime = time}, Cmd.none
 
 
 let view (model:Model) (dispatch:Msg -> unit) : View list=
     [
         label[]
+        
+
         label [
             Styles [
                 Pos (CenterPos,AbsPos 1)
@@ -96,4 +103,32 @@ let view (model:Model) (dispatch:Msg -> unit) : View list=
             ]
             Text (sprintf "The Secret Text says: %s" model.SecretText)
         ]
+
+
+        label [
+            Styles [
+                Pos (AbsPos 1,AbsPos 13)
+                Dim (AbsDim 14,AbsDim 1)                
+            ]
+            Text "Time Field:"
+        ]
+
+
+        timeField [
+            Styles [
+                Pos (AbsPos 16,AbsPos 13)
+            ]
+            Value model.CurrentTime
+            OnChanged (fun time -> dispatch <| ChangeTime time)
+        ]
+
+        label [
+            Styles [
+                Pos (AbsPos 1,AbsPos 15)
+                Dim (AbsDim 1,AbsDim 1)
+                Colors (Color.BrightYellow,Color.Red)
+            ]
+            Text (sprintf "The Secret Text says: %s" <| model.CurrentTime.ToString("HH:mm:ss"))
+        ]
+
     ]
