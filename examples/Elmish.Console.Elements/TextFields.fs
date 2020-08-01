@@ -7,19 +7,23 @@ open Terminal.Gui.Elmish
 type Model = {
     Text:string
     SecretText:string
-    CurrentTime:DateTime
+    CurrentTime:TimeSpan
+    CurrentDate:DateTime
 }
 
 type Msg =
     | ChangeText of string
     | ChangeSecretText of string
-    | ChangeTime of DateTime
+    | ChangeTime of TimeSpan
+    | ChangeDate of DateTime
+   
 
 let init () : Model * Cmd<Msg> =
     let model = {
         Text = "some Text!"
         SecretText = "Secret"
-        CurrentTime = DateTime.Now
+        CurrentTime = TimeSpan(9,1,35)
+        CurrentDate = DateTime.Today
     }
     model, Cmd.none
 
@@ -32,6 +36,10 @@ let update (msg:Msg) (model:Model) =
         {model with SecretText = txt}, Cmd.none
     | ChangeTime time ->
         {model with CurrentTime = time}, Cmd.none
+    | ChangeDate date ->
+        {model with CurrentDate = date}, Cmd.none
+        
+   
 
 
 let view (model:Model) (dispatch:Msg -> unit) : View list=
@@ -113,7 +121,6 @@ let view (model:Model) (dispatch:Msg -> unit) : View list=
             Text "Time Field:"
         ]
 
-
         timeField [
             Styles [
                 Pos (AbsPos 16,AbsPos 13)
@@ -122,13 +129,54 @@ let view (model:Model) (dispatch:Msg -> unit) : View list=
             OnChanged (fun time -> dispatch <| ChangeTime time)
         ]
 
+        timeField [
+            Styles [
+                Pos (AbsPos 30,AbsPos 13)
+            ]
+            IsShort
+            Value model.CurrentTime
+            OnChanged (fun time -> dispatch <| ChangeTime time)
+        ]
+
         label [
             Styles [
                 Pos (AbsPos 1,AbsPos 15)
+                Dim (AbsDim 14,AbsDim 1)                
+            ]
+            Text "Date Field:"
+        ]
+
+        dateField [
+            Styles [
+                Pos (AbsPos 16,AbsPos 15)
+            ]
+            Value model.CurrentDate
+            OnChanged (fun time -> dispatch <| ChangeDate time)
+        ]
+
+        dateField [
+            Styles [
+                Pos (AbsPos 30,AbsPos 15)
+            ]
+            IsShort
+            Value model.CurrentDate
+            OnChanged (fun time -> dispatch <| ChangeDate time)
+        ]
+        
+
+
+        
+
+        
+
+
+        label [
+            Styles [
+                Pos (AbsPos 1,AbsPos 17)
                 Dim (AbsDim 1,AbsDim 1)
                 Colors (Color.BrightYellow,Color.Red)
             ]
-            Text (sprintf "The Secret Text says: %s" <| model.CurrentTime.ToString("HH:mm:ss"))
+            Text (sprintf "The DateTime (time and date Field) says: %s" <| model.CurrentDate.Add(model.CurrentTime).ToString("ddd, yyyy-MM-dd HH:mm:ss"))
         ]
 
     ]

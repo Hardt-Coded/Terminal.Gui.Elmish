@@ -64,6 +64,8 @@ module StyleHelpers =
         | ScrollOffset of int * int
         | ScrollBar of ScrollBar
         | Frame of (int * int * int * int)
+        // Date And Time Field Stuff
+        | IsShort
 
         
 
@@ -230,7 +232,9 @@ module StyleHelpers =
         )
         |> Option.defaultValue (0,0)
         
-            
+    let hasShortProp (props:Prop<'TValue> list) =
+        props
+        |> List.exists (fun i -> match i with | IsShort _ -> true | _ -> false)
         
 
     let hasSecretInProps (props:Prop<'TValue> list) = 
@@ -310,9 +314,41 @@ module Elements =
         |> addPossibleStylesFromProps props
 
 
+    /// DateField:
+    /// Only AbsPos for Positioning 
+    /// Exclusive 'isShort' Prop
     /// Currently in Version 0.81 of the Terminal.Gui this use a DateTime
     /// From the time beeing, the master branch uses TimeSpan
-    let timeField (props:Prop<DateTime> list) =
+    let timeField (props:Prop<TimeSpan> list) =
+        let value = 
+            tryGetValueFromProps props
+            |> Option.defaultValue TimeSpan.Zero
+
+        let (x,y) =
+            getAbsPosFromProps props
+
+        let isShort =
+            hasShortProp props
+        
+
+        let t = TimeField(x,y,System.DateTime.MinValue.Add(value),isShort)
+
+        let changed = tryGetOnChangedFromProps props
+        match changed with
+        | Some changed ->
+            let dtToTs (dt:DateTime) =
+                TimeSpan(dt.Hour,dt.Minute,dt.Second)
+            t.Changed.AddHandler(fun o _ -> changed ((o:?>TimeField).Time |> dtToTs))        
+        | None -> ()
+        
+        t
+        |> addPossibleStylesFromProps props
+
+
+    /// DateField:
+    /// Only AbsPos for Positioning 
+    /// Exclusive 'isShort' Prop
+    let dateField (props:Prop<DateTime> list) =
         let value = 
             tryGetValueFromProps props
             |> Option.defaultValue DateTime.MinValue
@@ -320,18 +356,20 @@ module Elements =
         let (x,y) =
             getAbsPosFromProps props
 
+        let isShort =
+            hasShortProp props
         
-        
-        let t = TimeField(x,y,value)
+        let t = DateField(x,y,value,isShort)
 
         let changed = tryGetOnChangedFromProps props
         match changed with
         | Some changed ->
-            t.Changed.AddHandler(fun o _ -> changed ((o:?>TimeField).Time))        
+            t.Changed.AddHandler(fun o _ -> changed ((o:?>DateField).Date))        
         | None -> ()
         
         t
         |> addPossibleStylesFromProps props
+
 
     let textView (props:Prop<'TValue> list) =
         let text = getTextFromProps props
