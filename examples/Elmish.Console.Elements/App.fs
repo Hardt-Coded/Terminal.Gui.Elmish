@@ -225,6 +225,15 @@ let update (msg:Msg) (model:Model) =
 
 let view (model:Model) (dispatch:Msg->unit) =
     page [
+
+
+        statusBar [
+            statusItem "Counter (F2)"           Terminal.Gui.Key.F2     (fun () -> dispatch (ChangePage Counter))
+            statusItem "TextFields (F3)"        Terminal.Gui.Key.F3     (fun () -> dispatch (ChangePage TextFields))
+            statusItem "Radio and Check (F4)"   Terminal.Gui.Key.F4     (fun () -> dispatch (ChangePage RadioCheck))
+            statusItem "Exit (F10)"             Terminal.Gui.Key.F10    (fun () -> dispatch (ExitApp))
+        ]
+
         menuBar [
             menuBarItem "Demo" [
                 menuItem "Start" "" (fun () -> dispatch (ChangePage Start))
@@ -244,6 +253,8 @@ let view (model:Model) (dispatch:Msg->unit) =
             ]
         ]
 
+        
+
         window [
             Styles [
                 Pos (AbsPos 0,AbsPos 1)
@@ -251,6 +262,10 @@ let view (model:Model) (dispatch:Msg->unit) =
             ]
             Title (sprintf "Elmish Console Demo - %s" <| model.CurrentLocalTime.ToString("yyyy-MM-dd HH:mm:ss.ms"))
         ] [
+
+            
+
+
             window [
                 Styles [
                     Pos (AbsPos 2,AbsPos 2)
@@ -365,6 +380,8 @@ let view (model:Model) (dispatch:Msg->unit) =
                     | Some svmodel ->
                         yield! MessageBoxes.view svmodel (MessageBoxesMsg >> dispatch)
 
+                
+                
 
             ]
 

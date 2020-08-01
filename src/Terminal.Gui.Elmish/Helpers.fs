@@ -155,8 +155,6 @@ module Helpers =
                         [1..selectedEntry] |> List.iter (fun _ -> menuBar.SuperView.ProcessKey(KeyEvent(Key.CursorDown)) |> ignore)
                         
                     )
-
-
                     
                 | Focused id ->
                     allElements
@@ -164,7 +162,23 @@ module Helpers =
                     |> Option.iter (fun element -> if element.SuperView<> null then element.SuperView.SetFocus(element))
                 | NotRelevant ->
                     ()
+
             )
+
+            // bring status bar in front
+            let statusBar =
+                view.Subviews
+                |> Seq.tryFind (fun e -> e :? StatusBar)
+                |> Option.map (fun e -> e :?> StatusBar)
+
+            statusBar
+            |> Option.iter (fun sb ->
+                sb.Redraw(Rect(0,0,1000,1000))
+                view.BringSubviewToFront(sb)
+            )
+
+            
+            
 
 
         

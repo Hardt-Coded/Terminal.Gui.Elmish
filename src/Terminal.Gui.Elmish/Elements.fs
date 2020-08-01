@@ -474,6 +474,7 @@ module Elements =
         rg.Cursor <- x
         rg
 
+
     let inline radioGroup (props:Prop<'TValue> list) =
         let items = getItemsFromProps props        
         let value = tryGetValueFromProps props
@@ -509,8 +510,6 @@ module Elements =
             |> addSelectedChanged
             |> addPossibleStylesFromProps props
             
-        
-
     
     let scrollView (props:Prop<'TValue> list) (subViews:View list) =
         let frame = tryGetFrameFromProps props
@@ -553,7 +552,6 @@ module Elements =
             |> addPossibleStylesFromProps props
 
 
-
     let fileDialog title prompt nameFieldLabel message =
         let dia = FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
         Application.Run(dia)
@@ -567,6 +565,7 @@ module Elements =
             )
         file
 
+
     let openDialog title message =
         let dia = OpenDialog(title |> ustr,message |> ustr)                
         Application.Run(dia)
@@ -579,10 +578,6 @@ module Elements =
                 else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
             )
         file
-        
-            
-        
-        
         
 
     let saveDialog title message =
@@ -605,12 +600,23 @@ module Elements =
         | [] -> ""
         | _ -> buttons.[result]
 
+
     let errorBox width height title text (buttons:string list) =
         let result = MessageBox.ErrorQuery(width,height,title,text,buttons |> List.toArray)
         match buttons with
         | [] -> ""
         | _ -> buttons.[result]
-            
+
+
+    let statusBar (items:StatusItem list) =
+        StatusBar(items |> List.toArray)
+
+
+    let statusItem text (key:Terminal.Gui.Key) action =
+        if key = Key.F9 then
+            invalidArg "key" ("F9 is reserved to open a menu, sorry.")
+        else
+            StatusItem(key,text |> ustr, Action(action))
 
     
 
