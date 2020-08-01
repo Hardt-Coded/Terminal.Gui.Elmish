@@ -157,22 +157,12 @@ Target.create "Restore" (fun _ ->
 Target.create "Build" (fun _ ->
     let cmd = sprintf "build %s --configuration Release" solutionFile
     Path.getFullName "./" |> runDotNet cmd
-    //(*solutionFile
-    //|> DotNet.build (fun p ->
-    //    { p with
-    //        Configuration = buildConfiguration })*)
-    //let setParams (defaults:MSBuildParams) =
-    //    { defaults with
-    //        Verbosity = Some(Quiet)
-    //        Targets = ["Build"]
-    //        Properties =
-    //            [
-    //                "Optimize", "True"
-    //                "DebugSymbols", "True"
-    //                "Configuration", configuration
-    //            ]
-    //     }
-    //MSBuild.build setParams solutionFile
+)
+
+
+Target.create "BuildOnlyCore" (fun _ ->
+    let cmd = sprintf "build %s --configuration Release -f netcoreapp2.0" solutionFile
+    Path.getFullName "./" |> runDotNet cmd
 )
 
 // --------------------------------------------------------------------------------------
@@ -341,37 +331,6 @@ Target.create "Docs" (fun _ ->
 //open Octokit
 
 Target.create "Release" (fun _ ->
-    // not fully converted from  FAKE 4
-
-    //let user =
-    //    match getBuildParam "github-user" with
-    //    | s when not (String.isNullOrWhiteSpace s) -> s
-    //    | _ -> getUserInput "Username: "
-    //let pw =
-    //    match getBuildParam "github-pw" with
-    //    | s when not (String.isNullOrWhiteSpace s) -> s
-    //    | _ -> getUserPassword "Password: "
-    //let remote =
-    //    Git.CommandHelper.getGitResult "" "remote -v"
-    //    |> Seq.filter (fun (s: string) -> s.EndsWith("(push)"))
-    //    |> Seq.tryFind (fun (s: string) -> s.Contains(gitOwner + "/" + gitName))
-    //    |> function None -> gitHome + "/" + gitName | Some (s: string) -> s.Split().[0]
-
-    //Git.Staging.stageAll ""
-    //Git.Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
-    //Git.Branches.pushBranch "" remote (Git.Information.getBranchName "")
-
-    //Git.Branches.tag "" release.NugetVersion
-    //Git.Branches.pushTag "" remote release.NugetVersion
-
-    //// release on github
-    //GitHub.createClient user pw
-    //|> createDraft gitOwner gitName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
-    //// TODO: |> uploadFile "PATH_TO_FILE"
-    //|> releaseDraft
-    //|> Async.RunSynchronously
-
-    // using simplified FAKE 5 release for now
 
     Git.Staging.stageAll ""
     Git.Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
@@ -400,10 +359,12 @@ Target.create "All" ignore
   ==> "NuGet"
   ==> "All"
 
-//"CleanDocs"
-//  ==>"Docs"
-//  ==> "ReferenceDocs"
-//  ==> "GenerateDocs"
+"Clean"
+  ==> "AssemblyInfo"
+  ==> "Restore"
+  ==> "BuildOnlyCore"
+ 
+
 
 "Clean"
   ==> "Release"
