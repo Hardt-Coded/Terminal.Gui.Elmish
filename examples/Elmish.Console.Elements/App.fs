@@ -224,8 +224,15 @@ let update (msg:Msg) (model:Model) =
         
 
 let view (model:Model) (dispatch:Msg->unit) =
-    page [
-
+    styledPage [
+        Styles [
+            Colors (Terminal.Gui.Color.White, Terminal.Gui.Color.Gray)
+            FocusColors (Terminal.Gui.Color.Red, Terminal.Gui.Color.DarkGray)
+            HotNormalColors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Green)
+            HotFocusedColors (Terminal.Gui.Color.BrightMagenta, Terminal.Gui.Color.BrightGreen)
+            DisabledColors (Terminal.Gui.Color.Brown, Terminal.Gui.Color.White)
+        ]
+    ] [
 
         statusBar [
             statusItem "Counter (F2)"           Terminal.Gui.Key.F2     (fun () -> dispatch (ChangePage Counter))
@@ -234,7 +241,15 @@ let view (model:Model) (dispatch:Msg->unit) =
             statusItem "Exit (F10)"             Terminal.Gui.Key.F10    (fun () -> dispatch (ExitApp))
         ]
 
-        menuBar [
+        styledMenuBar [
+            Styles [
+                Colors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Gray)
+                //FocusColors (Terminal.Gui.Color.Red, Terminal.Gui.Color.DarkGray)
+                //HotNormalColors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Green)
+                //HotFocusedColors (Terminal.Gui.Color.BrightMagenta, Terminal.Gui.Color.BrightGreen)
+                //DisabledColors (Terminal.Gui.Color.Brown, Terminal.Gui.Color.White)
+            ]
+        ] [
             menuBarItem "Demo" [
                 menuItem "Start" "" (fun () -> dispatch (ChangePage Start))
                 menuItem "Counter" "" (fun () -> dispatch (ChangePage Counter))
@@ -275,7 +290,8 @@ let view (model:Model) (dispatch:Msg->unit) =
             ] [
                 button [
                     Styles [
-                        Pos (AbsPos 1, AbsPos 1)                        
+                        Pos (AbsPos 1, AbsPos 1)   
+                        
                     ]
                     Text "Start"
                     OnClicked (fun () -> dispatch (ChangePage Start))

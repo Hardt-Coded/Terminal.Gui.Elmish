@@ -3,6 +3,7 @@
 open System.Reflection
 open System.Collections
 open System
+open Terminal.Gui
 
 
 
@@ -47,6 +48,11 @@ module StyleHelpers =
         | TextAlignment of TextAlignment
         | TextColorScheme of ColorScheme
         | Colors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
+        // Additional Colors
+        | FocusColors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
+        | HotNormalColors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
+        | HotFocusedColors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
+        | DisabledColors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
         
         
 
@@ -102,15 +108,18 @@ module StyleHelpers =
         | Pos (x,y) ->
             view.X <- x |> convPos
             view.Y <- y |> convPos
+
         | Dim (width,height) ->
             view.Width <- width |> convDim
             view.Height <- height |> convDim
+
         | TextAlignment alignment ->
             match view with
             | :? Label as label ->                
                 alignment |> addTextAlignmentToLabel label
             | _ -> 
                 ()
+
         | TextColorScheme color ->
             let colorScheme =
                 let s = 
@@ -128,13 +137,46 @@ module StyleHelpers =
                 label.TextColor <- colorScheme
             | _ -> 
                 ()
+
         | Colors (fg,bg) ->
             let color = Terminal.Gui.Attribute.Make(fg,bg)
             match view with
             | :? Label as label ->                
                 label.TextColor <- color
-            | _ -> 
-                ()
+            | _ as view ->
+                if view.ColorScheme = null then
+                    view.ColorScheme <- Terminal.Gui.ColorScheme()
+                else
+                    view.ColorScheme.Normal <- color
+
+        | FocusColors (fg,bg) ->
+            let color = Terminal.Gui.Attribute.Make(fg,bg)
+            if view.ColorScheme = null then
+                view.ColorScheme <- Terminal.Gui.ColorScheme()
+            else
+                view.ColorScheme.Focus <- color
+
+        | HotNormalColors(fg,bg) ->
+            let color = Terminal.Gui.Attribute.Make(fg,bg)
+            if view.ColorScheme = null then
+                view.ColorScheme <- Terminal.Gui.ColorScheme()
+            else
+                view.ColorScheme.HotNormal <- color
+
+        | HotFocusedColors(fg,bg) ->
+            let color = Terminal.Gui.Attribute.Make(fg,bg)
+            if view.ColorScheme = null then
+                view.ColorScheme <- Terminal.Gui.ColorScheme()
+            else
+                view.ColorScheme.HotFocus <- color
+
+        | DisabledColors(fg,bg) ->
+            let color = Terminal.Gui.Attribute.Make(fg,bg)
+            if view.ColorScheme = null then
+                view.ColorScheme <- Terminal.Gui.ColorScheme()
+            else
+                view.ColorScheme.Disabled <- color
+            
             
             
     
@@ -260,10 +302,15 @@ module Elements =
     let page (subViews:View list) =
         let top = Toplevel.Create()        
         subViews |> List.iter (fun v -> top.Add(v))
-        //let state = Application.Begin(top)  
-        //state
         top
        
+
+    /// able to change the color scheme of the status bar
+    let styledPage (props:Prop<'TValue> list) (subViews:View list) =
+        let top = Toplevel.Create()        
+        subViews |> List.iter (fun v -> top.Add(v))
+        top
+        |> addPossibleStylesFromProps props
 
 
     let window (props:Prop<'TValue> list) (subViews:View list) =        
@@ -442,6 +489,11 @@ module Elements =
     let menuBar (items:MenuBarItem list) = 
         MenuBar (items |> List.toArray)
 
+    /// able to change the color scheme of the status bar
+    let styledMenuBar (props:Prop<'TValue> list) (items:MenuBarItem list) = 
+        MenuBar (items |> List.toArray)
+        |> addPossibleStylesFromProps props 
+
 
     let progressBar (props:Prop<float> list) = 
         let value = 
@@ -610,6 +662,11 @@ module Elements =
 
     let statusBar (items:StatusItem list) =
         StatusBar(items |> List.toArray)
+
+    /// able to change the color scheme of the status bar
+    let styledStatusBar (props:Prop<'TValue> list) (items:StatusItem list) =
+        StatusBar(items |> List.toArray)
+        |> addPossibleStylesFromProps props 
 
 
     let statusItem text (key:Terminal.Gui.Key) action =
