@@ -223,7 +223,7 @@ let update (msg:Msg) (model:Model) =
         
         
 
-let view (model:Model) (dispatch:Msg->unit) =
+let view2 (model:Model) (dispatch:Msg->unit) =
     page [
 
 
@@ -388,6 +388,13 @@ let view (model:Model) (dispatch:Msg->unit) =
 
         ]
     ]
+
+
+let view (model:Model) (dispatch:Msg->unit) =
+    let v = view2 model dispatch
+    let myAttribute = Terminal.Gui.Attribute(Terminal.Gui.Color.BrightYellow,Terminal.Gui.Color.Magenta)
+    v.ColorScheme.Normal <- myAttribute
+    v
 
 
 
