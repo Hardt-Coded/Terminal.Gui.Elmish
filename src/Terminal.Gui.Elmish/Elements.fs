@@ -305,7 +305,7 @@ module Elements =
         top
        
 
-    /// able to change the color scheme of the status bar
+    /// able to change the color scheme of the toplevel page
     let styledPage (props:Prop<'TValue> list) (subViews:View list) =
         let top = Toplevel.Create()        
         subViews |> List.iter (fun v -> top.Add(v))

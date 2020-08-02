@@ -65,8 +65,8 @@
             Program.map(...)
           </code>
           <div class="tip" id="1">
-            <strong>Signature:</strong> mapInit:((&#39;arg -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8362 -&gt; &#39;?8363 * Cmd&lt;&#39;?8364&gt;) -&gt; mapUpdate:((&#39;msg -&gt; &#39;model -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8364 -&gt; &#39;?8363 -&gt; &#39;?8363 * Cmd&lt;&#39;?8364&gt;) -&gt; mapView:((&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; &#39;?8363 -&gt; Dispatch&lt;&#39;?8364&gt; -&gt; (type)) -&gt; mapSetState:((&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; unit) -&gt; &#39;?8363 -&gt; Dispatch&lt;&#39;?8364&gt; -&gt; unit) -&gt; mapSubscribe:((&#39;model -&gt; Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8363 -&gt; Cmd&lt;&#39;?8364&gt;) -&gt; program:Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;view&gt; -&gt; Program&lt;&#39;?8362,&#39;?8363,&#39;?8364,&#39;?8366&gt;<br />
-                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8362, '?8363, '?8364, 'view, '?8366                      </div>
+            <strong>Signature:</strong> mapInit:((&#39;arg -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8368 -&gt; &#39;?8369 * Cmd&lt;&#39;?8370&gt;) -&gt; mapUpdate:((&#39;msg -&gt; &#39;model -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8370 -&gt; &#39;?8369 -&gt; &#39;?8369 * Cmd&lt;&#39;?8370&gt;) -&gt; mapView:((&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; &#39;?8369 -&gt; Dispatch&lt;&#39;?8370&gt; -&gt; (type)) -&gt; mapSetState:((&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; unit) -&gt; &#39;?8369 -&gt; Dispatch&lt;&#39;?8370&gt; -&gt; unit) -&gt; mapSubscribe:((&#39;model -&gt; Cmd&lt;&#39;msg&gt;) -&gt; &#39;?8369 -&gt; Cmd&lt;&#39;?8370&gt;) -&gt; program:Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;view&gt; -&gt; Program&lt;&#39;?8368,&#39;?8369,&#39;?8370,&#39;?8372&gt;<br />
+                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8368, '?8369, '?8370, 'view, '?8372                      </div>
         </td>
         <td class="xmldoc">
                       <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L123-123" class="github-link">
@@ -105,8 +105,8 @@
             Program.mkProgram init update view
           </code>
           <div class="tip" id="3">
-            <strong>Signature:</strong> init:(&#39;arg -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; update:(&#39;msg -&gt; &#39;model -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; view:(&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;?8307&gt;<br />
-                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8307                      </div>
+            <strong>Signature:</strong> init:(&#39;arg -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; update:(&#39;msg -&gt; &#39;model -&gt; &#39;model * Cmd&lt;&#39;msg&gt;) -&gt; view:(&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;?8313&gt;<br />
+                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8313                      </div>
         </td>
         <td class="xmldoc">
                       <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L37-37" class="github-link">
@@ -125,8 +125,8 @@
             Program.mkSimple init update view
           </code>
           <div class="tip" id="4">
-            <strong>Signature:</strong> init:(&#39;arg -&gt; &#39;model) -&gt; update:(&#39;msg -&gt; &#39;model -&gt; &#39;model) -&gt; view:(&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;?8312&gt;<br />
-                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8312                      </div>
+            <strong>Signature:</strong> init:(&#39;arg -&gt; &#39;model) -&gt; update:(&#39;msg -&gt; &#39;model -&gt; &#39;model) -&gt; view:(&#39;model -&gt; Dispatch&lt;&#39;msg&gt; -&gt; (type)) -&gt; Program&lt;&#39;arg,&#39;model,&#39;msg,&#39;?8318&gt;<br />
+                          <strong>Type parameters:</strong> 'arg, 'model, 'msg, '?8318                      </div>
         </td>
         <td class="xmldoc">
                       <a href="https://github.com/DieselMeister/Terminal.Gui.Elmish/tree/master/src/Terminal.Gui.Elmish/ElmishImplementation/program.fs#L50-50" class="github-link">

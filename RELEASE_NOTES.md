@@ -34,3 +34,5 @@
 * uplifing to the latest Terminal.Gui (Thanks Chet)
 * move to dotnet tools (Thanks Chet)
 * cleanup dependencies (Thanks Chet)
+
+#### 0.1.8-preview1 - Sunday, 02. August 2020
