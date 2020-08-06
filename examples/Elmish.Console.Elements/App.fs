@@ -223,8 +223,16 @@ let update (msg:Msg) (model:Model) =
         
         
 
-let view2 (model:Model) (dispatch:Msg->unit) =
-    page [
+let view (model:Model) (dispatch:Msg->unit) =
+    styledPage [
+        Styles [
+            Colors (Terminal.Gui.Color.White, Terminal.Gui.Color.Gray)
+            FocusColors (Terminal.Gui.Color.Red, Terminal.Gui.Color.DarkGray)
+            HotNormalColors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Green)
+            HotFocusedColors (Terminal.Gui.Color.BrightMagenta, Terminal.Gui.Color.BrightGreen)
+            DisabledColors (Terminal.Gui.Color.Brown, Terminal.Gui.Color.White)
+        ]
+    ] [
 
 
         statusBar [
@@ -389,12 +397,6 @@ let view2 (model:Model) (dispatch:Msg->unit) =
         ]
     ]
 
-
-let view (model:Model) (dispatch:Msg->unit) =
-    let v = view2 model dispatch
-    let myAttribute = Terminal.Gui.Attribute(Terminal.Gui.Color.BrightYellow,Terminal.Gui.Color.Magenta)
-    v.ColorScheme.Normal <- myAttribute
-    v
 
 
 

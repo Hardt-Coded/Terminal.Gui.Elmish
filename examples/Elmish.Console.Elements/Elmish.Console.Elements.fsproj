@@ -17,7 +17,7 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Terminal.Gui.Elmish" Version="0.1.7" />
+    <PackageReference Include="Terminal.Gui.Elmish" Version="0.1.8-preview1" />
   </ItemGroup>
   <!--<ItemGroup>
     <PackageReference Include="Terminal.Gui" Version="0.81.0" />
