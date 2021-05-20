@@ -5,11 +5,6 @@ module Helpers =
     open System    
     open Terminal.Gui
 
-    let findFocused (view:View) =
-        view
-        |> Seq.cast<View>            
-        |> Seq.collect (fun x -> x |> Seq.cast<View>)
-        |> Seq.tryFind (fun x -> x.HasFocus)
 
     let getAllElements (view:View) =
         let rec collectLoop (view:View) =
@@ -135,8 +130,8 @@ module Helpers =
                     |> Map.tryFind id
                     |> Option.iter (fun element -> 
                         let tv = (element :?> TextView)
-                        [1..row] |> List.iter (fun _ -> element.ProcessKey(KeyEvent(Key.CursorDown)) |> ignore)
-                        [1..col] |> List.iter (fun _ -> element.ProcessKey(KeyEvent(Key.CursorRight)) |> ignore)
+                        [1..row] |> List.iter (fun _ -> element.ProcessKey(KeyEvent(Key.CursorDown, KeyModifiers())) |> ignore)
+                        [1..col] |> List.iter (fun _ -> element.ProcessKey(KeyEvent(Key.CursorRight, KeyModifiers())) |> ignore)
                     )
                 | Menu (barTitle,selectedEntry) ->
                     view
@@ -150,16 +145,16 @@ module Helpers =
                             |> Array.findIndex (fun mi -> (mi.Title |> string) =  barTitle)
 
                         // activate menu
-                        menuBar.ProcessHotKey(KeyEvent(Key.F9)) |> ignore
-                        [1..barIndex] |> List.iter (fun _ -> menuBar.SuperView.ProcessKey(KeyEvent(Key.CursorRight)) |> ignore)
-                        [1..selectedEntry] |> List.iter (fun _ -> menuBar.SuperView.ProcessKey(KeyEvent(Key.CursorDown)) |> ignore)
+                        menuBar.ProcessHotKey(KeyEvent(Key.F9, KeyModifiers())) |> ignore
+                        [1..barIndex] |> List.iter (fun _ -> menuBar.SuperView.ProcessKey(KeyEvent(Key.CursorRight, KeyModifiers())) |> ignore)
+                        [1..selectedEntry] |> List.iter (fun _ -> menuBar.SuperView.ProcessKey(KeyEvent(Key.CursorDown, KeyModifiers())) |> ignore)
                         
                     )
                     
                 | Focused id ->
                     allElements
                     |> Map.tryFind id
-                    |> Option.iter (fun element -> if element.SuperView<> null then element.SuperView.SetFocus(element))
+                    |> Option.iter (fun element -> if element.SuperView<> null then element.SuperView.SetFocus())
                 | NotRelevant ->
                     ()
 

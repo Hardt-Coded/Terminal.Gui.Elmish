@@ -7,7 +7,6 @@ open Terminal.Gui
 
 
 
-
 [<AutoOpen>]
 module StyleHelpers =
     
@@ -122,19 +121,19 @@ module StyleHelpers =
 
         | TextColorScheme color ->
             let colorScheme =
-                let s = 
-                    if Application.Current<> null then
-                        Application.Current.ColorScheme
-                    else
-                        Terminal.Gui.ColorScheme()
-                match color with
-                | Normal -> s.Normal
-                | Focus -> s.Focus
-                | HotNormal -> s.HotNormal
-                | HotFocus -> s.HotFocus
+                if Application.Current<> null then
+                    Application.Current.ColorScheme
+                else
+                    Terminal.Gui.ColorScheme()
+
             match view with
             | :? Label as label ->                
-                label.TextColor <- colorScheme
+                match color with
+                | Normal -> label.ColorScheme.Normal <- colorScheme.Normal
+                | Focus ->  label.ColorScheme.Focus  <- colorScheme.Focus
+                | HotNormal -> label.ColorScheme.HotNormal <- colorScheme.HotNormal
+                | HotFocus -> label.ColorScheme.HotFocus <- colorScheme.HotFocus
+
             | _ -> 
                 ()
 
@@ -142,7 +141,7 @@ module StyleHelpers =
             let color = Terminal.Gui.Attribute.Make(fg,bg)
             match view with
             | :? Label as label ->                
-                label.TextColor <- color
+                label.ColorScheme.Normal <- color
             | _ as view ->
                 if view.ColorScheme = null then
                     view.ColorScheme <- Terminal.Gui.ColorScheme()
@@ -315,7 +314,7 @@ module Elements =
 
     let window (props:Prop<'TValue> list) (subViews:View list) =        
         let title = getTitleFromProps props
-        let window = Window(title |> ustr)
+        let window = new Window(title |> ustr)
         subViews |> List.iter (fun v -> window.Add(v))        
         window
         |> addPossibleStylesFromProps props
@@ -323,11 +322,11 @@ module Elements =
 
     let button (props:Prop<'TValue> list) = 
         let text = getTextFromProps props
-        let b = Button(text |> ustr)
+        let b = new Button(text |> ustr)
         let clicked = tryGetOnClickedFromProps props
         match clicked with
         | Some clicked ->
-            b.Clicked <- Action((fun () -> clicked() ))
+            b.add_Clicked(Action((fun () -> clicked() )))
         | None ->
             ()
         b
@@ -336,7 +335,7 @@ module Elements =
 
     let label (props:Prop<'TValue> list) =   
         let text = getTextFromProps props
-        let l = Label(text |> ustr)
+        let l = new Label(text |> ustr)
         l
         |> addPossibleStylesFromProps props
 
@@ -346,12 +345,12 @@ module Elements =
             tryGetValueFromProps props
             |> Option.defaultValue ""
         
-        let t = TextField(value |> ustr,Used = true)
+        let t = new TextField(value |> ustr,Used = true)
 
         let changed = tryGetOnChangedFromProps props
         match changed with
         | Some changed ->
-            t.Changed.AddHandler(fun o _ -> changed (((o:?>TextField).Text).ToString()))        
+            t.add_TextChanged(fun o -> changed (o.ToString()))
         | None -> ()
 
         let secret = hasSecretInProps props
@@ -378,14 +377,14 @@ module Elements =
             hasShortProp props
         
 
-        let t = TimeField(x,y,System.DateTime.MinValue.Add(value),isShort)
+        let t = new TimeField(x,y,System.TimeSpan.MinValue.Add(value),isShort)
 
         let changed = tryGetOnChangedFromProps props
         match changed with
         | Some changed ->
             let dtToTs (dt:DateTime) =
                 TimeSpan(dt.Hour,dt.Minute,dt.Second)
-            t.Changed.AddHandler(fun o _ -> changed ((o:?>TimeField).Time |> dtToTs))        
+            t.add_TimeChanged(fun o -> changed o.NewValue)        
         | None -> ()
         
         t
@@ -406,12 +405,12 @@ module Elements =
         let isShort =
             hasShortProp props
         
-        let t = DateField(x,y,value,isShort)
+        let t = new DateField(x,y,value,isShort)
 
         let changed = tryGetOnChangedFromProps props
         match changed with
         | Some changed ->
-            t.Changed.AddHandler(fun o _ -> changed ((o:?>DateField).Date))        
+            t.add_DateChanged(fun o -> changed o.NewValue)   
         | None -> ()
         
         t
@@ -420,7 +419,7 @@ module Elements =
 
     let textView (props:Prop<'TValue> list) =
         let text = getTextFromProps props
-        let t = TextView()
+        let t = new TextView()
         t.Text <- (text|> ustr)
         t
         |> addPossibleStylesFromProps props
@@ -428,18 +427,18 @@ module Elements =
 
     let frameView (props:Prop<'TValue> list) (subViews:View list) =
         let text = getTextFromProps props
-        let f = FrameView(text |> ustr)
+        let f = new FrameView(text |> ustr)
         subViews |> List.iter (fun v -> f.Add(v))
         f
         |> addPossibleStylesFromProps props
 
 
     let hexView (props:Prop<'TValue> list) stream =
-        HexView(stream)
+        new HexView(stream)
         |> addPossibleStylesFromProps props
 
 
-    let inline listView (props:Prop<'TValue> list) = 
+    let listView (props:Prop<'TValue> list) = 
         let items = getItemsFromProps props
         let displayValues = items |> List.map (snd) |> List.toArray :> IList
         let value = tryGetValueFromProps props
@@ -450,18 +449,18 @@ module Elements =
             )
             
         let lv = 
-            ListView(displayValues)
+            new ListView(displayValues)
             |> addPossibleStylesFromProps props
         let addSelectedChanged (lv:ListView) =
             let onChange =
                 tryGetOnChangedFromProps props
             match onChange with
             | Some onChange ->
-                let action = Action((fun () -> 
-                    let (value,disp) = items.[lv.SelectedItem]
+                let action = Action<Terminal.Gui.ListViewItemEventArgs>((fun args -> 
+                    let (value,disp) = items.[args.Item]
                     onChange (value)
                 ))
-                lv.add_SelectedChanged(action)
+                lv.add_SelectedItemChanged(action)
                 lv
             | None ->
                 lv
@@ -479,19 +478,19 @@ module Elements =
             
 
     let menuItem title help action = 
-        MenuItem(title |> ustr,help ,(fun () -> action () ))
+        MenuItem(ustr title, ustr help ,(fun () -> action () ))
 
 
     let menuBarItem text (items:MenuItem list) = 
-        MenuBarItem(text |> ustr,items |> List.toArray)
+        MenuBarItem(ustr text, items |> List.toArray)
 
 
     let menuBar (items:MenuBarItem list) = 
-        MenuBar (items |> List.toArray)
+        new MenuBar (items |> List.toArray)
 
     /// able to change the color scheme of the status bar
     let styledMenuBar (props:Prop<'TValue> list) (items:MenuBarItem list) = 
-        MenuBar (items |> List.toArray)
+        new MenuBar (items |> List.toArray)
         |> addPossibleStylesFromProps props 
 
 
@@ -500,7 +499,7 @@ module Elements =
             tryGetValueFromProps props
             |> Option.defaultValue 0.0
 
-        let pb = ProgressBar(Fraction = (value |> float32))        
+        let pb = new ProgressBar(Fraction = (value |> float32))        
         pb
         |> addPossibleStylesFromProps props
 
@@ -511,11 +510,11 @@ module Elements =
             |> Option.defaultValue false
 
         let text = getTextFromProps props
-        let cb = CheckBox(text |> ustr,isChecked)
+        let cb = new CheckBox(text |> ustr,isChecked)
         let onChanged = tryGetOnChangedFromProps props
         match onChanged with
         | Some onChanged ->
-            cb.Toggled.AddHandler((fun o e -> (o:?>CheckBox).Checked |> onChanged))
+            cb.add_Toggled((fun o -> o |> onChanged))
         | None ->
             ()
         cb
@@ -523,14 +522,14 @@ module Elements =
     
 
     let setCursorRadioGroup (x:int) (rg:RadioGroup) =
-        rg.Cursor <- x
+        rg.X <- Pos.op_Implicit x
         rg
 
 
-    let inline radioGroup (props:Prop<'TValue> list) =
+    let radioGroup (props:Prop<'TValue> list) =
         let items = getItemsFromProps props        
         let value = tryGetValueFromProps props
-        let displayValues = items |> List.map (snd) |> List.toArray
+        let displayValues = items |> List.map (snd >> ustr) |> List.toArray
         let idxItem = 
             value
             |> Option.bind (fun value ->
@@ -542,22 +541,23 @@ module Elements =
                 tryGetOnChangedFromProps props
             match onChange with
             | Some onChange ->
-                let action = Action<int>((fun idx -> 
+                let action = Action<Terminal.Gui.RadioGroup.SelectedItemChangedArgs>((fun (args:Terminal.Gui.RadioGroup.SelectedItemChangedArgs) -> 
+                    let idx = args.SelectedItem
                     let (value,disp) = items.[idx]
                     onChange (value)
                 ))
-                rg.SelectionChanged <- action
+                rg.add_SelectedItemChanged(action)
                 rg
             | None ->
                 rg
 
         match idxItem with
         | None ->
-            RadioGroup(displayValues)
+            new RadioGroup(displayValues)
             |> addSelectedChanged
             |> addPossibleStylesFromProps props
         | Some idx ->
-            RadioGroup(displayValues,idx)
+            new RadioGroup(displayValues,idx)
             |> setCursorRadioGroup idx
             |> addSelectedChanged
             |> addPossibleStylesFromProps props
@@ -569,7 +569,7 @@ module Elements =
         | None ->
             failwith "Scrollview need a Frame Prop"
         | Some (x,y,w,h) ->
-            let sv = ScrollView(Rect(x,y,w,h))
+            let sv = new ScrollView(Rect(x,y,w,h))
             // Scroll bars
             let bars = getScrollBarFromProps props
             match bars with
@@ -605,7 +605,7 @@ module Elements =
 
 
     let fileDialog title prompt nameFieldLabel message =
-        let dia = FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
+        let dia = new FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
         Application.Run(dia)
         let file = 
             dia.FilePath
@@ -619,7 +619,7 @@ module Elements =
 
 
     let openDialog title message =
-        let dia = OpenDialog(title |> ustr,message |> ustr)                
+        let dia = new OpenDialog(title |> ustr,message |> ustr)                
         Application.Run(dia)
         let file = 
             dia.FilePath
@@ -633,7 +633,7 @@ module Elements =
         
 
     let saveDialog title message =
-        let dia = SaveDialog(title |> ustr,message |> ustr)        
+        let dia = new SaveDialog(title |> ustr,message |> ustr)        
         Application.Run(dia)
         let file = 
             dia.FileName
@@ -647,25 +647,25 @@ module Elements =
 
 
     let messageBox width height title text (buttons:string list) =
-        let result = MessageBox.Query(width,height,title,text,buttons |> List.toArray)
+        let result = MessageBox.Query(width,height,ustr title, ustr text,buttons |> List.map ustr |> List.toArray)
         match buttons with
         | [] -> ""
         | _ -> buttons.[result]
 
 
     let errorBox width height title text (buttons:string list) =
-        let result = MessageBox.ErrorQuery(width,height,title,text,buttons |> List.toArray)
+        let result = MessageBox.ErrorQuery(width,height,ustr title, ustr text,buttons |> List.map ustr |> List.toArray)
         match buttons with
         | [] -> ""
         | _ -> buttons.[result]
 
 
     let statusBar (items:StatusItem list) =
-        StatusBar(items |> List.toArray)
+        new StatusBar(items |> List.toArray)
 
     /// able to change the color scheme of the status bar
     let styledStatusBar (props:Prop<'TValue> list) (items:StatusItem list) =
-        StatusBar(items |> List.toArray)
+        new StatusBar(items |> List.toArray)
         |> addPossibleStylesFromProps props 
 
 

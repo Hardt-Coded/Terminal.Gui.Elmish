@@ -1,3 +1,4 @@
+
 #### 0.1.0 - Samstag, 27. April 2019
 * Initial release
 
@@ -36,3 +37,8 @@
 * cleanup dependencies (Thanks Chet)
 
 #### 0.1.8-preview1 - Sunday, 02. August 2020
+
+
+#### 0.2.0 - Thursday, 20 May 2021
+* upgraded to Terminal.Gui 1.1.1
+
