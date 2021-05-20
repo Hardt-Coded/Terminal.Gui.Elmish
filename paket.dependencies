@@ -1,10 +1,12 @@
+version 5.247.4
+
 framework: auto-detect
 
 source https://api.nuget.org/v3/index.json
 storage: none
 
 nuget FSharp.Core >= 4.7.2
-nuget Terminal.Gui >= 0.81.0
+nuget Terminal.Gui >= 1.1.1
 nuget Argu
 
 nuget Expecto
