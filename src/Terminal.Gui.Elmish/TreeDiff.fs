@@ -10,7 +10,7 @@ type ViewElementType =
     | TextBoxElement
 
 
-//type IProp = interface end
+type IProp = interface end
 
 [<AutoOpen>]
 module Props =
@@ -56,32 +56,48 @@ module Props =
         | HotFocusedColors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
         | DisabledColors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
     
-
-    type Prop =
+    type CommonProp =
         | Styles of Style list
         | Value of obj
-        | Text of string
-        | Title of string
-        | OnTextChanged of (string -> unit)
         | OnChanged of (obj -> unit)
-        | OnClicked of (unit -> unit)
-        | Items of (obj * string) list
+        interface IProp
+
+    type TextProps =
+        | Text of string
+        | OnTextChanged of (string -> unit)
         | Secret
-        // Scrollbar Stuff
+        interface IProp
+
+    type WindowProps =
+        | Title of string
+        interface IProp
+
+    type ScrollBarProps =
         | ScrollContentSize of int * int
         | ScrollOffset of int * int
         | ScrollBar of ScrollBar
         | Frame of (int * int * int * int)
-        // Date And Time Field Stuff
+        interface IProp
+
+
+    type DateTimeProps =
         | IsShort
-      //  interface IProp
+        interface IProp
+
+    type ListProps =
+        | Items of (obj * string) list
+        interface IProp
+
+    type ButtonProp =
+        | OnClicked of (unit -> unit)
+        interface IProp
     
 
 type ViewElement = 
     {
         Type: ViewElementType
         Element: View option
-        Props:Prop list
+        Props:IProp list
         Children: ViewElement list
     }
 
@@ -194,49 +210,66 @@ let setStylesToElement (styles: Style list) (element:View) =
     
 
 
-let setPropsToElement (props:Prop list) (element:View) =
+let setPropsToElement (props:IProp list) (element:View) =
     // here type specialty
     props
     |> List.iter (fun p ->
         match p with
-        | Styles styles ->
-            element |> setStylesToElement styles
-
-        | Title title ->
-            match element with
-            | :? Window as w ->
-                w.Title <- ustring.Make(title)
-            | _ ->
-                ()
-        | Text text ->
-            match element with
-            | :? TextField as tf ->
-                tf.Text <- ustring.Make(text)
-                ()
-            | :? Label as l ->
-                l.Text <- ustring.Make(text)
-            | _ ->
-                ()
-        | OnChanged changed ->
-            match element with
-            | :? TextField as tf ->
-                tf.add_TextChanged(fun ustr -> changed(ustr.ToString()))
-                
-            | _ ->
-                ()
-        | OnTextChanged changed ->
+        | :? CommonProp as p ->
+            match p with
+            | Styles styles ->
+                element |> setStylesToElement styles
+            
+            | OnChanged changed ->
+                match element with
+                | :? TextField as tf ->
+                    tf.add_TextChanged(fun ustr -> changed(ustr.ToString()))
+                | _ ->
+                    ()
+        | :? TextProps as p ->
+            match p with
+            | Text text ->
+                match element with
+                | :? TextField as tf ->
+                    tf.Text <- ustring.Make(text)
+                    ()
+                | :? Label as l ->
+                    l.Text <- ustring.Make(text)
+                | _ ->
+                    ()
+            | OnTextChanged changed ->
                 match element with
                 | :? TextField as tf ->
                     tf.add_TextChanging(fun ev -> changed(ev.NewText.ToString()))
                     
                 | _ ->
                     ()
+        | :? WindowProps as p ->
+            match p with
+            | Title title ->
+                match element with
+                | :? Window as w ->
+                    w.Title <- ustring.Make(title)
+                | _ ->
+                    ()
+        | :? ScrollBarProps as p ->
+            match p with
+            | _ -> ()
+        | :? DateTimeProps as p ->
+            match p with
+            | _ -> ()
+        | :? ListProps as p ->
+            match p with
+            | _ -> ()
+        | :? ButtonProp as p ->
+            match p with
+            | _ -> ()
         | _ ->
             ()
     )
 
 
-let removePropsToElement (props:Prop list) (element:View) =
+let removePropsToElement (props:IProp list) (element:View) =
     // Maybe todo !
     ()
 
@@ -327,7 +360,7 @@ let (|ChildsDifferent|_|) (ve1,ve2) =
     let cve2 = ve2.Children |> List.map (fun e -> e.Type) |> List.sort
     if cve1 <> cve2 then Some () else None
 
-let processProps (props1:Prop list) (props2:Prop list) (element:View) =
+let processProps (props1:IProp list) (props2:IProp list) (element:View) =
     let prop1Types = props1 |> List.map (fun i -> i.GetType().Name)
     let prop2Types = props1 |> List.map (fun i -> i.GetType().Name)
     let addedPropTypes = prop2Types |> List.except prop1Types
@@ -362,10 +395,18 @@ let processProps (props1:Prop list) (props2:Prop list) (element:View) =
             |> List.tryFind (fun np -> np.GetType().Name = rp.GetType().Name)
             |> Option.map (fun newProp ->
                 match rp, newProp with
-                | OnChanged _, OnChanged _ ->
-                    (false, rp)
-                | OnTextChanged _, OnTextChanged _ ->
-                    (false, rp)
+                | :? CommonProp as rp', (:? CommonProp as newProp') ->
+                    match rp', newProp' with
+                    | OnChanged _, OnChanged _ ->
+                        (false, rp)
+                    | _, _ ->
+                        (true, newProp)
+                | :? TextProps as rp', (:? TextProps as newProp') ->
+                    match rp', newProp' with
+                    | OnTextChanged _, OnTextChanged _ ->
+                        (false, rp)
+                    | _, _ ->
+                        (true, newProp)
                 | _, _ ->
                     (true, newProp)
             )

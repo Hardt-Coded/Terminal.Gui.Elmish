@@ -704,7 +704,7 @@ module Elements =
     //    |> addPossibleStylesFromProps props
 
 
-    let window (props:Prop list) (subViews:ViewElement list) =        
+    let window (props:IProp list) (subViews:ViewElement list) =        
         {
             Type = WindowElement
             Element = None
@@ -726,7 +726,7 @@ module Elements =
     //    |> addPossibleStylesFromProps props
 
 
-    let label (props:Prop list) =   
+    let label (props:IProp list) =   
         {
             Type = TextElement
             Element = None
@@ -735,7 +735,7 @@ module Elements =
         }
 
 
-    let textField (props:Prop list) =        
+    let textField (props:IProp list) =        
         {
             Type = TextBoxElement
             Element = None

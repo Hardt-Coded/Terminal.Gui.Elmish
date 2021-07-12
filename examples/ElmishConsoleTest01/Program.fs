@@ -80,12 +80,12 @@ let update (msg:Msg) (model:Model) =
 
 let lab x y text =
     label [
-        Prop.Styles [ 
+        Styles [ 
             Pos (AbsPos x,AbsPos y)
             Dim (Fill,Fill)
             TextAlignment Centered
         ]
-        Prop.Text text
+        Text text
     ] 
 
 let logo = """
