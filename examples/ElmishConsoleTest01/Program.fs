@@ -5,6 +5,7 @@ open System
 open NStack
 open Terminal.Gui.Elmish
 open System.IO
+open TreeDiff
 
 
 
@@ -79,12 +80,12 @@ let update (msg:Msg) (model:Model) =
 
 let lab x y text =
     label [
-        Styles [ 
+        Prop.Styles [ 
             Pos (AbsPos x,AbsPos y)
             Dim (Fill,Fill)
             TextAlignment Centered
         ]
-        Text text
+        Prop.Text text
     ] 
 
 let logo = """
@@ -115,20 +116,20 @@ let logo = """
 let view (model:Model) (dispatch:Msg -> unit)=
     page [
         
-        let ms = new MemoryStream([|
-            10 |> byte; 20 |> byte; 30 |> byte; 40 |> byte; 50 |> byte 
-            10 |> byte; 20 |> byte; 30 |> byte; 40 |> byte; 50 |> byte
-            10 |> byte; 20 |> byte; 30 |> byte; 40 |> byte; 50 |> byte
-        |])
+        //let ms = new MemoryStream([|
+        //    10 |> byte; 20 |> byte; 30 |> byte; 40 |> byte; 50 |> byte 
+        //    10 |> byte; 20 |> byte; 30 |> byte; 40 |> byte; 50 |> byte
+        //    10 |> byte; 20 |> byte; 30 |> byte; 40 |> byte; 50 |> byte
+        //|])
 
-        yield menuBar [
-            menuBarItem "Terminal.Gui.Elmish" [
-                menuItem "MenuItem_1" "" (fun () -> dispatch (MenuItemSelected "MenuItem1"))
-                menuItem "MenuItem_2" "" (fun () -> dispatch (MenuItemSelected "MenuItem2"))
-            ]
-        ]
+        //yield menuBar [
+        //    menuBarItem "Terminal.Gui.Elmish" [
+        //        menuItem "MenuItem_1" "" (fun () -> dispatch (MenuItemSelected "MenuItem1"))
+        //        menuItem "MenuItem_2" "" (fun () -> dispatch (MenuItemSelected "MenuItem2"))
+        //    ]
+        //]
 
-        yield window [
+        window [
             Styles [
                 Pos (AbsPos 0,AbsPos 1)
                 Dim (Fill,Fill)
@@ -136,9 +137,38 @@ let view (model:Model) (dispatch:Msg -> unit)=
             Title "Terminal/Console Elmish"
         ] [
             
-            yield! logo.Split(Environment.NewLine)
-            |> Seq.mapi(fun i t -> lab 0 (i + 2) t)
-            |> Seq.map (fun e -> e :> Terminal.Gui.View)
+
+            label [
+                Styles [
+                    Pos (AbsPos 5,AbsPos 5)
+                    Dim (Fill,Fill)
+                ]
+                Text model.Text
+            ]
+
+            textField [
+                Styles [
+                    Pos (AbsPos 8,AbsPos 8)
+                    Dim (Fill,Fill)
+                ]
+                OnTextChanged (fun t -> dispatch <| ChangeText t)
+                Text model.Text
+            ]
+
+
+            if (model.Text = "Muh!!!") then
+                label [
+                    Styles [
+                        Pos (AbsPos 5,AbsPos 16)
+                        Dim (Fill,Fill)
+                        Colors (Terminal.Gui.Color.Red, Terminal.Gui.Color.BrightYellow)
+                    ]
+                    Text "Das super Mega geheime Wort!"
+                ]
+
+            //yield! logo.Split(Environment.NewLine)
+            //|> Seq.mapi(fun i t -> lab 0 (i + 2) t)
+            //|> Seq.map (fun e -> e :> Terminal.Gui.View)
 
             
             

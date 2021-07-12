@@ -12,10 +12,11 @@ namespace Terminal.Gui.Elmish
 
 open Terminal.Gui
 
-open Helpers.StateSychronizer
+
 open Terminal.Gui
 open System
 open System.Reflection
+open TreeDiff
 
 
 /// Program type captures various aspects of program behavior
@@ -23,7 +24,7 @@ type Program<'arg, 'model, 'msg, 'view> = private {
     init : 'arg -> 'model * Cmd<'msg>
     update : 'msg -> 'model -> 'model * Cmd<'msg>
     subscribe : 'model -> Cmd<'msg>
-    view : 'model -> Dispatch<'msg> -> Toplevel
+    view : 'model -> Dispatch<'msg> -> ViewElement
     setState : 'model -> Dispatch<'msg> -> unit
     onError : (string*exn) -> unit
     syncDispatch: Dispatch<'msg> -> Dispatch<'msg>
@@ -37,7 +38,7 @@ module Program =
     let mkProgram 
         (init : 'arg -> 'model * Cmd<'msg>) 
         (update : 'msg -> 'model -> 'model * Cmd<'msg>)
-        (view : 'model -> Dispatch<'msg> -> Toplevel) =
+        (view : 'model -> Dispatch<'msg> -> ViewElement) =
         { init = init
           update = update
           view = view
@@ -50,7 +51,7 @@ module Program =
     let mkSimple 
         (init : 'arg -> 'model) 
         (update : 'msg -> 'model -> 'model)
-        (view : 'model -> Dispatch<'msg> -> Toplevel) =
+        (view : 'model -> Dispatch<'msg> -> ViewElement) =
         { init = init >> fun state -> state,Cmd.none
           update = fun msg -> update msg >> fun state -> state,Cmd.none
           view = view
@@ -138,7 +139,8 @@ module Program =
         let (model,cmd) = program.init arg
         let rb = RingBuffer 10
         let mutable reentered = false
-        let mutable state = model        
+        let mutable state = model     
+        let mutable currentTreeState:ViewElement option = None
         let rec dispatch msg = 
             if reentered then
                 rb.Push msg
@@ -157,13 +159,18 @@ module Program =
                         
 
                         Application.MainLoop.Invoke(fun () ->
-                            let toSynchViewStates = Application.Top |> getViewElementState
-                            let newState = program.view model' syncDispatch
-                            Application.Top.RemoveAll()
-                            Application.Top.Add(newState.Subviews |> Seq.toArray)
-                            Application.Top.LayoutSubviews()
-                            Application.Top |> setViewElementState toSynchViewStates
-                            Application.Driver.Refresh()
+                            match currentTreeState with
+                            | None ->
+                                ()
+                            | Some currentState ->
+                                let nextTreeState = program.view model' syncDispatch
+                                let newTreeState = TreeDiff.updateTree currentState nextTreeState
+                                currentTreeState <- Some newTreeState
+                                //Application.Top.RemoveAll()
+                                //Application.Top.Add(newState.Subviews |> Seq.toArray)
+                                //Application.Top.LayoutSubviews()
+                                //Application.Top |> setViewElementState toSynchViewStates
+                                //Application.Driver.Refresh()
                         )
                                                 
                         cmd' |> Cmd.exec syncDispatch
@@ -179,23 +186,34 @@ module Program =
 
         program.setState model syncDispatch
 
-        let startState = program.view model syncDispatch        
+        let startState = program.view model syncDispatch   
+        
+        let initializedState = TreeDiff.initializeTree startState
+        currentTreeState <- Some initializedState
 
-        let sub = 
-            try 
-                program.subscribe model 
-            with ex ->
-                program.onError ("Unable to subscribe:", ex)
-                Cmd.none
-        sub @ cmd |> Cmd.exec syncDispatch
+        match initializedState.Element with
+        | None ->
+            failwith ("error state not initialized")
+        | Some topElement ->
+            match topElement with
+            | :? Toplevel ->
+                let sub = 
+                    try 
+                        program.subscribe model 
+                    with ex ->
+                        program.onError ("Unable to subscribe:", ex)
+                        Cmd.none
+                sub @ cmd |> Cmd.exec syncDispatch
         
-        // some reflection to set the actual top
-        let topProp = typeof<Application>.GetProperty("Top")
-        let currentProp = typeof<Application>.GetProperty("Current")
-        currentProp.SetValue(null,startState)
-        topProp.SetValue(null,startState)
+                // some reflection to set the actual top
+                let topProp = typeof<Application>.GetProperty("Top")
+                let currentProp = typeof<Application>.GetProperty("Current")
+                currentProp.SetValue(null,topElement)
+                topProp.SetValue(null,topElement)
         
-        Application.Run()
+                Application.Run()
+            | _ ->
+                failwith("first element must be a page!")
 
     /// Start the dispatch loop with `unit` for the init() function.
     let run (program: Program<unit, 'model, 'msg, 'view>) = runWith () program

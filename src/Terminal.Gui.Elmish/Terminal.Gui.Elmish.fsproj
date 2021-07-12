@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <RootNamespace>Terminal.Gui.Elmish</RootNamespace>
     <AssemblyName>Terminal.Gui.Elmish</AssemblyName>
     <Name>Terminal.Gui.Elmish</Name>
@@ -18,13 +18,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers.fs" />
+    <Compile Include="TreeDiff.fs" />
+    <Compile Include="Elements.fs" />
     <Compile Include="ElmishImplementation\cmd.fs" />
     <Compile Include="ElmishImplementation\prelude.fs" />
     <Compile Include="ElmishImplementation\ring.fs" />
     <Compile Include="ElmishImplementation\program.fs" />
-    <Compile Include="Elements.fs" />
-    <None Include="paket.references" />
-    <None Include="paket.template" />
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+  <ItemGroup>
+    <PackageReference Include="Terminal.Gui" Version="1.1.1" />
+  </ItemGroup>
 </Project>
