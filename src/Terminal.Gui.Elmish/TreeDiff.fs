@@ -231,7 +231,11 @@ let setPropsToElement (props:IProp list) (element:View) =
             | Text text ->
                 match element with
                 | :? TextField as tf ->
-                    tf.Text <- ustring.Make(text)
+                    tf.Text <- ustring.Make(text) 
+                    tf.CursorPosition <- text.Length
+                    // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
+                    tf.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
+                    tf.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
                     ()
                 | :? Label as l ->
                     l.Text <- ustring.Make(text)
