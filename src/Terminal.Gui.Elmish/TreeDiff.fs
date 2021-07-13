@@ -2,15 +2,31 @@
 
 open Terminal.Gui
 open NStack
+open System
 
 type ViewElementType =
     | PageElement
     | WindowElement
     | TextElement
     | TextBoxElement
+    | ButtonElement
+    | TimeFieldElement
+    | DateFieldElement
+    | TextViewElement
+    | FrameViewElement
+    | HexViewElement
+    | ListViewElement
+    | ProgressBarElement
+    | CheckBoxElement
+    | RadioGroupElement
+    | ScrollViewElement
+
 
 
 type IProp = interface end
+
+type IProp<'a> = 
+    inherit IProp
 
 [<AutoOpen>]
 module Props =
@@ -56,17 +72,17 @@ module Props =
         | HotFocusedColors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
         | DisabledColors of forground:Terminal.Gui.Color * background:Terminal.Gui.Color
     
-    type CommonProp =
+    type CommonProp<'a> =
         | Styles of Style list
-        | Value of obj
-        | OnChanged of (obj -> unit)
-        interface IProp
+        | Value of 'a
+        | OnChanged of ('a -> unit)
+        interface IProp<'a>
 
-    type TextProps =
+    type TextFieldProps =
         | Text of string
         | OnTextChanged of (string -> unit)
         | Secret
-        interface IProp
+        interface IProp<string>
 
     type WindowProps =
         | Title of string
@@ -109,6 +125,7 @@ let private convDim (dim:Dimension) =
     | FillMargin m -> Dim.Fill(m)
     | AbsDim i -> Dim.Sized(i)
     | PercentDim p -> Dim.Percent(p |> float32)
+
 
 let private convPos (dim:Position) =
     match dim with
@@ -215,7 +232,8 @@ let setPropsToElement (props:IProp list) (element:View) =
     props
     |> List.iter (fun p ->
         match p with
-        | :? CommonProp as p ->
+        // string based props like TextField
+        | :? CommonProp<string> as p ->
             match p with
             | Styles styles ->
                 element |> setStylesToElement styles
@@ -223,10 +241,79 @@ let setPropsToElement (props:IProp list) (element:View) =
             | OnChanged changed ->
                 match element with
                 | :? TextField as tf ->
-                    tf.add_TextChanged(fun ustr -> changed(ustr.ToString()))
+                    tf.add_TextChanging(fun ev -> changed(ev.NewText.ToString()))
                 | _ ->
                     ()
-        | :? TextProps as p ->
+
+            | Value value ->
+                match element with
+                | :? TextField as tf ->
+                    tf.Text <- ustring.Make(value) 
+                    tf.CursorPosition <- value.Length
+                    // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
+                    tf.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
+                    tf.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
+                    ()
+                | _ ->
+                    ()
+
+        | :? CommonProp<TimeSpan> as p ->
+            match p with
+            | Styles styles ->
+                element |> setStylesToElement styles
+            
+            | OnChanged changed ->
+                match element with
+                | :? TimeField as tf ->
+                    tf.add_TimeChanged(fun timeEv -> changed(timeEv.NewValue))
+                | _ ->
+                    ()
+
+            | Value value ->
+                match element with
+                | :? TimeField as tf ->
+                    tf.Time <- value
+                    // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
+                    tf.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
+                    tf.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
+                    ()
+                | _ ->
+                    ()
+
+
+        | :? CommonProp<DateTime> as p ->
+            match p with
+            | Styles styles ->
+                element |> setStylesToElement styles
+            
+            | OnChanged changed ->
+                match element with
+                | :? DateField as df ->
+                    df.add_DateChanged(fun dateEv -> changed(dateEv.NewValue))
+                | _ ->
+                    ()
+
+            | Value value ->
+                match element with
+                | :? DateField as df ->
+                    df.Date <- value
+                    // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
+                    df.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
+                    df.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
+                    ()
+                | _ ->
+                    ()
+
+        // doesn't care about the type at all
+        | :? CommonProp<_> as p ->
+            match p with
+            | Styles styles ->
+                element |> setStylesToElement styles
+            | _ ->
+                ()
+
+
+        | :? TextFieldProps as p ->
             match p with
             | Text text ->
                 match element with
@@ -348,6 +435,40 @@ let rec processElementObjects (parent:View option) (element:ViewElement) =
             { element with 
                 Children = (children |> List.map (fun c -> processElementObjects (Some el) c)) 
             }
+
+    | { Type = DateFieldElement; Props = props; Element = elem; Children = children } ->
+        match elem with
+        | None ->
+            let newElement = DateField()
+            newElement |> setPropsToElement props
+            parent |> Option.iter (fun p -> p.Add newElement)
+            {
+                element with
+                    Element = Some (newElement :> View)
+                    Children = (children |> List.map (fun c -> processElementObjects (Some (newElement :> View)) c)) 
+            }
+        | Some el ->
+            el |> setPropsToElement props
+            { element with 
+                Children = (children |> List.map (fun c -> processElementObjects (Some el) c)) 
+            }
+
+    | { Type = TimeFieldElement; Props = props; Element = elem; Children = children } ->
+        match elem with
+        | None ->
+            let newElement = TimeField()
+            newElement |> setPropsToElement props
+            parent |> Option.iter (fun p -> p.Add newElement)
+            {
+                element with
+                    Element = Some (newElement :> View)
+                    Children = (children |> List.map (fun c -> processElementObjects (Some (newElement :> View)) c)) 
+            }
+        | Some el ->
+            el |> setPropsToElement props
+            { element with 
+                Children = (children |> List.map (fun c -> processElementObjects (Some el) c)) 
+            }
             
 
 let initializeTree (tree:ViewElement) =
@@ -364,7 +485,7 @@ let (|ChildsDifferent|_|) (ve1,ve2) =
     let cve2 = ve2.Children |> List.map (fun e -> e.Type) |> List.sort
     if cve1 <> cve2 then Some () else None
 
-let processProps (props1:IProp list) (props2:IProp list) (element:View) =
+let inline processProps (props1:IProp list) (props2:IProp list) (element:View) =
     let prop1Types = props1 |> List.map (fun i -> i.GetType().Name)
     let prop2Types = props1 |> List.map (fun i -> i.GetType().Name)
     let addedPropTypes = prop2Types |> List.except prop1Types
@@ -399,13 +520,34 @@ let processProps (props1:IProp list) (props2:IProp list) (element:View) =
             |> List.tryFind (fun np -> np.GetType().Name = rp.GetType().Name)
             |> Option.map (fun newProp ->
                 match rp, newProp with
-                | :? CommonProp as rp', (:? CommonProp as newProp') ->
+                | :? CommonProp<string> as rp', (:? CommonProp<string> as newProp') ->
                     match rp', newProp' with
                     | OnChanged _, OnChanged _ ->
                         (false, rp)
                     | _, _ ->
                         (true, newProp)
-                | :? TextProps as rp', (:? TextProps as newProp') ->
+
+                | :? CommonProp<DateTime> as rp', (:? CommonProp<DateTime> as newProp') ->
+                    match rp', newProp' with
+                    | OnChanged _, OnChanged _ ->
+                        (false, rp)
+                    | _, _ ->
+                        (true, newProp)
+
+                | :? CommonProp<TimeSpan> as rp', (:? CommonProp<TimeSpan> as newProp') ->
+                    match rp', newProp' with
+                    | OnChanged _, OnChanged _ ->
+                        (false, rp)
+                    | _, _ ->
+                        (true, newProp)
+
+                | :? CommonProp<_> as rp', (:? CommonProp<_> as newProp') ->
+                    match rp', newProp' with
+                    | OnChanged _, OnChanged _ ->
+                        (false, rp)
+                    | _, _ ->
+                        (true, newProp)
+                | :? TextFieldProps as rp', (:? TextFieldProps as newProp') ->
                     match rp', newProp' with
                     | OnTextChanged _, OnTextChanged _ ->
                         (false, rp)

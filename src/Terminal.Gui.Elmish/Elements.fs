@@ -697,11 +697,13 @@ module Elements =
        
 
     ///// able to change the color scheme of the toplevel page
-    //let styledPage (props:Prop<'TValue> list) (subViews:View list) =
-    //    let top = Toplevel.Create()        
-    //    subViews |> List.iter (fun v -> top.Add(v))
-    //    top
-    //    |> addPossibleStylesFromProps props
+    let styledPage (props:IProp list) (subViews:ViewElement list) =
+        {
+            Type = PageElement
+            Element = None
+            Props = props
+            Children = subViews
+        }
 
 
     let window (props:IProp list) (subViews:ViewElement list) =        
@@ -713,17 +715,13 @@ module Elements =
         }
 
 
-    //let button (props:Prop<'TValue> list) = 
-    //    let text = getTextFromProps props
-    //    let b = Button(text |> ustr)
-    //    let clicked = tryGetOnClickedFromProps props
-    //    match clicked with
-    //    | Some clicked ->
-    //        b.Clicked <- Action((fun () -> clicked() ))
-    //    | None ->
-    //        ()
-    //    b
-    //    |> addPossibleStylesFromProps props
+    let button (props:IProp list) = 
+        {
+            Type = ButtonElement
+            Element = None
+            Props = props
+            Children = []
+        }
 
 
     let label (props:IProp list) =   
@@ -735,11 +733,11 @@ module Elements =
         }
 
 
-    let textField (props:IProp list) =        
+    let textField (props:IProp<string> list) =        
         {
             Type = TextBoxElement
             Element = None
-            Props = props
+            Props = props  |> List.map (fun i -> i :> IProp)
             Children = []
         }
 
@@ -747,130 +745,73 @@ module Elements =
     ///// DateField:
     ///// Only AbsPos for Positioning 
     ///// Exclusive 'isShort' Prop
-    ///// Currently in Version 0.81 of the Terminal.Gui this use a DateTime
-    ///// From the time beeing, the master branch uses TimeSpan
-    //let timeField (props:Prop<TimeSpan> list) =
-    //    let value = 
-    //        tryGetValueFromProps props
-    //        |> Option.defaultValue TimeSpan.Zero
-
-    //    let (x,y) =
-    //        getAbsPosFromProps props
-
-    //    let isShort =
-    //        hasShortProp props
-        
-
-    //    let t = TimeField(x,y,System.DateTime.MinValue.Add(value),isShort)
-
-    //    let changed = tryGetOnChangedFromProps props
-    //    match changed with
-    //    | Some changed ->
-    //        let dtToTs (dt:DateTime) =
-    //            TimeSpan(dt.Hour,dt.Minute,dt.Second)
-    //        t.Changed.AddHandler(fun o _ -> changed ((o:?>TimeField).Time |> dtToTs))        
-    //    | None -> ()
-        
-    //    t
-    //    |> addPossibleStylesFromProps props
+    let timeField (props:IProp<TimeSpan> list) =
+        {
+            Type = TimeFieldElement
+            Element = None
+            Props = props |> List.map (fun i -> i :> IProp)
+            Children = []
+        }
 
 
     ///// DateField:
     ///// Only AbsPos for Positioning 
     ///// Exclusive 'isShort' Prop
-    //let dateField (props:Prop<DateTime> list) =
-    //    let value = 
-    //        tryGetValueFromProps props
-    //        |> Option.defaultValue DateTime.MinValue
-
-    //    let (x,y) =
-    //        getAbsPosFromProps props
-
-    //    let isShort =
-    //        hasShortProp props
-        
-    //    let t = DateField(x,y,value,isShort)
-
-    //    let changed = tryGetOnChangedFromProps props
-    //    match changed with
-    //    | Some changed ->
-    //        t.Changed.AddHandler(fun o _ -> changed ((o:?>DateField).Date))        
-    //    | None -> ()
-        
-    //    t
-    //    |> addPossibleStylesFromProps props
+    let dateField (props:IProp<DateTime> list) =
+        {
+            Type = DateFieldElement
+            Element = None
+            Props = props  |> List.map (fun i -> i :> IProp)
+            Children = []
+        }
 
 
-    //let textView (props:Prop<'TValue> list) =
-    //    let text = getTextFromProps props
-    //    let t = TextView()
-    //    t.Text <- (text|> ustr)
-    //    t
-    //    |> addPossibleStylesFromProps props
+    let textView (props:IProp list) =
+        {
+            Type = TextViewElement
+            Element = None
+            Props = props
+            Children = []
+        }
    
 
-    //let frameView (props:Prop<'TValue> list) (subViews:View list) =
-    //    let text = getTextFromProps props
-    //    let f = FrameView(text |> ustr)
-    //    subViews |> List.iter (fun v -> f.Add(v))
-    //    f
-    //    |> addPossibleStylesFromProps props
+    let frameView (props:IProp list) (subViews:ViewElement list) =        
+        {
+            Type = FrameViewElement
+            Element = None
+            Props = props
+            Children = subViews
+        }
 
 
-    //let hexView (props:Prop<'TValue> list) stream =
-    //    HexView(stream)
-    //    |> addPossibleStylesFromProps props
+    let hexView (props:IProp list) =
+        {
+            Type = HexViewElement
+            Element = None
+            Props = props
+            Children = []
+        }
 
 
-    //let inline listView (props:Prop<'TValue> list) = 
-    //    let items = getItemsFromProps props
-    //    let displayValues = items |> List.map (snd) |> List.toArray :> IList
-    //    let value = tryGetValueFromProps props
-    //    let selectedIdx = 
-    //        value
-    //        |> Option.bind (fun value ->
-    //            items |> List.tryFindIndex (fun (v,_) -> v = value) 
-    //        )
-            
-    //    let lv = 
-    //        ListView(displayValues)
-    //        |> addPossibleStylesFromProps props
-    //    let addSelectedChanged (lv:ListView) =
-    //        let onChange =
-    //            tryGetOnChangedFromProps props
-    //        match onChange with
-    //        | Some onChange ->
-    //            let action = Action((fun () -> 
-    //                let (value,disp) = items.[lv.SelectedItem]
-    //                onChange (value)
-    //            ))
-    //            lv.add_SelectedChanged(action)
-    //            lv
-    //        | None ->
-    //            lv
-        
-    //    match selectedIdx with
-    //    | None ->
-    //        lv
-    //        |> addSelectedChanged
-    //        |> addPossibleStylesFromProps props
-    //    | Some idx ->
-    //        lv.SelectedItem <- idx
-    //        lv
-    //        |> addSelectedChanged
-    //        |> addPossibleStylesFromProps props
+    let inline listView (props:IProp list) =
+        {
+            Type = ListViewElement
+            Element = None
+            Props = props
+            Children = []
+        }
             
 
-    //let menuItem title help action = 
-    //    MenuItem(title |> ustr,help ,(fun () -> action () ))
+    let menuItem title help action = 
+        MenuItem(title |> ustr,help ,(fun () -> action () ))
 
 
-    //let menuBarItem text (items:MenuItem list) = 
-    //    MenuBarItem(text |> ustr,items |> List.toArray)
+    let menuBarItem text (items:MenuItem list) = 
+        MenuBarItem(text |> ustr,items |> List.toArray)
 
 
-    //let menuBar (items:MenuBarItem list) = 
-    //    MenuBar (items |> List.toArray)
+    let menuBar (items:MenuBarItem list) = 
+        MenuBar (items |> List.toArray)
 
     ///// able to change the color scheme of the status bar
     //let styledMenuBar (props:Prop<'TValue> list) (items:MenuBarItem list) = 
@@ -878,31 +819,22 @@ module Elements =
     //    |> addPossibleStylesFromProps props 
 
 
-    //let progressBar (props:Prop<float> list) = 
-    //    let value = 
-    //        tryGetValueFromProps props
-    //        |> Option.defaultValue 0.0
+    let progressBar (props:IProp list) =
+        {
+            Type = ProgressBarElement
+            Element = None
+            Props = props
+            Children = []
+        }
 
-    //    let pb = ProgressBar(Fraction = (value |> float32))        
-    //    pb
-    //    |> addPossibleStylesFromProps props
 
-
-    //let checkBox (props:Prop<bool> list) = 
-    //    let isChecked = 
-    //        tryGetValueFromProps props
-    //        |> Option.defaultValue false
-
-    //    let text = getTextFromProps props
-    //    let cb = CheckBox(text |> ustr,isChecked)
-    //    let onChanged = tryGetOnChangedFromProps props
-    //    match onChanged with
-    //    | Some onChanged ->
-    //        cb.Toggled.AddHandler((fun o e -> (o:?>CheckBox).Checked |> onChanged))
-    //    | None ->
-    //        ()
-    //    cb
-    //    |> addPossibleStylesFromProps props
+    let checkBox (props:IProp list) =
+        {
+            Type = CheckBoxElement
+            Element = None
+            Props = props
+            Children = []
+        }
     
 
     //let setCursorRadioGroup (x:int) (rg:RadioGroup) =
@@ -910,141 +842,82 @@ module Elements =
     //    rg
 
 
-    //let inline radioGroup (props:Prop<'TValue> list) =
-    //    let items = getItemsFromProps props        
-    //    let value = tryGetValueFromProps props
-    //    let displayValues = items |> List.map (snd) |> List.toArray
-    //    let idxItem = 
-    //        value
-    //        |> Option.bind (fun value ->
-    //            items |> List.tryFindIndex (fun (v,_) -> v = value)
-    //        )
-
-    //    let addSelectedChanged (rg:RadioGroup) =
-    //        let onChange =
-    //            tryGetOnChangedFromProps props
-    //        match onChange with
-    //        | Some onChange ->
-    //            let action = Action<int>((fun idx -> 
-    //                let (value,disp) = items.[idx]
-    //                onChange (value)
-    //            ))
-    //            rg.SelectionChanged <- action
-    //            rg
-    //        | None ->
-    //            rg
-
-    //    match idxItem with
-    //    | None ->
-    //        RadioGroup(displayValues)
-    //        |> addSelectedChanged
-    //        |> addPossibleStylesFromProps props
-    //    | Some idx ->
-    //        RadioGroup(displayValues,idx)
-    //        |> setCursorRadioGroup idx
-    //        |> addSelectedChanged
-    //        |> addPossibleStylesFromProps props
+    let inline radioGroup (props:IProp list) =
+        {
+            Type = RadioGroupElement
+            Element = None
+            Props = props
+            Children = []
+        }
             
     
-    //let scrollView (props:Prop<'TValue> list) (subViews:View list) =
-    //    let frame = tryGetFrameFromProps props
-    //    match frame with
-    //    | None ->
-    //        failwith "Scrollview need a Frame Prop"
-    //    | Some (x,y,w,h) ->
-    //        let sv = ScrollView(Rect(x,y,w,h))
-    //        // Scroll bars
-    //        let bars = getScrollBarFromProps props
-    //        match bars with
-    //        | NoBars ->
-    //            ()
-    //        | HorizontalBar ->
-    //            sv.ShowHorizontalScrollIndicator <- true
-    //        | VerticalBar ->
-    //            sv.ShowVerticalScrollIndicator <- true
-    //        | BothBars ->
-    //            sv.ShowHorizontalScrollIndicator <- true
-    //            sv.ShowVerticalScrollIndicator <- true
-
-    //        // ContentSize
-    //        let contentSize = getScrollContentSizeFromProps props
-    //        match contentSize with
-    //        | None -> ()
-    //        | Some (w,h) ->
-    //            sv.ContentSize <- Size(w,h)
-
-    //        // Offset
-    //        let offset = getScrollOffsetFromProps props
-    //        match offset with
-    //        | None -> ()
-    //        | Some (x,y) ->
-    //            sv.ContentOffset <- Point(x,y)
-
-            
-
-    //        subViews |> List.iter (fun i -> sv.Add(i))
-    //        sv
-    //        |> addPossibleStylesFromProps props
+    let scrollView (props:IProp list) (subViews:ViewElement list) =        
+        {
+            Type = ScrollViewElement
+            Element = None
+            Props = props
+            Children = subViews
+        }
 
 
-    //let fileDialog title prompt nameFieldLabel message =
-    //    let dia = FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
-    //    Application.Run(dia)
-    //    let file = 
-    //        dia.FilePath
-    //        |> Option.ofObj 
-    //        |> Option.map string
-    //        |> Option.bind (fun s ->
-    //            if String.IsNullOrEmpty(s) then None 
-    //            else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
-    //        )
-    //    file
+    let fileDialog title prompt nameFieldLabel message =
+        let dia = FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
+        Application.Run(dia)
+        let file = 
+            dia.FilePath
+            |> Option.ofObj 
+            |> Option.map string
+            |> Option.bind (fun s ->
+                if String.IsNullOrEmpty(s) then None 
+                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+            )
+        file
 
 
-    //let openDialog title message =
-    //    let dia = OpenDialog(title |> ustr,message |> ustr)                
-    //    Application.Run(dia)
-    //    let file = 
-    //        dia.FilePath
-    //        |> Option.ofObj 
-    //        |> Option.map string
-    //        |> Option.bind (fun s ->
-    //            if String.IsNullOrEmpty(s) then None 
-    //            else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
-    //        )
-    //    file
+    let openDialog title message =
+        let dia = OpenDialog(title |> ustr,message |> ustr)                
+        Application.Run(dia)
+        let file = 
+            dia.FilePath
+            |> Option.ofObj 
+            |> Option.map string
+            |> Option.bind (fun s ->
+                if String.IsNullOrEmpty(s) then None 
+                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+            )
+        file
         
 
-    //let saveDialog title message =
-    //    let dia = SaveDialog(title |> ustr,message |> ustr)        
-    //    Application.Run(dia)
-    //    let file = 
-    //        dia.FileName
-    //        |> Option.ofObj 
-    //        |> Option.map string
-    //        |> Option.bind (fun s ->
-    //            if String.IsNullOrEmpty(s) then None 
-    //            else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
-    //        )
-    //    file
+    let saveDialog title message =
+        let dia = SaveDialog(title |> ustr,message |> ustr)        
+        Application.Run(dia)
+        let file = 
+            dia.FileName
+            |> Option.ofObj 
+            |> Option.map string
+            |> Option.bind (fun s ->
+                if String.IsNullOrEmpty(s) then None 
+                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+            )
+        file
 
 
-    //let messageBox width height title text (buttons:string list) =
-    //    let result = MessageBox.Query(width,height,title,text,buttons |> List.toArray)
-    //    match buttons with
-    //    | [] -> ""
-    //    | _ -> buttons.[result]
+    let messageBox width height (title:string) (text:string) (buttons:string list) =
+        let result = MessageBox.Query(width,height,title |> ustring.Make, text |> ustring.Make, buttons |> List.map ustring.Make |> List.toArray)
+        match buttons with
+        | [] -> ""
+        | _ -> buttons.[result]
 
 
-    //let errorBox width height title text (buttons:string list) =
-    //    let result = MessageBox.ErrorQuery(width,height,title,text,buttons |> List.toArray)
-    //    match buttons with
-    //    | [] -> ""
-    //    | _ -> buttons.[result]
+    let errorBox width height title text (buttons:string list) =
+        let result = MessageBox.ErrorQuery(width,height,title,text,buttons |> List.map ustring.Make |> List.toArray)
+        match buttons with
+        | [] -> ""
+        | _ -> buttons.[result]
 
 
-    //let statusBar (items:StatusItem list) =
-    //    StatusBar(items |> List.toArray)
+    let statusBar (items:StatusItem list) =
+        StatusBar(items |> List.toArray)
 
     ///// able to change the color scheme of the status bar
     //let styledStatusBar (props:Prop<'TValue> list) (items:StatusItem list) =
@@ -1052,11 +925,11 @@ module Elements =
     //    |> addPossibleStylesFromProps props 
 
 
-    //let statusItem text (key:Terminal.Gui.Key) action =
-    //    if key = Key.F9 then
-    //        invalidArg "key" ("F9 is reserved to open a menu, sorry.")
-    //    else
-    //        StatusItem(key,text |> ustr, Action(action))
+    let statusItem text (key:Terminal.Gui.Key) action =
+        if key = Key.F9 then
+            invalidArg "key" ("F9 is reserved to open a menu, sorry.")
+        else
+            StatusItem(key,text |> ustr, Action(action))
 
     
 

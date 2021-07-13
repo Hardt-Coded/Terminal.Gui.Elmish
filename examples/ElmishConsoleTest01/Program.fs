@@ -140,7 +140,7 @@ let view (model:Model) (dispatch:Msg -> unit)=
 
             label [
                 Styles [
-                    Pos (AbsPos 5,AbsPos 5)
+                    Pos (AbsPos 3,AbsPos 3)
                     Dim (Fill,Fill)
                 ]
                 Text model.Text
@@ -148,11 +148,41 @@ let view (model:Model) (dispatch:Msg -> unit)=
 
             textField [
                 Styles [
-                    Pos (AbsPos 8,AbsPos 8)
+                    Pos (AbsPos 6,AbsPos 6)
                     Dim (Fill,Fill)
                 ]
                 OnTextChanged (fun t -> dispatch <| ChangeText t)
                 Text model.Text
+            ]
+
+
+            textField [
+                Styles [
+                    Pos (AbsPos 8,AbsPos 8)
+                    Dim (Fill,Fill)
+                ]
+                OnChanged (fun t -> dispatch <| ChangeText t)
+                Value model.Text
+            ]
+
+
+            dateField [
+                Styles [
+                    Pos (AbsPos 8,AbsPos 10)
+                    Dim (Fill,Fill)
+                ]
+                //OnChanged (fun t -> dispatch <| ChangeText t)
+                Value DateTime.Today
+            ]
+
+
+            timeField [
+                Styles [
+                    Pos (AbsPos 8,AbsPos 12)
+                    Dim (Fill,Fill)
+                ]
+                //OnChanged (fun t -> dispatch <| ChangeText t)
+                Value DateTime.Now.TimeOfDay
             ]
 
 
