@@ -169,7 +169,6 @@ let view (model:Model) (dispatch:Msg -> unit)=
             dateField [
                 Styles [
                     Pos (AbsPos 8,AbsPos 10)
-                    Dim (Fill,Fill)
                 ]
                 //OnChanged (fun t -> dispatch <| ChangeText t)
                 Value DateTime.Today
@@ -179,10 +178,29 @@ let view (model:Model) (dispatch:Msg -> unit)=
             timeField [
                 Styles [
                     Pos (AbsPos 8,AbsPos 12)
-                    Dim (Fill,Fill)
+                    
                 ]
                 //OnChanged (fun t -> dispatch <| ChangeText t)
                 Value DateTime.Now.TimeOfDay
+            ]
+
+            dateField [
+                Styles [
+                    Pos (AbsPos 8,AbsPos 14)
+                ]
+                //OnChanged (fun t -> dispatch <| ChangeText t)
+                Value DateTime.Today
+                IsShort
+            ]
+
+
+            timeField [
+                Styles [
+                    Pos (AbsPos 8,AbsPos 16)
+                ]
+                //OnChanged (fun t -> dispatch <| ChangeText t)
+                Value (TimeSpan(DateTime.Now.TimeOfDay.Hours,DateTime.Now.TimeOfDay.Minutes,0))
+                IsShort
             ]
 
 

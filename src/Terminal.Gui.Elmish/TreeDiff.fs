@@ -98,7 +98,8 @@ module Props =
 
     type DateTimeProps =
         | IsShort
-        interface IProp
+        interface IProp<DateTime>
+        interface IProp<TimeSpan>
 
     type ListProps =
         | Items of (obj * string) list
@@ -260,6 +261,8 @@ let setPropsToElement (props:IProp list) (element:View) =
         | :? CommonProp<TimeSpan> as p ->
             match p with
             | Styles styles ->
+                if styles |> List.map (fun i -> i.GetType().Name) |> List.contains ("Dim") then
+                    failwith ("Dim is not allowed in a time field")
                 element |> setStylesToElement styles
             
             | OnChanged changed ->
@@ -284,6 +287,9 @@ let setPropsToElement (props:IProp list) (element:View) =
         | :? CommonProp<DateTime> as p ->
             match p with
             | Styles styles ->
+                if styles |> List.map (fun i -> i.GetType().Name) |> List.contains ("Dim") then
+                    failwith ("Dim is not allowed in a date field")
+                    
                 element |> setStylesToElement styles
             
             | OnChanged changed ->
@@ -348,7 +354,18 @@ let setPropsToElement (props:IProp list) (element:View) =
             | _ -> ()
         | :? DateTimeProps as p ->
             match p with
-            | _ -> ()
+            | IsShort -> 
+                match element with
+                | :? TimeField as tf ->
+                    tf.IsShortFormat <- true
+                    
+                | :? DateField as df ->
+                    df.IsShortFormat <- true
+
+                | _ ->
+                    ()
+                ()
+            
         | :? ListProps as p ->
             match p with
             | _ -> ()
@@ -439,7 +456,8 @@ let rec processElementObjects (parent:View option) (element:ViewElement) =
     | { Type = DateFieldElement; Props = props; Element = elem; Children = children } ->
         match elem with
         | None ->
-            let newElement = DateField()
+            let newElement = DateField(IsShortFormat = false)
+            
             newElement |> setPropsToElement props
             parent |> Option.iter (fun p -> p.Add newElement)
             {
@@ -456,7 +474,7 @@ let rec processElementObjects (parent:View option) (element:ViewElement) =
     | { Type = TimeFieldElement; Props = props; Element = elem; Children = children } ->
         match elem with
         | None ->
-            let newElement = TimeField()
+            let newElement = TimeField(IsShortFormat = false)
             newElement |> setPropsToElement props
             parent |> Option.iter (fun p -> p.Add newElement)
             {
