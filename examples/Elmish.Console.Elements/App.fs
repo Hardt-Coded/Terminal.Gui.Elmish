@@ -234,39 +234,39 @@ let view (model:Model) (dispatch:Msg->unit) =
         ]
     ] [
 
-        statusBar [
-            statusItem "Counter (F2)"           Terminal.Gui.Key.F2     (fun () -> dispatch (ChangePage Counter))
-            statusItem "TextFields (F3)"        Terminal.Gui.Key.F3     (fun () -> dispatch (ChangePage TextFields))
-            statusItem "Radio and Check (F4)"   Terminal.Gui.Key.F4     (fun () -> dispatch (ChangePage RadioCheck))
-            statusItem "Exit (F10)"             Terminal.Gui.Key.F10    (fun () -> dispatch (ExitApp))
-        ]
+        //statusBar [
+        //    statusItem "Counter (F2)"           Terminal.Gui.Key.F2     (fun () -> dispatch (ChangePage Counter))
+        //    statusItem "TextFields (F3)"        Terminal.Gui.Key.F3     (fun () -> dispatch (ChangePage TextFields))
+        //    statusItem "Radio and Check (F4)"   Terminal.Gui.Key.F4     (fun () -> dispatch (ChangePage RadioCheck))
+        //    statusItem "Exit (F10)"             Terminal.Gui.Key.F10    (fun () -> dispatch (ExitApp))
+        //]
 
-        styledMenuBar [
-            Styles [
-                Colors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Gray)
-                //FocusColors (Terminal.Gui.Color.Red, Terminal.Gui.Color.DarkGray)
-                //HotNormalColors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Green)
-                //HotFocusedColors (Terminal.Gui.Color.BrightMagenta, Terminal.Gui.Color.BrightGreen)
-                //DisabledColors (Terminal.Gui.Color.Brown, Terminal.Gui.Color.White)
-            ]
-        ] [
-            menuBarItem "Demo" [
-                menuItem "Start" "" (fun () -> dispatch (ChangePage Start))
-                menuItem "Counter" "" (fun () -> dispatch (ChangePage Counter))
-                menuItem "TextFields" "" (fun () -> dispatch (ChangePage TextFields))
-                menuItem "Radio and Check" "" (fun () -> dispatch (ChangePage RadioCheck))
-                menuItem "Text File View" "" (fun () -> dispatch (ChangePage TextView))
-                menuItem "List View" "" (fun () -> dispatch (ChangePage ListView))
-                menuItem "Scroll View" "" (fun () -> dispatch (ChangePage ScrollView))
-                menuItem "Message Boxes" "" (fun () -> dispatch (ChangePage MessageBoxes))
-                menuItem "E_xit" "" (fun () -> dispatch (ExitApp))
-            ]
-            menuBarItem "Other Menu" [
-                menuItem "MenuItem 1" "" (fun () -> ())                
-                menuItem "MenuItem 2" "" (fun () -> ())                
-                menuItem "MenuItem 3" "" (fun () -> ())                
-            ]
-        ]
+        //styledMenuBar [
+        //    Styles [
+        //        Colors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Gray)
+        //        //FocusColors (Terminal.Gui.Color.Red, Terminal.Gui.Color.DarkGray)
+        //        //HotNormalColors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Green)
+        //        //HotFocusedColors (Terminal.Gui.Color.BrightMagenta, Terminal.Gui.Color.BrightGreen)
+        //        //DisabledColors (Terminal.Gui.Color.Brown, Terminal.Gui.Color.White)
+        //    ]
+        //] [
+        //    menuBarItem "Demo" [
+        //        menuItem "Start" "" (fun () -> dispatch (ChangePage Start))
+        //        menuItem "Counter" "" (fun () -> dispatch (ChangePage Counter))
+        //        menuItem "TextFields" "" (fun () -> dispatch (ChangePage TextFields))
+        //        menuItem "Radio and Check" "" (fun () -> dispatch (ChangePage RadioCheck))
+        //        menuItem "Text File View" "" (fun () -> dispatch (ChangePage TextView))
+        //        menuItem "List View" "" (fun () -> dispatch (ChangePage ListView))
+        //        menuItem "Scroll View" "" (fun () -> dispatch (ChangePage ScrollView))
+        //        menuItem "Message Boxes" "" (fun () -> dispatch (ChangePage MessageBoxes))
+        //        menuItem "E_xit" "" (fun () -> dispatch (ExitApp))
+        //    ]
+        //    menuBarItem "Other Menu" [
+        //        menuItem "MenuItem 1" "" (fun () -> ())                
+        //        menuItem "MenuItem 2" "" (fun () -> ())                
+        //        menuItem "MenuItem 3" "" (fun () -> ())                
+        //    ]
+        //]
 
         
 

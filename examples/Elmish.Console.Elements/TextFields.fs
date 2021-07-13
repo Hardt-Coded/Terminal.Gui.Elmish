@@ -42,7 +42,7 @@ let update (msg:Msg) (model:Model) =
    
 
 
-let view (model:Model) (dispatch:Msg -> unit) : View list=
+let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
     [
         label[]
         

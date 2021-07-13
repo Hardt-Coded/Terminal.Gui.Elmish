@@ -5,7 +5,6 @@ open System.Collections
 open System
 open Terminal.Gui
 
-open TreeDiff
 
 
 //[<AutoOpen>]
@@ -726,7 +725,7 @@ module Elements =
 
     let label (props:IProp list) =   
         {
-            Type = TextElement
+            Type = LabelElement
             Element = None
             Props = props
             Children = []
@@ -735,7 +734,7 @@ module Elements =
 
     let textField (props:IProp<string> list) =        
         {
-            Type = TextBoxElement
+            Type = TextFieldElement
             Element = None
             Props = props  |> List.map (fun i -> i :> IProp)
             Children = []
@@ -903,14 +902,14 @@ module Elements =
 
 
     let messageBox width height (title:string) (text:string) (buttons:string list) =
-        let result = MessageBox.Query(width,height,title |> ustring.Make, text |> ustring.Make, buttons |> List.map ustring.Make |> List.toArray)
+        let result = MessageBox.Query(width, height, title |> ustring.Make, text |> ustring.Make, buttons |> List.map ustring.Make |> List.toArray)
         match buttons with
         | [] -> ""
         | _ -> buttons.[result]
 
 
-    let errorBox width height title text (buttons:string list) =
-        let result = MessageBox.ErrorQuery(width,height,title,text,buttons |> List.map ustring.Make |> List.toArray)
+    let errorBox width height (title:string) (text:string) (buttons:string list) =
+        let result = MessageBox.ErrorQuery(width, height, title |> ustring.Make, text |> ustring.Make, buttons |> List.map ustring.Make |> List.toArray)
         match buttons with
         | [] -> ""
         | _ -> buttons.[result]

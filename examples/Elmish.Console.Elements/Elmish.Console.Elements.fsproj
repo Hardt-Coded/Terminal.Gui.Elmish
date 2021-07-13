@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>net50</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Start.fs" />
@@ -16,13 +16,9 @@
     <Compile Include="App.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Terminal.Gui" Version="0.81.0" />
-  </ItemGroup>
+ 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Terminal.Gui.Elmish\Terminal.Gui.Elmish.fsproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.2" />
-  </ItemGroup>
+  
 </Project>

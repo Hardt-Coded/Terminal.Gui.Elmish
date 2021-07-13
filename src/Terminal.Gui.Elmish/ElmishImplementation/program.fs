@@ -16,7 +16,7 @@ open Terminal.Gui
 open Terminal.Gui
 open System
 open System.Reflection
-open TreeDiff
+
 
 
 /// Program type captures various aspects of program behavior
@@ -164,7 +164,7 @@ module Program =
                                 ()
                             | Some currentState ->
                                 let nextTreeState = program.view model' syncDispatch
-                                let newTreeState = TreeDiff.updateTree currentState nextTreeState
+                                let newTreeState = TreeProcessing.updateTree currentState nextTreeState
                                 currentTreeState <- Some newTreeState
                                 //Application.Top.RemoveAll()
                                 //Application.Top.Add(newState.Subviews |> Seq.toArray)
@@ -188,7 +188,7 @@ module Program =
 
         let startState = program.view model syncDispatch   
         
-        let initializedState = TreeDiff.initializeTree startState
+        let initializedState = TreeProcessing.initializeTree startState
         currentTreeState <- Some initializedState
 
         match initializedState.Element with

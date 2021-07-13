@@ -49,7 +49,7 @@ let update (msg:Msg) (model:Model) =
         {model with Text = fileContent}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg -> unit) : View list=
+let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
     [
         yield label [
             Styles [

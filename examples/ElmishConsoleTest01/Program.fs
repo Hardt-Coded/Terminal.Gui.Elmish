@@ -5,7 +5,7 @@ open System
 open NStack
 open Terminal.Gui.Elmish
 open System.IO
-open TreeDiff
+
 
 
 
@@ -163,6 +163,8 @@ let view (model:Model) (dispatch:Msg -> unit)=
                 ]
                 OnChanged (fun t -> dispatch <| ChangeText t)
                 Value model.Text
+                if (model.Text = "Muh!!!") then
+                    Secret
             ]
 
 
@@ -190,7 +192,8 @@ let view (model:Model) (dispatch:Msg -> unit)=
                 ]
                 //OnChanged (fun t -> dispatch <| ChangeText t)
                 Value DateTime.Today
-                IsShort
+                if (model.Text <> "Muh!!!") then
+                    IsShort
             ]
 
 
@@ -199,15 +202,16 @@ let view (model:Model) (dispatch:Msg -> unit)=
                     Pos (AbsPos 8,AbsPos 16)
                 ]
                 //OnChanged (fun t -> dispatch <| ChangeText t)
-                Value (TimeSpan(DateTime.Now.TimeOfDay.Hours,DateTime.Now.TimeOfDay.Minutes,0))
-                IsShort
+                Value DateTime.Now.TimeOfDay
+                if (model.Text <> "Muh!!!") then
+                    IsShort
             ]
 
 
             if (model.Text = "Muh!!!") then
                 label [
                     Styles [
-                        Pos (AbsPos 5,AbsPos 16)
+                        Pos (AbsPos 5,AbsPos 18)
                         Dim (Fill,Fill)
                         Colors (Terminal.Gui.Color.Red, Terminal.Gui.Color.BrightYellow)
                     ]

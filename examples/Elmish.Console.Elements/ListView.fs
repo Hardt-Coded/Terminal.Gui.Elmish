@@ -42,7 +42,7 @@ let update (msg:Msg) (model:Model) =
         {model with VoteResult = vr}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg -> unit) : View list=
+let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
     [
         label [
             Styles [
@@ -72,16 +72,16 @@ let view (model:Model) (dispatch:Msg -> unit) : View list=
             Text "TextView"
         ] [
             
-            listView [
-                Styles [
-                    Pos (AbsPos 0,AbsPos 0)                
-                    Dim (Fill,Fill)
+            //listView [
+            //    Styles [
+            //        Pos (AbsPos 0,AbsPos 0)                
+            //        Dim (Fill,Fill)
 
-                ]
-                Value model.VoteResult
-                Items model.VoteResultItems
-                OnChanged (fun r -> dispatch (ItemSelected r))
-            ]
+            //    ]
+            //    Value model.VoteResult
+            //    Items model.VoteResultItems
+            //    OnChanged (fun r -> dispatch (ItemSelected r))
+            //]
             
         ]
         

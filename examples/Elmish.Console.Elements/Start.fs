@@ -3,7 +3,7 @@
 open Terminal.Gui
 open Terminal.Gui.Elmish
 
-let view : View list =
+let view : ViewElement list =
     [
         label [
             Styles [
@@ -64,7 +64,7 @@ let view : View list =
                 Pos (AbsPos 0,AbsPos 9)
                 Dim (Fill,AbsDim 1)
                 TextAlignment Centered
-                Colors (Color.BrighCyan,Color.Magenta)
+                Colors (Color.BrightCyan ,Color.Magenta)
             ]
             
             Text "And Colors"
