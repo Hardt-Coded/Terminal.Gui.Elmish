@@ -10,7 +10,7 @@ let main argv =
     
 
     Program.mkProgram init update view 
-    |> Program.withSubscription (fun _ -> Cmd.ofSub App.timerSubscription)
+    //|> Program.withSubscription (fun _ -> Cmd.ofSub App.timerSubscription)
     |> Program.run
 
 

@@ -150,8 +150,19 @@ module PropsMappings =
                 view.Y <- y |> convPos
     
             | Dim (width,height) ->
+                
+                match width, height with
+                | AbsDim _, AbsDim _
+                | AbsDim _, _
+                | _, AbsDim _ -> 
+                    view.LayoutStyle <- LayoutStyle.Absolute
+                | _, _ ->
+                    view.LayoutStyle <- LayoutStyle.Computed
+                 
+
                 view.Width <- width |> convDim
                 view.Height <- height |> convDim
+
     
             | TextAlignment alignment ->
                 match view with
@@ -343,8 +354,8 @@ module PropsMappings =
                         element |> setStylesToElement styles
                 
                     | OnChanged changed ->
-                        element.add_TimeChanged(fun timeEv -> changed(timeEv.NewValue))
-                            
+                        //element.add_TimeChanged(fun timeEv -> changed(timeEv.NewValue))
+                        element.add_TextChanging(fun t -> printfn "%A" t)
                     | Value value ->
                         element.Time <- value
                         // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
@@ -730,6 +741,9 @@ module TreeProcessing =
                         match rp', newProp' with
                         | OnChanged _, OnChanged _ ->
                             (false, rp)
+                        | Styles s1, Styles s2 ->
+                            let changed = s1 <> s2
+                            (changed, if changed then newProp else rp)
                         | _, _ ->
                             (true, newProp)
 
@@ -737,6 +751,9 @@ module TreeProcessing =
                         match rp', newProp' with
                         | OnChanged _, OnChanged _ ->
                             (false, rp)
+                        | Styles s1, Styles s2 ->
+                            let changed = s1 <> s2
+                            (changed, if changed then newProp else rp)
                         | _, _ ->
                             (true, newProp)
 
@@ -744,6 +761,9 @@ module TreeProcessing =
                         match rp', newProp' with
                         | OnChanged _, OnChanged _ ->
                             (false, rp)
+                        | Styles s1, Styles s2 ->
+                            let changed = s1 <> s2
+                            (changed, if changed then newProp else rp)
                         | _, _ ->
                             (true, newProp)
 
@@ -751,8 +771,12 @@ module TreeProcessing =
                         match rp', newProp' with
                         | OnChanged _, OnChanged _ ->
                             (false, rp)
+                        | Styles s1, Styles s2 ->
+                            let changed = s1 <> s2
+                            (changed, if changed then newProp else rp)
                         | _, _ ->
                             (true, newProp)
+
                     | :? TextFieldProps as rp', (:? TextFieldProps as newProp') ->
                         match rp', newProp' with
                         | OnTextChanged _, OnTextChanged _ ->
