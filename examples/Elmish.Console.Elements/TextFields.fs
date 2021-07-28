@@ -97,7 +97,7 @@ let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
         label [
             Styles [
                 Pos (AbsPos 1,AbsPos 9)
-                Dim (AbsDim 1,AbsDim 1)                
+                //Dim (AbsDim 1,AbsDim 1)                
                 Colors (Color.BrightYellow,Color.Red)
             ]
             Text (sprintf "The Text says: %s" model.Text)
@@ -106,7 +106,7 @@ let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
         label [
             Styles [
                 Pos (AbsPos 1,AbsPos 11)
-                Dim (AbsDim 1,AbsDim 1)
+                //Dim (AbsDim 1,AbsDim 1)
                 Colors (Color.BrightYellow,Color.Red)
             ]
             Text (sprintf "The Secret Text says: %s" model.SecretText)

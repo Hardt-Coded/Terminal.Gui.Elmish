@@ -113,6 +113,34 @@ module Props =
     
 
 
+module EventHelpers =
+
+    open System.Reflection
+
+    let getEventDelegates (eventName:string) (o:obj) =
+        let eventInfo  = o.GetType().GetEvent(eventName, BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
+        let eventDelegate = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic).GetValue(o) :?> MulticastDelegate
+        if (eventDelegate |> isNull) then
+            []
+        else
+            eventDelegate.GetInvocationList() |> Array.toList
+
+    let clearEventDelegates (eventName:string) (o:obj) =
+        let eventInfo  = o.GetType().GetEvent(eventName, BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
+        let eventDelegate = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic).GetValue(o) :?> MulticastDelegate
+        if (eventDelegate |> isNull) then
+            ()
+        else
+            
+            eventDelegate.GetInvocationList() |> Array.iter (fun d -> eventInfo.RemoveEventHandler(o, d))
+
+    let addEventDelegates (eventName:string) (delegates:Delegate list) (o:obj) =
+        let eventInfo  = o.GetType().GetEvent(eventName, BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
+        if (eventInfo |> isNull) then
+            ()
+        else
+            delegates |> List.iter (fun d -> eventInfo.AddEventHandler(o, d))
+
 
 [<AutoOpen>]
 module PropsMappings =
@@ -152,9 +180,7 @@ module PropsMappings =
             | Dim (width,height) ->
                 
                 match width, height with
-                | AbsDim _, AbsDim _
-                | AbsDim _, _
-                | _, AbsDim _ -> 
+                | AbsDim _, AbsDim _ ->
                     view.LayoutStyle <- LayoutStyle.Absolute
                 | _, _ ->
                     view.LayoutStyle <- LayoutStyle.Computed
@@ -162,7 +188,7 @@ module PropsMappings =
 
                 view.Width <- width |> convDim
                 view.Height <- height |> convDim
-
+                
     
             | TextAlignment alignment ->
                 match view with
@@ -281,9 +307,16 @@ module PropsMappings =
                     | Styles styles ->
                         element |> setStylesToElement styles
                     | OnChanged changed ->
+                        EventHelpers.clearEventDelegates "TextChanging" element
                         element.add_TextChanging(fun ev -> changed(ev.NewText.ToString()))
                     | Value value ->
+                        // remove change event handler to avoid endless loop
+                        let eventDel = EventHelpers.getEventDelegates "TextChanged" element
+                        EventHelpers.clearEventDelegates "TextChanged" element
                         element.Text <- ustring.Make(value) 
+                        EventHelpers.addEventDelegates "TextChanged" eventDel element
+                        
+
                         element.CursorPosition <- value.Length
                         // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
                         element.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
@@ -292,12 +325,17 @@ module PropsMappings =
                 | :? TextFieldProps as prop ->
                     match prop with
                     | Text text ->
+                        // remove change event handler to avoid endless loop
+                        let eventDel = EventHelpers.getEventDelegates "TextChanged" element
+                        EventHelpers.clearEventDelegates "TextChanged" element
                         element.Text <- ustring.Make(text) 
+                        EventHelpers.addEventDelegates "TextChanged" eventDel element
                         element.CursorPosition <- text.Length
                         // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
                         element.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
                         element.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
                     | OnTextChanged changed ->
+                        EventHelpers.clearEventDelegates "TextChanging" element
                         element.add_TextChanging(fun ev -> changed(ev.NewText.ToString()))
 
                     | Secret ->
@@ -317,6 +355,7 @@ module PropsMappings =
                 | :? ButtonProp as prop ->
                     match prop with
                     | OnClicked f ->
+                        EventHelpers.clearEventDelegates "Clicked" element
                         element.add_Clicked(Action(f))
                 | _ -> ()
                 
@@ -331,10 +370,16 @@ module PropsMappings =
                         element |> setStylesToElement styles
                 
                     | OnChanged changed ->
+                        EventHelpers.clearEventDelegates "DateChanged" element
                         element.add_DateChanged(fun dateEv -> changed(dateEv.NewValue))
                     
                     | Value value ->
+                        // remove change event handler to avoid endless loop
+                        let eventDel = EventHelpers.getEventDelegates "DateChanged" element
+                        EventHelpers.clearEventDelegates "DateChanged" element
                         element.Date <- value
+                        EventHelpers.addEventDelegates "DateChanged" eventDel element
+                        
                         // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
                         element.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
                         element.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
@@ -354,10 +399,15 @@ module PropsMappings =
                         element |> setStylesToElement styles
                 
                     | OnChanged changed ->
-                        //element.add_TimeChanged(fun timeEv -> changed(timeEv.NewValue))
-                        element.add_TextChanging(fun t -> printfn "%A" t)
+                        EventHelpers.clearEventDelegates "TimeChanged" element
+                        element.add_TimeChanged(fun timeEv -> changed(timeEv.NewValue))
                     | Value value ->
+                        // remove change event handler to avoid endless loop
+                        let eventDel = EventHelpers.getEventDelegates "TimeChanged" element
+                        EventHelpers.clearEventDelegates "TimeChanged" element
                         element.Time <- value
+                        EventHelpers.addEventDelegates "TimeChanged" eventDel element
+                        
                         // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
                         element.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
                         element.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
@@ -420,34 +470,62 @@ module PropsMappings =
                     match prop with
                     | Text text ->
                         element.Text <- ustring.Make(text)
+                    
                     | _ ->
                         ()
                 | _ -> ()
                 
             let removePropToTextFieldElement (prop:IProp) (element:TextField) =
                 match prop with
+                | :? CommonProp<string> as prop ->
+                    match prop with
+                    | OnChanged _ ->
+                        EventHelpers.clearEventDelegates "TextChanged" element
+                    | _ ->
+                        ()
+
                 | :? TextFieldProps as prop ->
                     match prop with
+                    | OnTextChanged _ ->
+                        EventHelpers.clearEventDelegates "TextChanged" element
                     | Secret ->
                         element.Secret <- false
                     | _ ->
                         ()
+
                 | _ -> ()
                 
             let removePropToButtonElement (prop:IProp) (element:Button) =
                 match prop with
+                | :? ButtonProp as prop ->
+                    match prop with
+                    | OnClicked _ ->
+                        EventHelpers.clearEventDelegates "Clicked" element
                 | _ -> ()
                 
             let removePropToDateFieldElement (prop:IProp) (element:DateField) =
                 match prop with
+                | :? CommonProp<DateTime> as prop ->
+                    match prop with
+                    | OnChanged _ ->
+                        EventHelpers.clearEventDelegates "DateChanged" element
+                    | _ ->
+                        ()
                 | :? DateTimeProps as prop ->
                     match prop with
+
                     | IsShort -> 
                         element.IsShortFormat <- false
                 | _ -> ()
                 
             let removePropToTimeFieldElement (prop:IProp) (element:TimeField) =
                 match prop with
+                | :? CommonProp<TimeSpan> as prop ->
+                    match prop with
+                    | OnChanged _ ->
+                        EventHelpers.clearEventDelegates "TimeChanged" element
+                    | _ ->
+                        ()
                 | :? DateTimeProps as prop ->
                     match prop with
                     | IsShort -> 
@@ -739,8 +817,8 @@ module TreeProcessing =
                     match rp, newProp with
                     | :? CommonProp<string> as rp', (:? CommonProp<string> as newProp') ->
                         match rp', newProp' with
-                        | OnChanged _, OnChanged _ ->
-                            (false, rp)
+                        //| OnChanged _, OnChanged _ ->
+                        //    (false, rp)
                         | Styles s1, Styles s2 ->
                             let changed = s1 <> s2
                             (changed, if changed then newProp else rp)
@@ -749,8 +827,8 @@ module TreeProcessing =
 
                     | :? CommonProp<DateTime> as rp', (:? CommonProp<DateTime> as newProp') ->
                         match rp', newProp' with
-                        | OnChanged _, OnChanged _ ->
-                            (false, rp)
+                        //| OnChanged _, OnChanged _ ->
+                        //    (false, rp)
                         | Styles s1, Styles s2 ->
                             let changed = s1 <> s2
                             (changed, if changed then newProp else rp)
@@ -759,8 +837,8 @@ module TreeProcessing =
 
                     | :? CommonProp<TimeSpan> as rp', (:? CommonProp<TimeSpan> as newProp') ->
                         match rp', newProp' with
-                        | OnChanged _, OnChanged _ ->
-                            (false, rp)
+                        //| OnChanged _, OnChanged _ ->
+                        //    (false, rp)
                         | Styles s1, Styles s2 ->
                             let changed = s1 <> s2
                             (changed, if changed then newProp else rp)
@@ -769,8 +847,8 @@ module TreeProcessing =
 
                     | :? CommonProp<_> as rp', (:? CommonProp<_> as newProp') ->
                         match rp', newProp' with
-                        | OnChanged _, OnChanged _ ->
-                            (false, rp)
+                        //| OnChanged _, OnChanged _ ->
+                        //    (false, rp)
                         | Styles s1, Styles s2 ->
                             let changed = s1 <> s2
                             (changed, if changed then newProp else rp)
@@ -779,15 +857,16 @@ module TreeProcessing =
 
                     | :? TextFieldProps as rp', (:? TextFieldProps as newProp') ->
                         match rp', newProp' with
-                        | OnTextChanged _, OnTextChanged _ ->
-                            (false, rp)
+                        //| OnTextChanged _, OnTextChanged _ ->
+                        //    (false, rp)
                         | _, _ ->
                             (true, newProp)
 
-                    | :? ButtonProp as rp', (:? ButtonProp as newProp') ->
-                        match rp', newProp' with
-                        | OnClicked _, OnClicked _ ->
-                            (false, rp)
+                    //| :? ButtonProp as rp', (:? ButtonProp as newProp') ->
+                    //    match rp', newProp' with
+                    //    | OnClicked _, OnClicked _ ->
+                    //        (false, rp)
+
 
                     | _, _ ->
                         (true, newProp)
