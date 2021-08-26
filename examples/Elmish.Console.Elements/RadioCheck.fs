@@ -66,15 +66,15 @@ let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
             Text "Please Vote!"
         ]
 
-        //radioGroup [
-        //    Styles [
-        //        Pos (CenterPos,AbsPos 7)                
+        radioGroup [
+            Styles [
+                Pos (CenterPos,AbsPos 7)                
 
-        //    ]
-        //    Value model.VoteResult
-        //    Items model.VoteResultItems
-        //    OnChanged (fun r -> dispatch (ChangeVoteResult r))
-        //]
+            ]
+            Value model.VoteResult
+            Items model.VoteResultItems
+            OnChanged (fun r -> dispatch (ChangeVoteResult r))
+        ]
                 
 
         checkBox [

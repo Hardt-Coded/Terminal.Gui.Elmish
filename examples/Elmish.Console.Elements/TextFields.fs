@@ -44,7 +44,6 @@ let update (msg:Msg) (model:Model) =
 
 let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
     [
-        label[]
         
 
         label [

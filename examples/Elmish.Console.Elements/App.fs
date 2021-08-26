@@ -45,7 +45,7 @@ type Msg =
 let timerSubscription dispatch =
     let rec loop () =
         async {
-            do! Async.Sleep 1000
+            do! Async.Sleep 100
             dispatch UpdateTime
             return! loop ()
         }

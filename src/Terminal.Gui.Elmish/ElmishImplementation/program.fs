@@ -164,7 +164,7 @@ module Program =
                                 ()
                             | Some currentState ->
                                 let nextTreeState = program.view model' syncDispatch
-                                let newTreeState = TreeProcessing.updateTree currentState nextTreeState
+                                let newTreeState = TreeProcessing.updateTree currentState nextTreeState None
                                 currentTreeState <- Some newTreeState
                                 //Application.Top.RemoveAll()
                                 //Application.Top.Add(newState.Subviews |> Seq.toArray)

@@ -6,6 +6,8 @@ open NStack
 open System
 open System.Data
 
+
+
 type ViewElementType =
     | PageElement
     | WindowElement
@@ -103,9 +105,9 @@ module Props =
         interface IProp<DateTime>
         interface IProp<TimeSpan>
 
-    type ListProps =
-        | Items of (obj * string) list
-        interface IProp
+    type ListProps<'a> =
+        | Items of ('a * string) list
+        interface IProp<'a>
 
     type ButtonProp =
         | OnClicked of (unit -> unit)
@@ -163,114 +165,163 @@ module PropsMappings =
             | Position.CenterPos -> Pos.Center()
     
     
-        let addTextAlignmentToLabel (label:Label) (alignment:TextAlignment) =
+        let addTextAlignmentToView (view:View) (alignment:TextAlignment) =
             match alignment with
-            | Left -> label.TextAlignment <- Terminal.Gui.TextAlignment.Left
-            | Right -> label.TextAlignment <- Terminal.Gui.TextAlignment.Right
-            | Centered -> label.TextAlignment <- Terminal.Gui.TextAlignment.Centered
-            | Justified -> label.TextAlignment <- Terminal.Gui.TextAlignment.Justified
+            | Left -> view.TextAlignment <- Terminal.Gui.TextAlignment.Left
+            | Right -> view.TextAlignment <- Terminal.Gui.TextAlignment.Right
+            | Centered -> view.TextAlignment <- Terminal.Gui.TextAlignment.Centered
+            | Justified -> view.TextAlignment <- Terminal.Gui.TextAlignment.Justified
     
     
+        let (|IsDimAbsolute|_|) (o:obj) =
+            let n = o.GetType().Name
+            if n = "DimAbsolute" then Some () else None
+
+
+        let getTopLevelColorScheme () =
+            new Terminal.Gui.ColorScheme(Normal=Application.Top.ColorScheme.Normal,
+                Focus=Application.Top.ColorScheme.Focus,
+                HotNormal=Application.Top.ColorScheme.HotNormal,
+                HotFocus=Application.Top.ColorScheme.HotFocus,
+                Disabled=Application.Top.ColorScheme.Disabled
+            )
+            
+
         let private addStyleToView (view:View) (style:Style) =
+            view.SetNeedsDisplay()
             match style with
             | Pos (x,y) ->
-                view.X <- x |> convPos
-                view.Y <- y |> convPos
+                match x,y with
+                | AbsPos _, AbsPos _ ->
+                    view.LayoutStyle <- LayoutStyle.Absolute
+                    view.X <- x |> convPos
+                    view.Y <- y |> convPos
+                | AbsPos _, _ ->
+                    view.LayoutStyle <- LayoutStyle.Absolute
+                    view.X <- x |> convPos
+                    view.LayoutStyle <- LayoutStyle.Computed
+                    view.Y <- y |> convPos
+                | _, AbsPos _ ->
+                    view.LayoutStyle <- LayoutStyle.Absolute
+                    view.Y <- y |> convPos
+                    view.LayoutStyle <- LayoutStyle.Computed
+                    view.X <- x |> convPos
+                    
+                | _ ->
+                    view.LayoutStyle <- LayoutStyle.Computed
+                    view.X <- x |> convPos
+                    view.Y <- y |> convPos
+                //view.X <- x |> convPos
+                //view.Y <- y |> convPos
     
             | Dim (width,height) ->
                 
-                match width, height with
+                match width,height with
                 | AbsDim _, AbsDim _ ->
                     view.LayoutStyle <- LayoutStyle.Absolute
-                | _, _ ->
+                    view.Width <- width |> convDim
+                    view.Height <- height |> convDim
+                | AbsDim _, _ ->
+                    view.LayoutStyle <- LayoutStyle.Absolute
+                    view.Width <- width |> convDim
                     view.LayoutStyle <- LayoutStyle.Computed
-                 
+                    view.Height <- height |> convDim
+                | _, AbsDim _ ->
+                    view.LayoutStyle <- LayoutStyle.Absolute
+                    view.Height <- height |> convDim
+                    view.LayoutStyle <- LayoutStyle.Computed
+                    view.Width <- width |> convDim
+                    
+                | _ ->
+                    view.LayoutStyle <- LayoutStyle.Computed
+                    view.Width <- width |> convDim
+                    view.Height <- height |> convDim
+                //view.Width <- width |> convDim
+                //view.Height <- height |> convDim
 
-                view.Width <- width |> convDim
-                view.Height <- height |> convDim
-                
-    
             | TextAlignment alignment ->
                 match view with
                 | :? Label as label ->                
-                    alignment |> addTextAlignmentToLabel label
+                    alignment |> addTextAlignmentToView label
                 | _ -> 
                     ()
     
             | TextColorScheme color ->
                 let colorScheme =
                     let s = 
-                        if Application.Current<> null then
-                            Application.Current.ColorScheme
-                        else
-                            Terminal.Gui.ColorScheme()
+                        getTopLevelColorScheme ()
                     match color with
                     | Normal -> s.Normal
                     | Focus -> s.Focus
                     | HotNormal -> s.HotNormal
                     | HotFocus -> s.HotFocus
+
+                
                 match view with
                 | :? Label as label ->         
                     if label.ColorScheme = null then
-                        label.ColorScheme <- Terminal.Gui.ColorScheme()
+                        label.ColorScheme <- getTopLevelColorScheme ()
                     label.ColorScheme.Normal <- colorScheme
                 | _ -> 
                     ()
     
             | Colors (fg,bg) ->
                 let color = Terminal.Gui.Attribute.Make(fg,bg)
-                match view with
-                | :? Label as label -> 
-                    if label.ColorScheme = null then
-                        label.ColorScheme <- Terminal.Gui.ColorScheme()
-                    label.ColorScheme.Normal <- color
-                | _ as view ->
-                    if view.ColorScheme = null then
-                        view.ColorScheme <- Terminal.Gui.ColorScheme()
-                    else
-                        view.ColorScheme.Normal <- color
+                view.ColorScheme <- getTopLevelColorScheme ()
+                view.ColorScheme.Normal <- color
     
             | FocusColors (fg,bg) ->
                 let color = Terminal.Gui.Attribute.Make(fg,bg)
-                if view.ColorScheme = null then
-                    view.ColorScheme <- Terminal.Gui.ColorScheme()
-                else
-                    view.ColorScheme.Focus <- color
+                view.ColorScheme <- getTopLevelColorScheme ()
+                view.ColorScheme.Focus <- color
     
             | HotNormalColors(fg,bg) ->
                 let color = Terminal.Gui.Attribute.Make(fg,bg)
-                if view.ColorScheme = null then
-                    view.ColorScheme <- Terminal.Gui.ColorScheme()
-                else
-                    view.ColorScheme.HotNormal <- color
+                view.ColorScheme <- getTopLevelColorScheme ()
+                view.ColorScheme.HotNormal <- color
     
             | HotFocusedColors(fg,bg) ->
                 let color = Terminal.Gui.Attribute.Make(fg,bg)
-                if view.ColorScheme = null then
-                    view.ColorScheme <- Terminal.Gui.ColorScheme()
-                else
-                    view.ColorScheme.HotFocus <- color
+                view.ColorScheme <- getTopLevelColorScheme ()
+                view.ColorScheme.HotFocus <- color
     
             | DisabledColors(fg,bg) ->
                 let color = Terminal.Gui.Attribute.Make(fg,bg)
-                if view.ColorScheme = null then
-                    view.ColorScheme <- Terminal.Gui.ColorScheme()
-                else
-                    view.ColorScheme.Disabled <- color
+                view.ColorScheme <- getTopLevelColorScheme ()
+                view.ColorScheme.Disabled <- color
+            
+
+        
+        let private resetAllStyleOnView (view:View) (style:Style) =
+                Left |> addTextAlignmentToView view
+                view.ColorScheme <- null
     
-    
-    
+
+
         let setStylesToElement (styles: Style list) (element:View) =
             styles |> List.iter (fun s -> addStyleToView element s)
+
+        let resetStylesOnElement (styles: Style list) (element:View) =
+            styles |> List.iter (fun s -> resetAllStyleOnView element s)
 
 
     [<AutoOpen>]
     module Props =
 
+        let ustr (x:string) = ustring.Make(x)
+
         let inline setCommonObjStyleOnly (prop:CommonProp<'a>) (element:View) =
             match prop with
             | Styles styles ->
                 element |> setStylesToElement styles
+            | _ ->
+                ()
+
+
+        let inline resetCommonObjStyleOnly (prop:CommonProp<'a>) (element:View) =
+            match prop with
+            | Styles styles ->
+                element |> resetStylesOnElement styles
             | _ ->
                 ()
 
@@ -311,10 +362,10 @@ module PropsMappings =
                         element.add_TextChanging(fun ev -> changed(ev.NewText.ToString()))
                     | Value value ->
                         // remove change event handler to avoid endless loop
-                        let eventDel = EventHelpers.getEventDelegates "TextChanged" element
-                        EventHelpers.clearEventDelegates "TextChanged" element
+                        let eventDel = EventHelpers.getEventDelegates "TextChanging" element
+                        EventHelpers.clearEventDelegates "TextChanging" element
                         element.Text <- ustring.Make(value) 
-                        EventHelpers.addEventDelegates "TextChanged" eventDel element
+                        EventHelpers.addEventDelegates "TextChanging" eventDel element
                         
 
                         element.CursorPosition <- value.Length
@@ -421,30 +472,58 @@ module PropsMappings =
         
             let setPropToTextViewElement (prop:IProp) (element:TextView) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToFrameViewElement (prop:IProp) (element:FrameView) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToHexViewElement (prop:IProp) (element:HexView) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToListViewElement (prop:IProp) (element:ListView) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToProgressBarElement (prop:IProp) (element:ProgressBar) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToCheckBoxElement (prop:IProp) (element:CheckBox) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToRadioGroupElement (prop:IProp) (element:RadioGroup) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    match prop with
+                    | Styles _ ->
+                        setCommonObjStyleOnly prop element 
+                    | Value value ->
+                        ()
+                    | OnChanged onChanged ->
+                        ()
+
+                | :? ListProps<_> as prop ->
+                    match prop with
+                    | Items items ->
+                        let labels = items |> List.map (fun (_,s) -> ustr (s)) |> List.toArray
+                        element.RadioLabels <- labels
+                
+                    
                 | _ -> ()
         
         
@@ -453,7 +532,7 @@ module PropsMappings =
             let removePropToWindowElement (prop:IProp) (element:Window) =
                 match prop with 
                 | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
+                    resetCommonObjStyleOnly prop element 
                 | :? WindowProps as prop->
                     match prop with
                     | Title title ->
@@ -465,7 +544,7 @@ module PropsMappings =
             let removePropsToTextElement (prop:IProp) (element:Label) =
                 match prop with
                 | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
+                    resetCommonObjStyleOnly prop element 
                 | :? TextFieldProps as prop ->
                     match prop with
                     | Text text ->
@@ -481,8 +560,11 @@ module PropsMappings =
                     match prop with
                     | OnChanged _ ->
                         EventHelpers.clearEventDelegates "TextChanged" element
+                    | Styles _ ->
+                        resetCommonObjStyleOnly prop element
                     | _ ->
                         ()
+                        
 
                 | :? TextFieldProps as prop ->
                     match prop with
@@ -497,6 +579,8 @@ module PropsMappings =
                 
             let removePropToButtonElement (prop:IProp) (element:Button) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    resetCommonObjStyleOnly prop element 
                 | :? ButtonProp as prop ->
                     match prop with
                     | OnClicked _ ->
@@ -509,6 +593,8 @@ module PropsMappings =
                     match prop with
                     | OnChanged _ ->
                         EventHelpers.clearEventDelegates "DateChanged" element
+                    | Styles _ ->
+                        resetCommonObjStyleOnly prop element
                     | _ ->
                         ()
                 | :? DateTimeProps as prop ->
@@ -524,6 +610,8 @@ module PropsMappings =
                     match prop with
                     | OnChanged _ ->
                         EventHelpers.clearEventDelegates "TimeChanged" element
+                    | Styles _ ->
+                        resetCommonObjStyleOnly prop element
                     | _ ->
                         ()
                 | :? DateTimeProps as prop ->
@@ -535,30 +623,44 @@ module PropsMappings =
                 
             let removePropToTextViewElement (prop:IProp) (element:TextView) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
             let removePropToFrameViewElement (prop:IProp) (element:FrameView) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
             let removePropToHexViewElement (prop:IProp) (element:HexView) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
             let removePropToListViewElement (prop:IProp) (element:ListView) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
             let removePropToProgressBarElement (prop:IProp) (element:ProgressBar) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
             let removePropToCheckBoxElement (prop:IProp) (element:CheckBox) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
             let removePropToRadioGroupElement (prop:IProp) (element:RadioGroup) =
                 match prop with
+                | :? CommonProp<_> as prop -> 
+                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
 
         open Setters
@@ -780,6 +882,75 @@ module TreeProcessing =
         let cve2 = ve2.Children |> List.map (fun e -> e.Type) |> List.sort
         if cve1 <> cve2 then Some () else None
 
+
+    let checkReplacement (props1:IProp list) (props2:IProp list) =
+        let prop1Types = props1 |> List.map (fun i -> i.GetType().Name)
+        let prop2Types = props2 |> List.map (fun i -> i.GetType().Name)
+        let addedPropTypes = prop2Types |> List.except prop1Types
+        let deletedPropTypes = prop1Types |> List.except prop2Types
+        let modifiedPropTypes = prop1Types |> List.except deletedPropTypes
+        let modifiedProps =
+            modifiedPropTypes
+            |> List.map (fun name -> 
+                let np = props2 |> List.tryFind (fun p2 -> p2.GetType().Name = name)
+                let op = props1 |> List.tryFind (fun p2 -> p2.GetType().Name = name)
+                match (np,op) with
+                | Some np, Some op ->
+                    {| 
+                        NewProps = np
+                        OldProps = op
+                    |} |> Some
+                | _, _ ->
+                    None
+            )
+            |> List.choose id
+            
+
+        let checkStyles oldStyles newStyles =
+            false
+            //let checkStyle oldStyle newStyle =
+            //    match oldStyle, newStyle with
+            //    | Pos (AbsPos _, AbsPos _), Pos (AbsPos _, AbsPos _) ->
+            //        false
+            //    | Pos (AbsPos _, AbsPos _), Pos (_, AbsPos _) 
+            //    | Pos (_, AbsPos _), Pos (AbsPos _, AbsPos _) 
+            //    | Pos (AbsPos _, _), Pos (AbsPos _, AbsPos _) 
+            //    | Pos (AbsPos _, AbsPos _), Pos (AbsPos _, _) ->
+            //        true
+            //    | Dim (AbsDim _, AbsDim _), Dim (AbsDim _, AbsDim _) ->
+            //        false
+            //    | Dim (_, AbsDim _), Dim (AbsDim _, AbsDim _)
+            //    | Dim (AbsDim _, AbsDim _), Dim (_, AbsDim _)
+            //    | Dim (AbsDim _, _), Dim (AbsDim _, AbsDim _)
+            //    | Dim (AbsDim _, AbsDim _), Dim (AbsDim _, _) ->
+            //        true
+            //    | _ ->
+            //        false
+            //newStyles
+            //|> List.exists (fun newStyle ->
+            //    let oldStyle = oldStyles |> List.tryFind (fun p2 -> p2.GetType().Name = newStyle.GetType().Name)
+            //    oldStyle 
+            //    |> Option.map (fun oldStyle ->
+            //        checkStyle oldStyle newStyle
+            //    )
+            //    |> Option.defaultValue false
+            //)
+
+        modifiedProps
+        |> List.exists (fun p ->
+            match (p.NewProps,p.OldProps) with
+            | (:? CommonProp<_> as p1), (:? CommonProp<_> as p2) ->
+                match p1,p2 with
+                | Styles oldStyles, Styles newStyles ->
+                    checkStyles oldStyles newStyles
+                | _ ->
+                    false
+            | _ -> false
+
+                
+        )
+
+
     let processProps (props1:IProp list) (props2:IProp list) (element:View) =
         let prop1Types = props1 |> List.map (fun i -> i.GetType().Name)
         let prop2Types = props2 |> List.map (fun i -> i.GetType().Name)
@@ -801,12 +972,13 @@ module TreeProcessing =
             props1
             |> List.filter (fun e -> (deletedPropTypes |> List.contains (e.GetType().Name)))
 
-    
-        removePropsToElement deletedProps element
+        if (deletedProps |> List.isEmpty |> not) then
+            removePropsToElement deletedProps element
 
         let remainProps =
             props1
             |> List.filter (fun e -> (deletedPropTypes |> List.contains (e.GetType().Name) |> not))
+
 
         let changedRemainProps =
             remainProps
@@ -879,7 +1051,25 @@ module TreeProcessing =
             |> List.filter (fun (b,_) -> b)
             |> List.map ( fun (_,e)-> e)
 
+        // reset here the styles before setting them new
+        toUpdate
+        |> List.iter (fun prop ->
+            match prop with
+            | :? CommonProp<_> as p ->
+                match p with
+                | Styles styles ->
+                    resetStylesOnElement styles element
+                | _ ->
+                    ()
+            | _ ->
+                ()
+                
+        )
+        
+
         setPropsToElement toUpdate element
+
+
 
         let newModified =
             changedRemainProps 
@@ -897,66 +1087,87 @@ module TreeProcessing =
 
 
 
-    let rec updateTree rootTree newTree =
+    let rec updateTree rootTree newTree (parentElement:View Option) : ViewElement =
         match rootTree.Element with
         | None ->
             failwith ("root element must be initialized")
         | Some rootElement ->
             match rootTree, newTree with
             | rt,nt when rt.Type <> nt.Type ->
-                initializeTree newTree
+                processElementObjects parentElement newTree
             | OnlyPropsChanged ->
-                let newProps = processProps rootTree.Props newTree.Props rootElement
-                let sortedRootChildren = rootTree.Children |> List.sortBy (fun v -> v.Type)
-                let sortedNewChildren = newTree.Children |> List.sortBy (fun v -> v.Type)
-                let newChildList = (sortedRootChildren,sortedNewChildren) ||> List.map2 (fun rt nt -> updateTree rt nt)
-                { rootTree with Props = newProps; Children = newChildList }
-            | ChildsDifferent ->
-                let sortedRootChildren = rootTree.Children |> List.sortBy (fun v -> v.Type)
-                let sortedNewChildren = newTree.Children |> List.sortBy (fun v -> v.Type)
-                let groupedRootType = sortedRootChildren |> List.map (fun v -> v.Type) |> List.distinct
-                let groupedNewType = sortedNewChildren |> List.map (fun v -> v.Type) |> List.distinct
-                let allTypes = groupedRootType @ groupedNewType |> List.distinct
-            
-                // find out new added existing types and mix it with existing elements and set the new props
-                let newChildList = 
-                    allTypes
-                    |> List.map (fun et ->
-                        let rootElements = sortedRootChildren |> List.filter (fun e -> e.Type = et)
-                        let newElements = sortedNewChildren |> List.filter (fun e -> e.Type = et)
-                        if (newElements.Length > rootElements.Length) then
-                            newElements
-                            |> List.mapi (fun idx ne ->
-                                if (idx+1 <= rootElements.Length) then
-                                    updateTree rootElements.[idx] ne
-                                else
-                                    let newElem = initializeTree ne
-                                    // add elementobj to children
-                                    newElem.Element |> Option.iter rootElement.Add 
-                                    newElem
-                        
-                            )
-                        else
-                            rootElements
-                            |> List.mapi (fun idx re ->
-                                if (idx+1 <= newElements.Length) then
-                                    Some (updateTree re newElements.[idx])
-                                else
-                                    // the res we remove
-                                    re.Element |> Option.map rootElement.Remove |> ignore
-                                    None
-                            
-                            )
-                            |> List.choose id
+                let replaceFullElement = checkReplacement rootTree.Props newTree.Props
+                if replaceFullElement then
+                    parentElement 
+                    |> Option.iter (fun parentElement ->
+                        parentElement.Remove(rootElement);
                     )
-                    |> List.collect id
+                    rootElement.Dispose()
+                    processElementObjects parentElement newTree
+                else
+                    let newProps = processProps rootTree.Props newTree.Props rootElement
+                    let sortedRootChildren = rootTree.Children |> List.sortBy (fun v -> v.Type)
+                    let sortedNewChildren = newTree.Children |> List.sortBy (fun v -> v.Type)
+                    let newChildList = (sortedRootChildren,sortedNewChildren) ||> List.map2 (fun rt nt -> updateTree rt nt rootTree.Element)
+                    { rootTree with Props = newProps; Children = newChildList }
+            | ChildsDifferent ->
+                let replaceFullElement = checkReplacement rootTree.Props newTree.Props
+                if replaceFullElement then
+                    parentElement 
+                    |> Option.iter (fun parentElement ->
+                        parentElement.Remove(rootElement);
+                    )
+                    rootElement.Dispose()
+                    processElementObjects parentElement newTree
+                else
+                    let sortedRootChildren = rootTree.Children |> List.sortBy (fun v -> v.Type)
+                    let sortedNewChildren = newTree.Children |> List.sortBy (fun v -> v.Type)
+                    let groupedRootType = sortedRootChildren |> List.map (fun v -> v.Type) |> List.distinct
+                    let groupedNewType = sortedNewChildren |> List.map (fun v -> v.Type) |> List.distinct
+                    let allTypes = groupedRootType @ groupedNewType |> List.distinct
             
-                // Update Props
+                    // find out new added existing types and mix it with existing elements and set the new props
+                    let newChildList = 
+                        allTypes
+                        |> List.map (fun et ->
+                            let rootElements = sortedRootChildren |> List.filter (fun e -> e.Type = et)
+                            let newElements = sortedNewChildren |> List.filter (fun e -> e.Type = et)
+                            if (newElements.Length > rootElements.Length) then
+                                newElements
+                                |> List.mapi (fun idx ne ->
+                                    if (idx+1 <= rootElements.Length) then
+                                        updateTree rootElements.[idx] ne rootTree.Element
+                                    else
+                                        let newElem = processElementObjects (Some rootElement) ne
+                                        // add elementobj to children
+                                        //newElem.Element |> Option.iter rootElement.Add 
+                                        newElem
+                        
+                                )
+                            else
+                                rootElements
+                                |> List.mapi (fun idx re ->
+                                    if (idx+1 <= newElements.Length) then
+                                        Some (updateTree re newElements.[idx] rootTree.Element)
+                                    else
+                                        // the res we remove
+                                        re.Element 
+                                        |> Option.iter (fun el -> 
+                                            rootElement.Remove(el)
+                                            el.Dispose()
+                                        )
+                                        None
+                            
+                                )
+                                |> List.choose id
+                        )
+                        |> List.collect id
+            
+                    // Update Props
+                    let newProps = processProps rootTree.Props newTree.Props rootElement
 
-                let newProps = processProps rootTree.Props newTree.Props rootElement
-
-                let res = { rootTree with Props = newProps; Children = newChildList }
-                res
+                    let res = { rootTree with Props = newProps; Children = newChildList }
+                    res
       
             | _ ->
                 failwith "not implemented yet"

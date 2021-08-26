@@ -841,11 +841,11 @@ module Elements =
     //    rg
 
 
-    let inline radioGroup (props:IProp list) =
+    let inline radioGroup (props:IProp<'a> list) =
         {
             Type = RadioGroupElement
             Element = None
-            Props = props
+            Props = props |> List.map (fun i -> i :> IProp)
             Children = []
         }
             
