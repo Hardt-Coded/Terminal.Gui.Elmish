@@ -66,28 +66,28 @@ let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
 
         frameView [
             Styles [
-                Pos (AbsPos 1,AbsPos 4)
+                Pos (AbsPos 1,AbsPos 5)
                 Dim (FillMargin 1,FillMargin 5)                                
             ]
             Text "TextView"
         ] [
             
-            //listView [
-            //    Styles [
-            //        Pos (AbsPos 0,AbsPos 0)                
-            //        Dim (Fill,Fill)
+            listView [
+                Styles [
+                    Pos (AbsPos 0,AbsPos 0)                
+                    Dim (Fill,Fill)
 
-            //    ]
-            //    Value model.VoteResult
-            //    Items model.VoteResultItems
-            //    OnChanged (fun r -> dispatch (ItemSelected r))
-            //]
+                ]
+                Value model.VoteResult
+                Items model.VoteResultItems
+                OnChanged (fun r -> dispatch (ItemSelected r))
+            ]
             
         ]
         
         label [
             Styles [
-                Pos (AbsPos 1,AbsPos 18)
+                Pos (AbsPos 1,AbsPos 3)
                 Dim (AbsDim 1,AbsDim 1)                
                 Colors (Color.BrightYellow,Color.Red)
             ]

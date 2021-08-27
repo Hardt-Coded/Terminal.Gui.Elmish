@@ -792,11 +792,11 @@ module Elements =
         }
 
 
-    let inline listView (props:IProp list) =
+    let inline listView (props:IProp<'a> list) =
         {
             Type = ListViewElement
             Element = None
-            Props = props
+            Props = props |> List.map (fun i -> (i |> toObjProp) :> IProp)
             Children = []
         }
             
