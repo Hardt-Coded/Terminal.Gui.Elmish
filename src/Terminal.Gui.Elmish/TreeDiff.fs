@@ -114,6 +114,31 @@ module Props =
         interface IProp
     
 
+    open Microsoft.FSharp.Reflection
+
+    let GetUnionCaseName (x:'a) = 
+        match FSharpValue.GetUnionFields(x, typeof<'a>) with
+        | case, _ -> case.Name
+
+    let inline toObjProp<'a> (input:IProp<'a>) : IProp<obj> =
+        match input with
+        | :? ListProps<'a> as listProp ->
+            match listProp with
+            | Items items ->
+                let objList = (items |> List.map (fun (item,name) -> (box item, name)))
+                Items objList :> IProp<obj>
+        | :? CommonProp<'a> as commonProp ->
+            match commonProp with
+            | Styles styles ->
+                Styles styles :> IProp<obj>
+            | Value a ->
+                Value (box a) :> IProp<obj>
+            | OnChanged func ->
+                let objF (obj:obj) = func((obj :?> 'a))
+                (OnChanged objF) :> IProp<obj>
+                
+        | _ -> failwith ("can not convert prop top obj prop")
+
 
 module EventHelpers =
 
@@ -363,7 +388,8 @@ module PropsMappings =
                     | Value value ->
                         // remove change event handler to avoid endless loop
                         let eventDel = EventHelpers.getEventDelegates "TextChanging" element
-                        EventHelpers.clearEventDelegates "TextChanging" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "TextChanging" element
                         element.Text <- ustring.Make(value) 
                         EventHelpers.addEventDelegates "TextChanging" eventDel element
                         
@@ -378,7 +404,8 @@ module PropsMappings =
                     | Text text ->
                         // remove change event handler to avoid endless loop
                         let eventDel = EventHelpers.getEventDelegates "TextChanged" element
-                        EventHelpers.clearEventDelegates "TextChanged" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "TextChanged" element
                         element.Text <- ustring.Make(text) 
                         EventHelpers.addEventDelegates "TextChanged" eventDel element
                         element.CursorPosition <- text.Length
@@ -386,7 +413,9 @@ module PropsMappings =
                         element.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
                         element.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
                     | OnTextChanged changed ->
-                        EventHelpers.clearEventDelegates "TextChanging" element
+                        let eventDel = EventHelpers.getEventDelegates "TextChanging" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "TextChanging" element
                         element.add_TextChanging(fun ev -> changed(ev.NewText.ToString()))
 
                     | Secret ->
@@ -406,7 +435,9 @@ module PropsMappings =
                 | :? ButtonProp as prop ->
                     match prop with
                     | OnClicked f ->
-                        EventHelpers.clearEventDelegates "Clicked" element
+                        let eventDel = EventHelpers.getEventDelegates "Clicked" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "Clicked" element
                         element.add_Clicked(Action(f))
                 | _ -> ()
                 
@@ -421,13 +452,16 @@ module PropsMappings =
                         element |> setStylesToElement styles
                 
                     | OnChanged changed ->
-                        EventHelpers.clearEventDelegates "DateChanged" element
+                        let eventDel = EventHelpers.getEventDelegates "DateChanged" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "DateChanged" element
                         element.add_DateChanged(fun dateEv -> changed(dateEv.NewValue))
                     
                     | Value value ->
                         // remove change event handler to avoid endless loop
                         let eventDel = EventHelpers.getEventDelegates "DateChanged" element
-                        EventHelpers.clearEventDelegates "DateChanged" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "DateChanged" element
                         element.Date <- value
                         EventHelpers.addEventDelegates "DateChanged" eventDel element
                         
@@ -450,12 +484,16 @@ module PropsMappings =
                         element |> setStylesToElement styles
                 
                     | OnChanged changed ->
-                        EventHelpers.clearEventDelegates "TimeChanged" element
+                        let eventDel = EventHelpers.getEventDelegates "TimeChanged" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "TimeChanged" element
                         element.add_TimeChanged(fun timeEv -> changed(timeEv.NewValue))
+
                     | Value value ->
                         // remove change event handler to avoid endless loop
                         let eventDel = EventHelpers.getEventDelegates "TimeChanged" element
-                        EventHelpers.clearEventDelegates "TimeChanged" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "TimeChanged" element
                         element.Time <- value
                         EventHelpers.addEventDelegates "TimeChanged" eventDel element
                         
@@ -507,24 +545,50 @@ module PropsMappings =
                 | _ -> ()
         
             let setPropToRadioGroupElement (prop:IProp) (element:RadioGroup) =
+                
                 match prop with
-                | :? CommonProp<_> as prop -> 
+                | :? CommonProp<obj> as prop ->
                     match prop with
                     | Styles _ ->
                         setCommonObjStyleOnly prop element 
                     | Value value ->
-                        ()
-                    | OnChanged onChanged ->
-                        ()
+                        if element.Data |> isNull |> not then
+                            let items = unbox<(obj * string) list> element.Data
+                            let idx = items |> List.findIndex (fun (o,_)-> o = value)
 
-                | :? ListProps<_> as prop ->
+                            // remove change event handler to avoid endless loop
+                            let eventDel = EventHelpers.getEventDelegates "SelectedItemChanged" element
+                            if (eventDel.Length > 0) then
+                                EventHelpers.clearEventDelegates "SelectedItemChanged" element
+                            element.SelectedItem <- idx
+                            EventHelpers.addEventDelegates "SelectedItemChanged" eventDel element
+                        
+                    | OnChanged onChanged ->
+                        if element.Data |> isNull |> not then
+                            let eventDel = EventHelpers.getEventDelegates "SelectedItemChanged" element
+                            if (eventDel.Length > 0) then
+                                EventHelpers.clearEventDelegates "SelectedItemChanged" element
+                            element.add_SelectedItemChanged(fun ev -> 
+                                if (ev.PreviousSelectedItem <> ev.SelectedItem) then
+                                    let items = unbox<(obj * string) list> element.Data
+                                    let (item,_) = items.[ev.SelectedItem]
+                                    onChanged(item)
+                            )
+                | :? ListProps<obj> as prop ->
                     match prop with
                     | Items items ->
+                        // Selected Item will be fired when set the RadioLabels
+                        let eventDel = EventHelpers.getEventDelegates "SelectedItemChanged" element
+                        if (eventDel.Length > 0) then
+                            EventHelpers.clearEventDelegates "SelectedItemChanged" element
                         let labels = items |> List.map (fun (_,s) -> ustr (s)) |> List.toArray
                         element.RadioLabels <- labels
+                        element.Data <- (box items)
                 
                     
                 | _ -> ()
+
+            
         
         
         module Remove =
@@ -659,8 +723,21 @@ module PropsMappings =
                 
             let removePropToRadioGroupElement (prop:IProp) (element:RadioGroup) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
+                | :? CommonProp<obj> as prop -> 
+                    match prop with
+                    | Styles styles ->
+                        resetCommonObjStyleOnly prop element 
+                    | Value a ->
+                        element.SelectedItem <- 0
+                    | OnChanged _ ->
+                        EventHelpers.clearEventDelegates "SelectedItemChanged" element
+                    
+                | :? ListProps<obj> as listProp ->
+                    
+                    match listProp with
+                    | Items items ->
+                        element.Data <- null
+                        element.RadioLabels <- [||]
                 | _ -> ()
 
         open Setters
@@ -679,7 +756,17 @@ module PropsMappings =
             | :? ListView as element ->     props |> List.iter (fun p -> setPropToListViewElement p element)
             | :? ProgressBar as element ->  props |> List.iter (fun p -> setPropToProgressBarElement p element)
             | :? CheckBox as element ->     props |> List.iter (fun p -> setPropToCheckBoxElement p element)
-            | :? RadioGroup as element ->   props |> List.iter (fun p -> setPropToRadioGroupElement p element)
+            // Force here to process the Items at first!
+            | :? RadioGroup as element ->   
+                props 
+                |> List.sortWith (
+                    fun e1 e2 -> 
+                        match e1 with 
+                        | :? ListProps<obj> as prop -> 
+                            match prop with | Items _ -> -1 
+                        | _ -> 1
+                    ) 
+                    |> List.iter (fun p -> setPropToRadioGroupElement p element)
 
             | _ -> ()
                 
@@ -1017,13 +1104,17 @@ module TreeProcessing =
                         | _, _ ->
                             (true, newProp)
 
-                    | :? CommonProp<_> as rp', (:? CommonProp<_> as newProp') ->
+                    | :? CommonProp<obj> as rp', (:? CommonProp<obj> as newProp') ->
                         match rp', newProp' with
                         //| OnChanged _, OnChanged _ ->
                         //    (false, rp)
                         | Styles s1, Styles s2 ->
                             let changed = s1 <> s2
                             (changed, if changed then newProp else rp)
+                        | Value v1, Value v2 ->
+                            let changed = v1 <> v2
+                            (changed, if changed then newProp else rp)
+                        
                         | _, _ ->
                             (true, newProp)
 
@@ -1033,6 +1124,13 @@ module TreeProcessing =
                         //    (false, rp)
                         | _, _ ->
                             (true, newProp)
+
+                    | :? ListProps<obj> as rp', (:? ListProps<obj> as newProp') ->
+                        match rp', newProp' with
+                        | Items i1, Items i2 ->
+                            let changed = i1 <> i2
+                            (changed, if changed then newProp else rp)
+                        
 
                     //| :? ButtonProp as rp', (:? ButtonProp as newProp') ->
                     //    match rp', newProp' with

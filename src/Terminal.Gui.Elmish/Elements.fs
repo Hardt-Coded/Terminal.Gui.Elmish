@@ -845,7 +845,7 @@ module Elements =
         {
             Type = RadioGroupElement
             Element = None
-            Props = props |> List.map (fun i -> i :> IProp)
+            Props = props |> List.map (fun i -> (i |> toObjProp) :> IProp)
             Children = []
         }
             
