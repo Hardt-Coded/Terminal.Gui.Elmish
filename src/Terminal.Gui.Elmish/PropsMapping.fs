@@ -171,27 +171,110 @@ module internal PropsMappings =
 
         let ustr (x:string) = ustring.Make(x)
 
-        let inline setCommonObjStyleOnly (prop:CommonProp<'a>) (element:View) =
-            match prop with
-            | Styles styles ->
-                element |> setStylesToElement styles
-            | _ ->
-                ()
+        //let inline setCommonObjStyleOnly (prop:View) (element:View) =
+        //    match prop with
+        //    | Styles styles ->
+        //        element |> setStylesToElement styles
+        //    | _ ->
+        //        ()
 
 
-        let inline resetCommonObjStyleOnly (prop:CommonProp<'a>) (element:View) =
-            match prop with
-            | Styles styles ->
-                element |> resetStylesOnElement styles
-            | _ ->
-                ()
+        //let inline resetCommonObjStyleOnly (prop:CommonProp<'a>) (element:View) =
+        //    match prop with
+        //    | Styles styles ->
+        //        element |> resetStylesOnElement styles
+        //    | _ ->
+        //        ()
+
+        let removeEventHandlerIfNecessary evName element =
+            let eventDel = EventHelpers.getEventDelegates evName element
+            if (eventDel.Length > 0) then
+                EventHelpers.clearEventDelegates evName element
 
         module Setters =
 
+
+            let inline setViewPropToBaseElement<'a> (prop:ViewProp<'a>) (element:View) =
+                match prop with
+                | Styles styles ->
+                    match element with
+                    | :? DateField ->
+                        if styles |> List.map (fun i -> i.GetType().Name) |> List.contains ("Dim") then
+                            failwith ("Dim is not allowed in a date field")
+                        element |> setStylesToElement styles
+                    | :? TimeField ->
+                        if styles |> List.map (fun i -> i.GetType().Name) |> List.contains ("Dim") then
+                            failwith ("Dim is not allowed in a time field")
+                        element |> setStylesToElement styles
+                    |_ ->
+                        element |> setStylesToElement styles
+                | OnEntered func            -> 
+                    element |> removeEventHandlerIfNecessary "Enter"
+                    element.add_Enter(Action<View.FocusEventArgs>(func))
+                | OnLeft func               -> 
+                    element |> removeEventHandlerIfNecessary "Leave"
+                    element.add_Leave(Action<View.FocusEventArgs>(func))
+                | OnMouseEntered func       -> 
+                    element |> removeEventHandlerIfNecessary "MouseEnter"
+                    element.add_MouseEnter(Action<View.MouseEventArgs>(func))
+                | OnMouseLeft func          -> 
+                    element |> removeEventHandlerIfNecessary "MouseLeave"
+                    element.add_MouseLeave(Action<View.MouseEventArgs>(func))
+                | OnMouseClicked func       -> 
+                    element |> removeEventHandlerIfNecessary "MouseClick"
+                    element.add_MouseClick(Action<View.MouseEventArgs>(func))
+                | OnCanFocusChanged func    -> 
+                    element |> removeEventHandlerIfNecessary "CanFocusChanged"
+                    element.add_CanFocusChanged(Action(func))
+                | OnEnabledChanged func     -> 
+                    element |> removeEventHandlerIfNecessary "EnabledChanged"
+                    element.add_EnabledChanged(Action(func))
+                | OnVisibleChanged func     -> 
+                    element |> removeEventHandlerIfNecessary "VisibleChanged"
+                    element.add_VisibleChanged(Action(func))
+                | HotKey key                -> 
+                    element.HotKey <- key
+                | ShortCut key              -> 
+                    element.Shortcut <- key
+                | TabIndex idx              -> 
+                    element.TabIndex <- idx
+                | TabStop tabStop           -> 
+                    element.TabStop <- tabStop
+                | Text text ->
+                    let eventDel = EventHelpers.getEventDelegates "TextChanged" element
+                    if (eventDel.Length > 0) then
+                        EventHelpers.clearEventDelegates "TextChanged" element
+
+                    match element with
+                    | :? Button as e ->
+                        e.Text <- ustring.Make(text)
+                    | :? Label as e ->
+                        e.Text <- ustring.Make(text)
+                    | :? CheckBox as e ->
+                        e.Text <- ustring.Make(text)
+                    | :? TextField as e ->
+                        e.Text <- ustring.Make(text)
+                    | :? ComboBox as e ->
+                        e.Text <- ustring.Make(text)
+                    |_ ->
+                        element.Text <- ustring.Make(text) 
+                    EventHelpers.addEventDelegates "TextChanged" eventDel element
+
+            let setPropToBaseViewElement (prop:IProp) (element:View) =
+                match prop with
+                | :? ViewProp<string> as prop ->
+                    setViewPropToBaseElement prop element
+                | :? ViewProp<DateTime> as prop ->
+                    setViewPropToBaseElement prop element
+                | :? ViewProp<TimeSpan> as prop ->
+                    setViewPropToBaseElement prop element
+                | :? ViewProp<obj> as prop ->
+                    setViewPropToBaseElement prop element
+                | _ -> ()
+
+
             let setPropToWindowElement (prop:IProp) (element:Window) =
                 match prop with 
-                | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
                 | :? WindowProps as prop->
                     match prop with
                     | Title title ->
@@ -201,23 +284,22 @@ module internal PropsMappings =
             
         
             let setPropsToTextElement (prop:IProp) (element:Label) =
-                match prop with
-                | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
-                | :? TextFieldProps as prop ->
-                    match prop with
-                    | Text text ->
-                        element.Text <- ustring.Make(text)
-                    | _ ->
-                        ()
-                | _ -> ()
+                ()
         
             let setPropToTextFieldElement (prop:IProp) (element:TextField) =
                 match prop with
+                | :? ViewProp<obj> as prop ->
+                    match prop with
+                    | Text text ->
+                        element.CursorPosition <- text.Length
+                        // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
+                        element.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
+                        element.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
+                    | _ ->
+                        ()
+
                 | :? CommonProp<string> as prop -> 
                     match prop with
-                    | Styles styles ->
-                        element |> setStylesToElement styles
                     | OnChanged changed ->
                         EventHelpers.clearEventDelegates "TextChanging" element
                         element.add_TextChanging(fun ev -> changed(ev.NewText.ToString()))
@@ -237,17 +319,6 @@ module internal PropsMappings =
                     
                 | :? TextFieldProps as prop ->
                     match prop with
-                    | Text text ->
-                        // remove change event handler to avoid endless loop
-                        let eventDel = EventHelpers.getEventDelegates "TextChanged" element
-                        if (eventDel.Length > 0) then
-                            EventHelpers.clearEventDelegates "TextChanged" element
-                        element.Text <- ustring.Make(text) 
-                        EventHelpers.addEventDelegates "TextChanged" eventDel element
-                        element.CursorPosition <- text.Length
-                        // weird hack, because after set text and cursor pos the text is shifted left "out" of th box
-                        element.ProcessKey(KeyEvent(Key.Home,KeyModifiers())) |> ignore
-                        element.ProcessKey(KeyEvent(Key.End,KeyModifiers()))  |> ignore 
                     | OnTextChanged changed ->
                         let eventDel = EventHelpers.getEventDelegates "TextChanging" element
                         if (eventDel.Length > 0) then
@@ -260,12 +331,8 @@ module internal PropsMappings =
         
             let setPropToButtonElement (prop:IProp) (element:Button) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
                 | :? TextFieldProps as prop ->
                     match prop with
-                    | Text text ->
-                        element.Text <- ustring.Make(text) 
                     | _ -> ()
 
                 | :? ButtonProp as prop ->
@@ -282,11 +349,6 @@ module internal PropsMappings =
                 match prop with
                 | :? CommonProp<DateTime> as prop ->
                     match prop with
-                    | Styles styles ->
-                        if styles |> List.map (fun i -> i.GetType().Name) |> List.contains ("Dim") then
-                            failwith ("Dim is not allowed in a date field")
-                        element |> setStylesToElement styles
-                
                     | OnChanged changed ->
                         let eventDel = EventHelpers.getEventDelegates "DateChanged" element
                         if (eventDel.Length > 0) then
@@ -314,11 +376,6 @@ module internal PropsMappings =
                 match prop with
                 | :? CommonProp<TimeSpan> as prop ->
                     match prop with
-                    | Styles styles ->
-                        if styles |> List.map (fun i -> i.GetType().Name) |> List.contains ("Dim") then
-                            failwith ("Dim is not allowed in a time field")
-                        element |> setStylesToElement styles
-                
                     | OnChanged changed ->
                         let eventDel = EventHelpers.getEventDelegates "TimeChanged" element
                         if (eventDel.Length > 0) then
@@ -346,28 +403,25 @@ module internal PropsMappings =
         
             let setPropToTextViewElement (prop:IProp) (element:TextView) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
+                | :? ViewProp<string> as prop ->
+                    match prop with
+                    | Text text ->
+                        ()
+                    | _ -> ()
                 | _ -> ()
         
             let setPropToFrameViewElement (prop:IProp) (element:FrameView) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToHexViewElement (prop:IProp) (element:HexView) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToListViewElement (prop:IProp) (element:ListView) =
                 match prop with
                 | :? CommonProp<obj> as prop ->
                     match prop with
-                    | Styles _ ->
-                        setCommonObjStyleOnly prop element 
                     | Value value ->
                         if element.Data |> isNull |> not then
                             let items = unbox<(obj * string) list> element.Data
@@ -407,23 +461,16 @@ module internal PropsMappings =
         
             let setPropToProgressBarElement (prop:IProp) (element:ProgressBar) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToCheckBoxElement (prop:IProp) (element:CheckBox) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    setCommonObjStyleOnly prop element 
                 | _ -> ()
         
             let setPropToRadioGroupElement (prop:IProp) (element:RadioGroup) =
-                
                 match prop with
                 | :? CommonProp<obj> as prop ->
                     match prop with
-                    | Styles _ ->
-                        setCommonObjStyleOnly prop element 
                     | Value value ->
                         if element.Data |> isNull |> not then
                             let items = unbox<(obj * string) list> element.Data
@@ -466,10 +513,44 @@ module internal PropsMappings =
         
         module Remove =
         
-            let removePropToWindowElement (prop:IProp) (element:Window) =
+
+            let removePropFromBaseViewElement (prop:IProp) (element:View) =
+                match prop with
+                | :? ViewProp<obj> as prop ->
+                    match prop with
+                    | Styles styles ->
+                        element |> resetStylesOnElement styles
+                    | OnEntered func            -> 
+                        element |> removeEventHandlerIfNecessary "Enter"
+                    | OnLeft func               -> 
+                        element |> removeEventHandlerIfNecessary "Leave"
+                    | OnMouseEntered func       -> 
+                        element |> removeEventHandlerIfNecessary "MouseEnter"
+                    | OnMouseLeft func          -> 
+                        element |> removeEventHandlerIfNecessary "MouseLeave"
+                    | OnMouseClicked func       -> 
+                        element |> removeEventHandlerIfNecessary "MouseClick"
+                    | OnCanFocusChanged func    -> 
+                        element |> removeEventHandlerIfNecessary "CanFocusChanged"
+                    | OnEnabledChanged func     -> 
+                        element |> removeEventHandlerIfNecessary "EnabledChanged"
+                    | OnVisibleChanged func     -> 
+                        element |> removeEventHandlerIfNecessary "VisibleChanged"
+                    | HotKey key                -> 
+                        element.HotKey <- Key.Unknown
+                    | ShortCut key              -> 
+                        element.Shortcut <- Key.Unknown
+                    | TabIndex idx              -> 
+                        element.TabIndex <- 0
+                    | TabStop tabStop           -> 
+                        element.TabStop <- false
+                    | Text text ->
+                        element.Text <- ustr ""
+                | _ -> ()
+
+
+            let removePropFromWindowElement (prop:IProp) (element:Window) =
                 match prop with 
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
                 | :? WindowProps as prop->
                     match prop with
                     | Title title ->
@@ -478,27 +559,16 @@ module internal PropsMappings =
                 | _ -> ()
                     
                 
-            let removePropsToTextElement (prop:IProp) (element:Label) =
+            let removePropsFromTextElement (prop:IProp) (element:Label) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
-                | :? TextFieldProps as prop ->
-                    match prop with
-                    | Text text ->
-                        element.Text <- ustring.Make(text)
-                    
-                    | _ ->
-                        ()
                 | _ -> ()
                 
-            let removePropToTextFieldElement (prop:IProp) (element:TextField) =
+            let removePropFromTextFieldElement (prop:IProp) (element:TextField) =
                 match prop with
                 | :? CommonProp<string> as prop ->
                     match prop with
                     | OnChanged _ ->
                         EventHelpers.clearEventDelegates "TextChanged" element
-                    | Styles _ ->
-                        resetCommonObjStyleOnly prop element
                     | _ ->
                         ()
                         
@@ -509,29 +579,22 @@ module internal PropsMappings =
                         EventHelpers.clearEventDelegates "TextChanged" element
                     | Secret ->
                         element.Secret <- false
-                    | _ ->
-                        ()
-
                 | _ -> ()
                 
-            let removePropToButtonElement (prop:IProp) (element:Button) =
+            let removePropFromButtonElement (prop:IProp) (element:Button) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
                 | :? ButtonProp as prop ->
                     match prop with
                     | OnClicked _ ->
                         EventHelpers.clearEventDelegates "Clicked" element
                 | _ -> ()
                 
-            let removePropToDateFieldElement (prop:IProp) (element:DateField) =
+            let removePropFromDateFieldElement (prop:IProp) (element:DateField) =
                 match prop with
                 | :? CommonProp<DateTime> as prop ->
                     match prop with
                     | OnChanged _ ->
                         EventHelpers.clearEventDelegates "DateChanged" element
-                    | Styles _ ->
-                        resetCommonObjStyleOnly prop element
                     | _ ->
                         ()
                 | :? DateTimeProps as prop ->
@@ -541,14 +604,12 @@ module internal PropsMappings =
                         element.IsShortFormat <- false
                 | _ -> ()
                 
-            let removePropToTimeFieldElement (prop:IProp) (element:TimeField) =
+            let removePropFromTimeFieldElement (prop:IProp) (element:TimeField) =
                 match prop with
                 | :? CommonProp<TimeSpan> as prop ->
                     match prop with
                     | OnChanged _ ->
                         EventHelpers.clearEventDelegates "TimeChanged" element
-                    | Styles _ ->
-                        resetCommonObjStyleOnly prop element
                     | _ ->
                         ()
                 | :? DateTimeProps as prop ->
@@ -558,30 +619,22 @@ module internal PropsMappings =
                             
                 | _ -> ()
                 
-            let removePropToTextViewElement (prop:IProp) (element:TextView) =
+            let removePropFromTextViewElement (prop:IProp) (element:TextView) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
-            let removePropToFrameViewElement (prop:IProp) (element:FrameView) =
+            let removePropFromFrameViewElement (prop:IProp) (element:FrameView) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
-            let removePropToHexViewElement (prop:IProp) (element:HexView) =
+            let removePropFromHexViewElement (prop:IProp) (element:HexView) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
-            let removePropToListViewElement (prop:IProp) (element:ListView) =
+            let removePropFromListViewElement (prop:IProp) (element:ListView) =
                 match prop with
                 | :? CommonProp<obj> as prop -> 
                     match prop with
-                    | Styles styles ->
-                        resetCommonObjStyleOnly prop element 
                     | Value a ->
                         element.SelectedItem <- 0
                     | OnChanged _ ->
@@ -595,24 +648,18 @@ module internal PropsMappings =
                         element.SetSource(null)
                 | _ -> ()
                 
-            let removePropToProgressBarElement (prop:IProp) (element:ProgressBar) =
+            let removePropFromProgressBarElement (prop:IProp) (element:ProgressBar) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
-            let removePropToCheckBoxElement (prop:IProp) (element:CheckBox) =
+            let removePropFromCheckBoxElement (prop:IProp) (element:CheckBox) =
                 match prop with
-                | :? CommonProp<_> as prop -> 
-                    resetCommonObjStyleOnly prop element 
                 | _ -> ()
                 
-            let removePropToRadioGroupElement (prop:IProp) (element:RadioGroup) =
+            let removePropFromRadioGroupElement (prop:IProp) (element:RadioGroup) =
                 match prop with
                 | :? CommonProp<obj> as prop -> 
                     match prop with
-                    | Styles styles ->
-                        resetCommonObjStyleOnly prop element 
                     | Value a ->
                         element.SelectedItem <- 0
                     | OnChanged _ ->
@@ -629,6 +676,19 @@ module internal PropsMappings =
         open Setters
         
         let setPropsToElement (props:IProp list) (element:View) =
+            // Styles in the end, but text at first
+            props 
+            |> List.sortWith (
+                fun e1 e2 -> 
+                    match e1 with 
+                    | :? ViewProp<obj> as prop -> 
+                        match prop with | Text _ -> 1 | _ -> -1
+                    | _ -> -1
+            ) 
+            |> List.iter (fun p -> 
+                setPropToBaseViewElement p element
+            )
+
             match element with
             | :? Window as element ->       props |> List.iter (fun p -> setPropToWindowElement p element)
             | :? Label as element ->        props |> List.iter (fun p -> setPropsToTextElement p element)
@@ -640,7 +700,6 @@ module internal PropsMappings =
             | :? FrameView as element ->    props |> List.iter (fun p -> setPropToFrameViewElement p element)
             | :? HexView as element ->      props |> List.iter (fun p -> setPropToHexViewElement p element)
             | :? ListView as element ->     
-                props 
                 props 
                 |> List.sortWith (
                     fun e1 e2 -> 
@@ -665,25 +724,27 @@ module internal PropsMappings =
                 |> List.iter (fun p -> setPropToRadioGroupElement p element)
 
             | _ -> ()
+            
                 
         
         open Remove
 
         let removePropsToElement (props:IProp list) (element:View) =
+            props |> List.iter (fun p -> removePropFromBaseViewElement p element)
             match element with
-            | :? Window as element ->       props |> List.iter (fun p -> removePropToWindowElement p element)
-            | :? Label as element ->        props |> List.iter (fun p -> removePropsToTextElement p element)
-            | :? Button as element ->       props |> List.iter (fun p -> removePropToButtonElement p element)
-            | :? DateField as element ->    props |> List.iter (fun p -> removePropToDateFieldElement p element)
-            | :? TimeField as element ->    props |> List.iter (fun p -> removePropToTimeFieldElement p element)
-            | :? TextField as element ->    props |> List.iter (fun p -> removePropToTextFieldElement p element)
-            | :? TextView as element ->     props |> List.iter (fun p -> removePropToTextViewElement p element)
-            | :? FrameView as element ->    props |> List.iter (fun p -> removePropToFrameViewElement p element)
-            | :? HexView as element ->      props |> List.iter (fun p -> removePropToHexViewElement p element)
-            | :? ListView as element ->     props |> List.iter (fun p -> removePropToListViewElement p element)
-            | :? ProgressBar as element ->  props |> List.iter (fun p -> removePropToProgressBarElement p element)
-            | :? CheckBox as element ->     props |> List.iter (fun p -> removePropToCheckBoxElement p element)
-            | :? RadioGroup as element ->   props |> List.iter (fun p -> removePropToRadioGroupElement p element)
+            | :? Window as element ->       props |> List.iter (fun p -> removePropFromWindowElement p element)
+            | :? Label as element ->        props |> List.iter (fun p -> removePropsFromTextElement p element)
+            | :? Button as element ->       props |> List.iter (fun p -> removePropFromButtonElement p element)
+            | :? DateField as element ->    props |> List.iter (fun p -> removePropFromDateFieldElement p element)
+            | :? TimeField as element ->    props |> List.iter (fun p -> removePropFromTimeFieldElement p element)
+            | :? TextField as element ->    props |> List.iter (fun p -> removePropFromTextFieldElement p element)
+            | :? TextView as element ->     props |> List.iter (fun p -> removePropFromTextViewElement p element)
+            | :? FrameView as element ->    props |> List.iter (fun p -> removePropFromFrameViewElement p element)
+            | :? HexView as element ->      props |> List.iter (fun p -> removePropFromHexViewElement p element)
+            | :? ListView as element ->     props |> List.iter (fun p -> removePropFromListViewElement p element)
+            | :? ProgressBar as element ->  props |> List.iter (fun p -> removePropFromProgressBarElement p element)
+            | :? CheckBox as element ->     props |> List.iter (fun p -> removePropFromCheckBoxElement p element)
+            | :? RadioGroup as element ->   props |> List.iter (fun p -> removePropFromRadioGroupElement p element)
 
             | _ -> ()
 

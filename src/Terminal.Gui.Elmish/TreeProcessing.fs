@@ -195,38 +195,12 @@ module internal TreeProcessing =
 
         let checkStyles oldStyles newStyles =
             false
-            //let checkStyle oldStyle newStyle =
-            //    match oldStyle, newStyle with
-            //    | Pos (AbsPos _, AbsPos _), Pos (AbsPos _, AbsPos _) ->
-            //        false
-            //    | Pos (AbsPos _, AbsPos _), Pos (_, AbsPos _) 
-            //    | Pos (_, AbsPos _), Pos (AbsPos _, AbsPos _) 
-            //    | Pos (AbsPos _, _), Pos (AbsPos _, AbsPos _) 
-            //    | Pos (AbsPos _, AbsPos _), Pos (AbsPos _, _) ->
-            //        true
-            //    | Dim (AbsDim _, AbsDim _), Dim (AbsDim _, AbsDim _) ->
-            //        false
-            //    | Dim (_, AbsDim _), Dim (AbsDim _, AbsDim _)
-            //    | Dim (AbsDim _, AbsDim _), Dim (_, AbsDim _)
-            //    | Dim (AbsDim _, _), Dim (AbsDim _, AbsDim _)
-            //    | Dim (AbsDim _, AbsDim _), Dim (AbsDim _, _) ->
-            //        true
-            //    | _ ->
-            //        false
-            //newStyles
-            //|> List.exists (fun newStyle ->
-            //    let oldStyle = oldStyles |> List.tryFind (fun p2 -> p2.GetType().Name = newStyle.GetType().Name)
-            //    oldStyle 
-            //    |> Option.map (fun oldStyle ->
-            //        checkStyle oldStyle newStyle
-            //    )
-            //    |> Option.defaultValue false
-            //)
+            
 
         modifiedProps
         |> List.exists (fun p ->
             match (p.NewProps,p.OldProps) with
-            | (:? CommonProp<_> as p1), (:? CommonProp<_> as p2) ->
+            | (:? ViewProp<obj> as p1), (:? ViewProp<obj> as p2) ->
                 match p1,p2 with
                 | Styles oldStyles, Styles newStyles ->
                     checkStyles oldStyles newStyles
@@ -236,6 +210,30 @@ module internal TreeProcessing =
 
                 
         )
+
+
+    let checkViewProps<'a> (rp:ViewProp<'a>) (newProp:ViewProp<'a>) =
+        match rp, newProp with
+        | Styles s1, Styles s2 ->
+            let changed = s1 <> s2
+            (changed, if changed then newProp :> IProp else rp :> IProp)
+        | Text t1, Text t2 ->
+            let changed = t1 <> t2
+            (changed, if changed then newProp :> IProp else rp :> IProp)
+        | HotKey k1,  HotKey k2 ->
+            let changed = k1 <> k2
+            (changed, if changed then newProp :> IProp else rp :> IProp)
+        | ShortCut k1, ShortCut k2 -> 
+            let changed = k1 <> k2
+            (changed, if changed then newProp :> IProp else rp :> IProp)
+        | TabIndex idx1, TabIndex idx2  ->
+            let changed = idx1 <> idx2
+            (changed, if changed then newProp :> IProp else rp :> IProp)
+        | TabStop b1, TabStop b2 ->
+            let changed = b1 <> b2
+            (changed, if changed then newProp :> IProp else rp :> IProp)
+        | _ ->
+            (true, newProp :> IProp)
 
 
     let processProps (props1:IProp list) (props2:IProp list) (element:View) =
@@ -267,6 +265,8 @@ module internal TreeProcessing =
             |> List.filter (fun e -> (deletedPropTypes |> List.contains (e.GetType().Name) |> not))
 
 
+        
+
         let changedRemainProps =
             remainProps
             |> List.map (fun rp ->
@@ -274,54 +274,49 @@ module internal TreeProcessing =
                 |> List.tryFind (fun np -> np.GetType().Name = rp.GetType().Name)
                 |> Option.map (fun newProp ->
                     match rp, newProp with
+                    | :? ViewProp<string> as rp', (:? ViewProp<string> as newProp') ->
+                        checkViewProps rp' newProp'
+                    | :? ViewProp<DateTime> as rp', (:? ViewProp<DateTime> as newProp') ->
+                        checkViewProps rp' newProp'
+                    | :? ViewProp<TimeSpan> as rp', (:? ViewProp<TimeSpan> as newProp') ->
+                        checkViewProps rp' newProp'
+                    | :? ViewProp<obj> as rp', (:? ViewProp<obj> as newProp') ->
+                        checkViewProps rp' newProp'
+
                     | :? CommonProp<string> as rp', (:? CommonProp<string> as newProp') ->
                         match rp', newProp' with
-                        //| OnChanged _, OnChanged _ ->
-                        //    (false, rp)
-                        | Styles s1, Styles s2 ->
-                            let changed = s1 <> s2
+                        | Value v1, Value v2 ->
+                            let changed = v1 <> v2
                             (changed, if changed then newProp else rp)
                         | _, _ ->
                             (true, newProp)
 
                     | :? CommonProp<DateTime> as rp', (:? CommonProp<DateTime> as newProp') ->
                         match rp', newProp' with
-                        //| OnChanged _, OnChanged _ ->
-                        //    (false, rp)
-                        | Styles s1, Styles s2 ->
-                            let changed = s1 <> s2
+                        | Value v1, Value v2 ->
+                            let changed = v1 <> v2
                             (changed, if changed then newProp else rp)
                         | _, _ ->
                             (true, newProp)
 
                     | :? CommonProp<TimeSpan> as rp', (:? CommonProp<TimeSpan> as newProp') ->
                         match rp', newProp' with
-                        //| OnChanged _, OnChanged _ ->
-                        //    (false, rp)
-                        | Styles s1, Styles s2 ->
-                            let changed = s1 <> s2
+                        | Value v1, Value v2 ->
+                            let changed = v1 <> v2
                             (changed, if changed then newProp else rp)
                         | _, _ ->
                             (true, newProp)
 
                     | :? CommonProp<obj> as rp', (:? CommonProp<obj> as newProp') ->
                         match rp', newProp' with
-                        //| OnChanged _, OnChanged _ ->
-                        //    (false, rp)
-                        | Styles s1, Styles s2 ->
-                            let changed = s1 <> s2
-                            (changed, if changed then newProp else rp)
                         | Value v1, Value v2 ->
                             let changed = v1 <> v2
                             (changed, if changed then newProp else rp)
-                        
                         | _, _ ->
                             (true, newProp)
 
                     | :? TextFieldProps as rp', (:? TextFieldProps as newProp') ->
                         match rp', newProp' with
-                        //| OnTextChanged _, OnTextChanged _ ->
-                        //    (false, rp)
                         | _, _ ->
                             (true, newProp)
 
@@ -331,6 +326,11 @@ module internal TreeProcessing =
                             let changed = i1 <> i2
                             (changed, if changed then newProp else rp)
                         
+                    | :? WindowProps as rp', (:? WindowProps as newProp') ->
+                        match rp', newProp' with
+                        | Title t1, Title t2 ->
+                            let changed = t1 <> t2
+                            (changed, if changed then newProp else rp)
 
                     //| :? ButtonProp as rp', (:? ButtonProp as newProp') ->
                     //    match rp', newProp' with
@@ -353,7 +353,25 @@ module internal TreeProcessing =
         toUpdate
         |> List.iter (fun prop ->
             match prop with
-            | :? CommonProp<_> as p ->
+            | :? ViewProp<string> as p ->
+                match p with
+                | Styles styles ->
+                    resetStylesOnElement styles element
+                | _ ->
+                    ()
+            | :? ViewProp<DateTime> as p ->
+                match p with
+                | Styles styles ->
+                    resetStylesOnElement styles element
+                | _ ->
+                    ()
+            | :? ViewProp<TimeSpan> as p ->
+                match p with
+                | Styles styles ->
+                    resetStylesOnElement styles element
+                | _ ->
+                    ()
+            | :? ViewProp<obj> as p ->
                 match p with
                 | Styles styles ->
                     resetStylesOnElement styles element
@@ -374,14 +392,6 @@ module internal TreeProcessing =
             |> List.map ( fun (_,e)-> e)
 
         newModified @ addedProps
-
-    
-
-  
-
-
-  
-        
 
 
 

@@ -14,8 +14,12 @@ module internal EventHelpers =
     open System.Reflection
 
     let getEventDelegates (eventName:string) (o:obj) =
-        let eventInfo  = o.GetType().GetEvent(eventName, BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
-        let eventDelegate = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic).GetValue(o) :?> MulticastDelegate
+        //let eventInfo  = o.GetType().GetEvent(eventName, BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
+        //if eventInfo |> isNull then
+        //    []
+        //else
+        let field = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic)
+        let eventDelegate = if field |> isNull |> not then field.GetValue(o) :?> MulticastDelegate else null
         if (eventDelegate |> isNull) then
             []
         else
@@ -23,12 +27,16 @@ module internal EventHelpers =
 
     let clearEventDelegates (eventName:string) (o:obj) =
         let eventInfo  = o.GetType().GetEvent(eventName, BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
-        let eventDelegate = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic).GetValue(o) :?> MulticastDelegate
-        if (eventDelegate |> isNull) then
+        if eventInfo |> isNull then
             ()
         else
+            let field = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic)
+            let eventDelegate = if field |> isNull |> not then field.GetValue(o) :?> MulticastDelegate else null
+            if (eventDelegate |> isNull) then
+                ()
+            else
             
-            eventDelegate.GetInvocationList() |> Array.iter (fun d -> eventInfo.RemoveEventHandler(o, d))
+                eventDelegate.GetInvocationList() |> Array.iter (fun d -> eventInfo.RemoveEventHandler(o, d))
 
     let addEventDelegates (eventName:string) (delegates:Delegate list) (o:obj) =
         let eventInfo  = o.GetType().GetEvent(eventName, BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
