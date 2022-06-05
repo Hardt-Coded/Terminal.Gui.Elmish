@@ -4,6 +4,168 @@ open System.Reflection
 open System.Collections
 open System
 open Terminal.Gui
+open Terminal.Gui
+open Terminal.Gui
+
+
+
+[<AbstractClass>]
+type TerminalElement (props:IProperty list) =
+    let mutable view: View = null
+    let c = props |> Interop.getValueDefault<TerminalElement list> "children" []
+
+    member this.element with get() = view and set v = view <- v
+    member _.properties = props
+    member _.children   = c
+
+    abstract create: unit -> unit
+    abstract update: prevElement:View -> oldProps:IProperty list -> unit
+    abstract name: string
+
+
+
+module ViewElement =
+
+    let setProps (view:View) props =
+        let x = props |> Interop.getValueDefault<Pos> "x" view.X
+        view.X <- x
+        let y = props |> Interop.getValueDefault<Pos> "y" view.X
+        view.Y <- y
+        let width = props |> Interop.getValueDefault<Dim> "width" view.Width
+        view.Width <- width
+        let height = props |> Interop.getValueDefault<Dim> "height" view.Height
+        view.Height <- height
+
+
+
+type PageElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (toplevel:Toplevel) props =
+        // todo: StatusBar
+        // toplevel.StatusBar
+        ()
+
+    override _.name = "Page"
+
+
+    override this.create () =
+        let el = Toplevel.Create()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.update prevElement oldProps = 
+        let window = prevElement :?> Toplevel
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps window changedProps
+        this.element <- prevElement
+
+
+
+type WindowElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let title = props |> Interop.getValueDefault "title" ""
+    
+
+    let setProps (window:Window) props =
+        let title = props |> Interop.getValueDefault "title" (window.Title |> Interop.str)
+        window.Title <- title
+
+    override _.name = "Window"
+
+
+    override this.create () =
+        let el = new Window(title |> Interop.ustr)
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.update prevElement oldProps = 
+        let window = prevElement :?> Window
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps window changedProps
+        this.element <- prevElement
+
+
+type LabelElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let text = props |> Interop.getValueDefault "text" ""
+    
+
+    let setProps (element:Label) props =
+        let text = props |> Interop.getValueDefault "text" (element.Text |> Interop.str)
+        element.Text <- text
+
+    override _.name = "Label"
+
+
+    override this.create () =
+        let el = new Label(text |> Interop.ustr)
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> Label
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+type ButtonElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let text = props |> Interop.getValueDefault "text" ""
+    let onClick = props |> Interop.getValue "onclick"
+
+    let onClick = fun () ->
+        
+
+    let setProps (element:Button) props =
+        let text = props |> Interop.getValueDefault "text" (element.Text |> Interop.str)
+        element.Text <- text
+        let onClick = props |> Interop.getValue "onclick"
+        match onClick with
+        | None ->
+            element.add_Clicked
+
+    override _.name = "Button"
+
+
+    override this.create () =
+        let el = new Button(text |> Interop.ustr)
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> Button
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -677,258 +839,258 @@ open Terminal.Gui
 
 
 
-[<AutoOpen>]
-module Elements =
+//[<AutoOpen>]
+//module Elements =
 
-    open Terminal.Gui
-    open NStack
+//    open Terminal.Gui
+//    open NStack
 
-    let ustr (x:string) = ustring.Make(x)
+//    let ustr (x:string) = ustring.Make(x)
 
 
-    let page (subViews:ViewElement list) =
-        {
-            Type = PageElement
-            Element = None
-            Props = []
-            Children = subViews
-        }
+//    let page (subViews:ViewElement list) =
+//        {
+//            Type = PageElement
+//            Element = None
+//            Props = []
+//            Children = subViews
+//        }
        
 
-    ///// able to change the color scheme of the toplevel page
-    let styledPage (props:IProp list) (subViews:ViewElement list) =
-        {
-            Type = PageElement
-            Element = None
-            Props = props
-            Children = subViews
-        }
+//    ///// able to change the color scheme of the toplevel page
+//    let styledPage (props:IProp list) (subViews:ViewElement list) =
+//        {
+//            Type = PageElement
+//            Element = None
+//            Props = props
+//            Children = subViews
+//        }
 
 
-    let window (props:IProp list) (subViews:ViewElement list) =        
-        {
-            Type = WindowElement
-            Element = None
-            Props = props
-            Children = subViews
-        }
+//    let window (props:IProp list) (subViews:ViewElement list) =        
+//        {
+//            Type = WindowElement
+//            Element = None
+//            Props = props
+//            Children = subViews
+//        }
 
 
-    let button (props:IProp list) = 
-        {
-            Type = ButtonElement
-            Element = None
-            Props = props
-            Children = []
-        }
+//    let button (props:IProp list) = 
+//        {
+//            Type = ButtonElement
+//            Element = None
+//            Props = props
+//            Children = []
+//        }
 
 
-    let label (props:IProp list) =   
-        {
-            Type = LabelElement
-            Element = None
-            Props = props
-            Children = []
-        }
+//    let label (props:IProp list) =   
+//        {
+//            Type = LabelElement
+//            Element = None
+//            Props = props
+//            Children = []
+//        }
 
 
-    let textField (props:IProp<string> list) =        
-        {
-            Type = TextFieldElement
-            Element = None
-            Props = props  |> List.map (fun i -> i :> IProp)
-            Children = []
-        }
+//    let textField (props:IProp<string> list) =        
+//        {
+//            Type = TextFieldElement
+//            Element = None
+//            Props = props  |> List.map (fun i -> i :> IProp)
+//            Children = []
+//        }
 
 
-    ///// DateField:
-    ///// Only AbsPos for Positioning 
-    ///// Exclusive 'isShort' Prop
-    let timeField (props:IProp<TimeSpan> list) =
-        {
-            Type = TimeFieldElement
-            Element = None
-            Props = props |> List.map (fun i -> i :> IProp)
-            Children = []
-        }
+//    ///// DateField:
+//    ///// Only AbsPos for Positioning 
+//    ///// Exclusive 'isShort' Prop
+//    let timeField (props:IProp<TimeSpan> list) =
+//        {
+//            Type = TimeFieldElement
+//            Element = None
+//            Props = props |> List.map (fun i -> i :> IProp)
+//            Children = []
+//        }
 
 
-    ///// DateField:
-    ///// Only AbsPos for Positioning 
-    ///// Exclusive 'isShort' Prop
-    let dateField (props:IProp<DateTime> list) =
-        {
-            Type = DateFieldElement
-            Element = None
-            Props = props  |> List.map (fun i -> i :> IProp)
-            Children = []
-        }
+//    ///// DateField:
+//    ///// Only AbsPos for Positioning 
+//    ///// Exclusive 'isShort' Prop
+//    let dateField (props:IProp<DateTime> list) =
+//        {
+//            Type = DateFieldElement
+//            Element = None
+//            Props = props  |> List.map (fun i -> i :> IProp)
+//            Children = []
+//        }
 
 
-    let textView (props:IProp list) =
-        {
-            Type = TextViewElement
-            Element = None
-            Props = props
-            Children = []
-        }
+//    let textView (props:IProp list) =
+//        {
+//            Type = TextViewElement
+//            Element = None
+//            Props = props
+//            Children = []
+//        }
    
 
-    let frameView (props:IProp list) (subViews:ViewElement list) =        
-        {
-            Type = FrameViewElement
-            Element = None
-            Props = props
-            Children = subViews
-        }
+//    let frameView (props:IProp list) (subViews:ViewElement list) =        
+//        {
+//            Type = FrameViewElement
+//            Element = None
+//            Props = props
+//            Children = subViews
+//        }
 
 
-    let hexView (props:IProp list) =
-        {
-            Type = HexViewElement
-            Element = None
-            Props = props
-            Children = []
-        }
+//    let hexView (props:IProp list) =
+//        {
+//            Type = HexViewElement
+//            Element = None
+//            Props = props
+//            Children = []
+//        }
 
 
-    let inline listView (props:IProp list) =
-        {
-            Type = ListViewElement
-            Element = None
-            Props = props
-            Children = []
-        }
+//    let inline listView (props:IProp list) =
+//        {
+//            Type = ListViewElement
+//            Element = None
+//            Props = props
+//            Children = []
+//        }
             
 
-    let menuItem title help action = 
-        MenuItem(title |> ustr,help ,(fun () -> action () ))
+//    let menuItem title help action = 
+//        MenuItem(title |> ustr,help ,(fun () -> action () ))
 
 
-    let menuBarItem text (items:MenuItem list) = 
-        MenuBarItem(text |> ustr,items |> List.toArray)
+//    let menuBarItem text (items:MenuItem list) = 
+//        MenuBarItem(text |> ustr,items |> List.toArray)
 
 
-    let menuBar (items:MenuBarItem list) = 
-        MenuBar (items |> List.toArray)
+//    let menuBar (items:MenuBarItem list) = 
+//        MenuBar (items |> List.toArray)
 
-    ///// able to change the color scheme of the status bar
-    //let styledMenuBar (props:Prop<'TValue> list) (items:MenuBarItem list) = 
-    //    MenuBar (items |> List.toArray)
-    //    |> addPossibleStylesFromProps props 
-
-
-    let progressBar (props:IProp list) =
-        {
-            Type = ProgressBarElement
-            Element = None
-            Props = props
-            Children = []
-        }
+//    ///// able to change the color scheme of the status bar
+//    //let styledMenuBar (props:Prop<'TValue> list) (items:MenuBarItem list) = 
+//    //    MenuBar (items |> List.toArray)
+//    //    |> addPossibleStylesFromProps props 
 
 
-    let checkBox (props:IProp list) =
-        {
-            Type = CheckBoxElement
-            Element = None
-            Props = props
-            Children = []
-        }
+//    let progressBar (props:IProp list) =
+//        {
+//            Type = ProgressBarElement
+//            Element = None
+//            Props = props
+//            Children = []
+//        }
+
+
+//    let checkBox (props:IProp list) =
+//        {
+//            Type = CheckBoxElement
+//            Element = None
+//            Props = props
+//            Children = []
+//        }
     
 
-    //let setCursorRadioGroup (x:int) (rg:RadioGroup) =
-    //    rg.Cursor <- x
-    //    rg
+//    //let setCursorRadioGroup (x:int) (rg:RadioGroup) =
+//    //    rg.Cursor <- x
+//    //    rg
 
 
-    let inline radioGroup (props:IProp list) =
-        {
-            Type = RadioGroupElement
-            Element = None
-            Props = props
-            Children = []
-        }
+//    let inline radioGroup (props:IProp list) =
+//        {
+//            Type = RadioGroupElement
+//            Element = None
+//            Props = props
+//            Children = []
+//        }
             
     
-    let scrollView (props:IProp list) (subViews:ViewElement list) =        
-        {
-            Type = ScrollViewElement
-            Element = None
-            Props = props
-            Children = subViews
-        }
+//    let scrollView (props:IProp list) (subViews:ViewElement list) =        
+//        {
+//            Type = ScrollViewElement
+//            Element = None
+//            Props = props
+//            Children = subViews
+//        }
 
 
-    let fileDialog title prompt nameFieldLabel message =
-        let dia = FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
-        Application.Run(dia)
-        let file = 
-            dia.FilePath
-            |> Option.ofObj 
-            |> Option.map string
-            |> Option.bind (fun s ->
-                if String.IsNullOrEmpty(s) then None 
-                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
-            )
-        file
+//    let fileDialog title prompt nameFieldLabel message =
+//        let dia = FileDialog(title |> ustr,prompt |> ustr,nameFieldLabel |> ustr,message |> ustr)
+//        Application.Run(dia)
+//        let file = 
+//            dia.FilePath
+//            |> Option.ofObj 
+//            |> Option.map string
+//            |> Option.bind (fun s ->
+//                if String.IsNullOrEmpty(s) then None 
+//                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+//            )
+//        file
 
 
-    let openDialog title message =
-        let dia = OpenDialog(title |> ustr,message |> ustr)                
-        Application.Run(dia)
-        let file = 
-            dia.FilePath
-            |> Option.ofObj 
-            |> Option.map string
-            |> Option.bind (fun s ->
-                if String.IsNullOrEmpty(s) then None 
-                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
-            )
-        file
+//    let openDialog title message =
+//        let dia = OpenDialog(title |> ustr,message |> ustr)                
+//        Application.Run(dia)
+//        let file = 
+//            dia.FilePath
+//            |> Option.ofObj 
+//            |> Option.map string
+//            |> Option.bind (fun s ->
+//                if String.IsNullOrEmpty(s) then None 
+//                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+//            )
+//        file
         
 
-    let saveDialog title message =
-        let dia = SaveDialog(title |> ustr,message |> ustr)        
-        Application.Run(dia)
-        let file = 
-            dia.FileName
-            |> Option.ofObj 
-            |> Option.map string
-            |> Option.bind (fun s ->
-                if String.IsNullOrEmpty(s) then None 
-                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
-            )
-        file
+//    let saveDialog title message =
+//        let dia = SaveDialog(title |> ustr,message |> ustr)        
+//        Application.Run(dia)
+//        let file = 
+//            dia.FileName
+//            |> Option.ofObj 
+//            |> Option.map string
+//            |> Option.bind (fun s ->
+//                if String.IsNullOrEmpty(s) then None 
+//                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+//            )
+//        file
 
 
-    let messageBox width height (title:string) (text:string) (buttons:string list) =
-        let result = MessageBox.Query(width, height, title |> ustring.Make, text |> ustring.Make, buttons |> List.map ustring.Make |> List.toArray)
-        match buttons with
-        | [] -> ""
-        | _ -> buttons.[result]
+//    let messageBox width height (title:string) (text:string) (buttons:string list) =
+//        let result = MessageBox.Query(width, height, title |> ustring.Make, text |> ustring.Make, buttons |> List.map ustring.Make |> List.toArray)
+//        match buttons with
+//        | [] -> ""
+//        | _ -> buttons.[result]
 
 
-    let errorBox width height (title:string) (text:string) (buttons:string list) =
-        let result = MessageBox.ErrorQuery(width, height, title |> ustring.Make, text |> ustring.Make, buttons |> List.map ustring.Make |> List.toArray)
-        match buttons with
-        | [] -> ""
-        | _ -> buttons.[result]
+//    let errorBox width height (title:string) (text:string) (buttons:string list) =
+//        let result = MessageBox.ErrorQuery(width, height, title |> ustring.Make, text |> ustring.Make, buttons |> List.map ustring.Make |> List.toArray)
+//        match buttons with
+//        | [] -> ""
+//        | _ -> buttons.[result]
 
 
-    let statusBar (items:StatusItem list) =
-        StatusBar(items |> List.toArray)
+//    let statusBar (items:StatusItem list) =
+//        StatusBar(items |> List.toArray)
 
-    ///// able to change the color scheme of the status bar
-    //let styledStatusBar (props:Prop<'TValue> list) (items:StatusItem list) =
-    //    StatusBar(items |> List.toArray)
-    //    |> addPossibleStylesFromProps props 
+//    ///// able to change the color scheme of the status bar
+//    //let styledStatusBar (props:Prop<'TValue> list) (items:StatusItem list) =
+//    //    StatusBar(items |> List.toArray)
+//    //    |> addPossibleStylesFromProps props 
 
 
-    let statusItem text (key:Terminal.Gui.Key) action =
-        if key = Key.F9 then
-            invalidArg "key" ("F9 is reserved to open a menu, sorry.")
-        else
-            StatusItem(key,text |> ustr, Action(action))
+//    let statusItem text (key:Terminal.Gui.Key) action =
+//        if key = Key.F9 then
+//            invalidArg "key" ("F9 is reserved to open a menu, sorry.")
+//        else
+//            StatusItem(key,text |> ustr, Action(action))
 
     
 

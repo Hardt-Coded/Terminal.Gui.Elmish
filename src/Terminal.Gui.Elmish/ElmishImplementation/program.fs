@@ -24,7 +24,7 @@ type Program<'arg, 'model, 'msg, 'view> = private {
     init : 'arg -> 'model * Cmd<'msg>
     update : 'msg -> 'model -> 'model * Cmd<'msg>
     subscribe : 'model -> Cmd<'msg>
-    view : 'model -> Dispatch<'msg> -> ViewElement
+    view : 'model -> Dispatch<'msg> -> TerminalElement
     setState : 'model -> Dispatch<'msg> -> unit
     onError : (string*exn) -> unit
     syncDispatch: Dispatch<'msg> -> Dispatch<'msg>
@@ -38,7 +38,7 @@ module Program =
     let mkProgram 
         (init : 'arg -> 'model * Cmd<'msg>) 
         (update : 'msg -> 'model -> 'model * Cmd<'msg>)
-        (view : 'model -> Dispatch<'msg> -> ViewElement) =
+        (view : 'model -> Dispatch<'msg> -> TerminalElement) =
         { init = init
           update = update
           view = view
@@ -51,7 +51,7 @@ module Program =
     let mkSimple 
         (init : 'arg -> 'model) 
         (update : 'msg -> 'model -> 'model)
-        (view : 'model -> Dispatch<'msg> -> ViewElement) =
+        (view : 'model -> Dispatch<'msg> -> TerminalElement) =
         { init = init >> fun state -> state,Cmd.none
           update = fun msg -> update msg >> fun state -> state,Cmd.none
           view = view
@@ -140,7 +140,7 @@ module Program =
         let rb = RingBuffer 10
         let mutable reentered = false
         let mutable state = model     
-        let mutable currentTreeState:ViewElement option = None
+        let mutable currentTreeState:TerminalElement option = None
         let rec dispatch msg = 
             if reentered then
                 rb.Push msg
@@ -164,8 +164,8 @@ module Program =
                                 ()
                             | Some currentState ->
                                 let nextTreeState = program.view model' syncDispatch
-                                let newTreeState = TreeProcessing.updateTree currentState nextTreeState
-                                currentTreeState <- Some newTreeState
+                                Differ.update currentState nextTreeState
+                                currentTreeState <- Some nextTreeState
                                 //Application.Top.RemoveAll()
                                 //Application.Top.Add(newState.Subviews |> Seq.toArray)
                                 //Application.Top.LayoutSubviews()
@@ -188,13 +188,13 @@ module Program =
 
         let startState = program.view model syncDispatch   
         
-        let initializedState = TreeProcessing.initializeTree startState
-        currentTreeState <- Some initializedState
+        Differ.initializeTree None startState
+        currentTreeState <- Some startState
 
-        match initializedState.Element with
-        | None ->
+        match startState.element with
+        | null ->
             failwith ("error state not initialized")
-        | Some topElement ->
+        | topElement ->
             match topElement with
             | :? Toplevel ->
                 let sub = 

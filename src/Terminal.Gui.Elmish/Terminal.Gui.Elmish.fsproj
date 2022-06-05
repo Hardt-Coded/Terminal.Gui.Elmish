@@ -17,15 +17,18 @@
     <EmbeddedResource Remove="Scripts\**" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers.fs" />
-    <Compile Include="TreeDiff.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Interop.fs" />
     <Compile Include="Elements.fs" />
+    <Compile Include="Props.fs" />
+    <Compile Include="Views.fs" />
+    <Compile Include="TreeDiff.fs" />
     <Compile Include="ElmishImplementation\cmd.fs" />
     <Compile Include="ElmishImplementation\prelude.fs" />
     <Compile Include="ElmishImplementation\ring.fs" />
     <Compile Include="ElmishImplementation\program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Terminal.Gui" Version="1.1.1" />
+    <PackageReference Include="Terminal.Gui" Version="1.6.4" />
   </ItemGroup>
 </Project>
