@@ -71,3 +71,9 @@ module Interop =
     let ustr (s:string) = ustring.Make s
 
     let str (s:ustring) = s.ToString()
+
+
+    let removeEventHandlerIfNecessary evName element =
+        let eventDel = EventHelpers.getEventDelegates evName element
+        if (eventDel.Length > 0) then
+            EventHelpers.clearEventDelegates evName element
