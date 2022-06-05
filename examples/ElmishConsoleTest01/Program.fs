@@ -93,13 +93,19 @@ let view (state:Model) (dispatch:Msg -> unit) =
                     prop.position.x.at 4
                     prop.position.y.at 4
                     prop.width.fill 4
-                    prop.height.sized 10
+                    prop.height.sized 20
                     window.title "Anderer toller Titel"
                     prop.children [
                         View.label [
-                            prop.position.x.at 6
-                            prop.position.y.at 4
                             prop.text $"Hello Counter: {state.Count}"
+
+                            let c = (state.Count |> float) / 100.0
+                            let x = (16.0 * Math.Cos(c)) |> int 
+                            let y = (8.0 * Math.Sin(c)) |> int
+
+                            prop.position.x.at (x + 20)
+                            prop.position.y.at (y + 10)
+                            
                         ]
                         View.button [
                             prop.position.x.at 4
@@ -127,16 +133,16 @@ let view (state:Model) (dispatch:Msg -> unit) =
 let main argv =
     
     Program.mkProgram init update view  
-    //|> Program.withSubscription (fun state ->
-    //        fun dispatch ->
-    //            async {
-    //                while state.Count < 1_000_000 do
-    //                    do! Async.Sleep 10
-    //                    dispatch Inc
-    //            }
-    //            |> Async.StartImmediate
-    //        |> Cmd.ofSub
-    //)
+    |> Program.withSubscription (fun state ->
+            fun dispatch ->
+                async {
+                    while state.Count < 1_000_000 do
+                        do! Async.Sleep 10
+                        dispatch Inc
+                }
+                |> Async.StartImmediate
+            |> Cmd.ofSub
+    )
     |> Program.run
     
     0 // return an integer exit code
