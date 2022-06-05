@@ -10,6 +10,7 @@ type style =
 type prop =
     static member inline style (children:IStyle list) = Interop.mkprop "style" children
     static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
+    static member inline text (text:string) = Interop.mkprop "text" text
 
 module prop =
 
@@ -40,12 +41,9 @@ module prop =
 
 
 
-
-
-
-
-
-
 type window =
     static member inline title (p:string) = Interop.mkprop "title" p
+
+type button =
+    static member inline onclick (f:unit->unit) = Interop.mkprop "onclick" f
 

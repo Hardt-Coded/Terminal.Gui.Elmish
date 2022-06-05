@@ -29,13 +29,14 @@ module ViewElement =
     let setProps (view:View) props =
         let x = props |> Interop.getValueDefault<Pos> "x" view.X
         view.X <- x
-        let y = props |> Interop.getValueDefault<Pos> "y" view.X
+        let y = props |> Interop.getValueDefault<Pos> "y" view.Y
         view.Y <- y
         let width = props |> Interop.getValueDefault<Dim> "width" view.Width
         view.Width <- width
         let height = props |> Interop.getValueDefault<Dim> "height" view.Height
         view.Height <- height
-
+        let text = props |> Interop.getValueDefault<string> "text" (view.Text |> Interop.str)
+        view.Text <- text
 
 
 type PageElement(props:IProperty list) =
@@ -103,7 +104,7 @@ type LabelElement(props:IProperty list) =
         let text = props |> Interop.getValueDefault "text" (element.Text |> Interop.str)
         element.Text <- text
 
-    override _.name = "Label"
+    override _.name = $"Label"
 
 
     override this.create () =
@@ -125,20 +126,18 @@ type ButtonElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let text = props |> Interop.getValueDefault "text" ""
-    let onClick = props |> Interop.getValue "onclick"
-
-    let onClick = fun () ->
-        
 
     let setProps (element:Button) props =
         let text = props |> Interop.getValueDefault "text" (element.Text |> Interop.str)
         element.Text <- text
-        let onClick = props |> Interop.getValue "onclick"
+        let onClick = props |> Interop.getValue<unit->unit> "onclick"
+        Interop.removeEventHandlerIfNecessary "Clicked" element
         match onClick with
-        | None ->
-            element.add_Clicked
+        | None -> ()
+        | Some onClick ->
+            element.add_Clicked onClick
 
-    override _.name = "Button"
+    override _.name = $"Button"
 
 
     override this.create () =

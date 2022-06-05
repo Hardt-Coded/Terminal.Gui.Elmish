@@ -156,16 +156,23 @@ module Program =
                     try
                         let (model',cmd') = program.update msg state
 
-                        
+                        match currentTreeState with
+                        | None ->
+                            ()
+                        | Some currentState ->
+                            let nextTreeState = program.view model' syncDispatch
+                            Differ.update currentState nextTreeState
+                            currentTreeState <- Some nextTreeState
 
                         Application.MainLoop.Invoke(fun () ->
                             match currentTreeState with
                             | None ->
                                 ()
                             | Some currentState ->
-                                let nextTreeState = program.view model' syncDispatch
-                                Differ.update currentState nextTreeState
-                                currentTreeState <- Some nextTreeState
+                                //let nextTreeState = program.view model' syncDispatch
+                                //Differ.update currentState nextTreeState
+                                //currentTreeState <- Some nextTreeState
+                                ()
                                 //Application.Top.RemoveAll()
                                 //Application.Top.Add(newState.Subviews |> Seq.toArray)
                                 //Application.Top.LayoutSubviews()

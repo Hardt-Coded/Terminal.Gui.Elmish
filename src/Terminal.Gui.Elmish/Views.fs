@@ -16,6 +16,17 @@ type View =
         let props = [ prop.children children ]
         WindowElement(props) :> TerminalElement
 
+    static member inline label (props:IProperty list) = LabelElement(props) :> TerminalElement
+    static member inline label (children:TerminalElement list) = 
+        let props = [ prop.children children ]
+        LabelElement(props) :> TerminalElement
+
+    static member inline button (props:IProperty list) = ButtonElement(props) :> TerminalElement
+    static member inline button (children:TerminalElement list) = 
+        let props = [ prop.children children ]
+        ButtonElement(props) :> TerminalElement
+
+
 
 
 

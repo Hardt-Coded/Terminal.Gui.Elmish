@@ -80,7 +80,7 @@ let update (msg:Msg) (model:Model) =
 
 
 
-let view (model:Model) (dispatch:Msg -> unit) =
+let view (state:Model) (dispatch:Msg -> unit) =
     View.page [
         View.window [
             prop.position.x.at 1
@@ -95,6 +95,26 @@ let view (model:Model) (dispatch:Msg -> unit) =
                     prop.width.fill 4
                     prop.height.sized 10
                     window.title "Anderer toller Titel"
+                    prop.children [
+                        View.label [
+                            prop.position.x.at 6
+                            prop.position.y.at 4
+                            prop.text $"Hello Counter: {state.Count}"
+                        ]
+                        View.button [
+                            prop.position.x.at 4
+                            prop.position.y.at 5
+                            prop.text "Plus"
+                            button.onclick (fun () -> dispatch Msg.Inc)
+                        ]
+
+                        View.button [
+                            prop.position.x.at 14
+                            prop.position.y.at 5
+                            prop.text "Minus"
+                            button.onclick (fun () -> dispatch Msg.Dec)
+                        ]
+                    ]
                 ]
             ]
         ]
@@ -107,6 +127,16 @@ let view (model:Model) (dispatch:Msg -> unit) =
 let main argv =
     
     Program.mkProgram init update view  
+    //|> Program.withSubscription (fun state ->
+    //        fun dispatch ->
+    //            async {
+    //                while state.Count < 1_000_000 do
+    //                    do! Async.Sleep 10
+    //                    dispatch Inc
+    //            }
+    //            |> Async.StartImmediate
+    //        |> Cmd.ofSub
+    //)
     |> Program.run
     
     0 // return an integer exit code

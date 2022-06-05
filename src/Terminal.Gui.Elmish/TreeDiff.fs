@@ -37,13 +37,11 @@ module Differ =
         | rt, nt when rt.name <> nt.name ->
             initializeTree None newTree
         | OnlyPropsChanged ->
-            printfn "only pros changed"
             newTree.update rootTree.element rootTree.properties
             let sortedRootChildren = rootTree.children |> List.sortBy (fun v -> v.name)
             let sortedNewChildren = newTree.children |> List.sortBy (fun v -> v.name)
             (sortedRootChildren,sortedNewChildren) ||> List.iter2 (fun rt nt -> update rt nt)
         | ChildsDifferent ->
-            printfn "only children  differs"
             newTree.update rootTree.element rootTree.properties
             let sortedRootChildren = rootTree.children |> List.sortBy (fun v -> v.name)
             let sortedNewChildren = newTree.children |> List.sortBy (fun v -> v.name)
