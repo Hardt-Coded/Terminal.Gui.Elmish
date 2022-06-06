@@ -9,6 +9,8 @@ open Terminal.Gui
 
 
 
+
+
 [<AbstractClass>]
 type TerminalElement (props:IProperty list) =
     let mutable view: View = null
@@ -20,10 +22,11 @@ type TerminalElement (props:IProperty list) =
 
     abstract create: unit -> unit
     abstract update: prevElement:View -> oldProps:IProperty list -> unit
+    abstract canUpdate: prevElement:View -> oldProps:IProperty list -> bool
     abstract name: string
 
 
-
+[<RequireQualifiedAccess>]
 module ViewElement =
 
     let setProps (view:View) props =
@@ -37,6 +40,10 @@ module ViewElement =
         view.Height <- height
         let text = props |> Interop.getValueDefault<string> "text" (view.Text |> Interop.str)
         view.Text <- text
+
+
+    let canUpdate (view:View) props =
+        true
 
 
 type PageElement(props:IProperty list) =
@@ -56,12 +63,18 @@ type PageElement(props:IProperty list) =
         setProps el props
         this.element <- el
 
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
 
     override this.update prevElement oldProps = 
-        let window = prevElement :?> Toplevel
+        let page = prevElement :?> Toplevel
         let changedProps = Interop.filterProps oldProps props
         ViewElement.setProps prevElement changedProps
-        setProps window changedProps
+        setProps page changedProps
         this.element <- prevElement
 
 
@@ -86,6 +99,13 @@ type WindowElement(props:IProperty list) =
         this.element <- el
 
 
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
     override this.update prevElement oldProps = 
         let window = prevElement :?> Window
         let changedProps = Interop.filterProps oldProps props
@@ -106,6 +126,13 @@ type LabelElement(props:IProperty list) =
 
     override _.name = $"Label"
 
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
 
     override this.create () =
         let el = new Label(text |> Interop.ustr)
@@ -141,11 +168,19 @@ type ButtonElement(props:IProperty list) =
 
 
     override this.create () =
+        System.Diagnostics.Debug.WriteLine($"button created!")
         let el = new Button(text |> Interop.ustr)
         ViewElement.setProps el props
         setProps el props
         this.element <- el
 
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
 
     override this.update prevElement oldProps = 
         let element = prevElement :?> Button
@@ -156,10 +191,957 @@ type ButtonElement(props:IProperty list) =
 
 
 
+type CheckBoxElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:CheckBox) props =
+        ()
+
+    override _.name = $"CheckBox"
+
+
+    override this.create () =
+        let el = new CheckBox()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> CheckBox
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type ColorPickerElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:ColorPicker) props =
+        ()
+
+    override _.name = $"ColorPicker"
+
+
+    override this.create () =
+        let el = new ColorPicker()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> ColorPicker
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type ComboBoxElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:ComboBox) props =
+        ()
+
+    override _.name = $"ComboBox"
+
+
+    override this.create () =
+        let el = new ComboBox()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> ComboBox
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type DateFieldElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:DateField) props =
+        ()
+
+    override _.name = $"DateField"
+
+
+    override this.create () =
+        let el = new DateField()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> DateField
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type FrameViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:FrameView) props =
+        ()
+
+    override _.name = $"FrameView"
+
+
+    override this.create () =
+        let el = new FrameView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> FrameView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type GraphViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:GraphView) props =
+        ()
+
+    override _.name = $"GraphView"
+
+
+    override this.create () =
+        let el = new GraphView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> GraphView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type HexViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:HexView) props =
+        ()
+
+    override _.name = $"HexView"
+
+
+    override this.create () =
+        let el = new HexView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> HexView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type LineViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:LineView) props =
+        ()
+
+    override _.name = $"LineView"
+
+
+    override this.create () =
+        let el = new LineView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> LineView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type ListViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:ListView) props =
+        ()
+
+    override _.name = $"ListView"
+
+
+    override this.create () =
+        let el = new ListView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> ListView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type MenuBarElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:MenuBar) props =
+        ()
+
+    override _.name = $"MenuBar"
+
+
+    override this.create () =
+        let el = new MenuBar()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> MenuBar
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type PanelViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:PanelView) props =
+        ()
+
+    override _.name = $"PanelView"
+
+
+    override this.create () =
+        let el = new PanelView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> PanelView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type ProgressBarElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:ProgressBar) props =
+        ()
+
+    override _.name = $"ProgressBar"
+
+
+    override this.create () =
+        let el = new ProgressBar()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> ProgressBar
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type RadioGroupElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:RadioGroup) props =
+        ()
+
+    override _.name = $"RadioGroup"
+
+
+    override this.create () =
+        let el = new RadioGroup()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> RadioGroup
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type ScrollBarViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:ScrollBarView) props =
+        ()
+
+    override _.name = $"ScrollBarView"
+
+
+    override this.create () =
+        let el = new ScrollBarView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> ScrollBarView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type ScrollViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:ScrollView) props =
+        ()
+
+    override _.name = $"ScrollView"
+
+
+    override this.create () =
+        let el = new ScrollView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> ScrollView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type StatusBarElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:StatusBar) props =
+        ()
+
+    override _.name = $"StatusBar"
+
+
+    override this.create () =
+        let el = new StatusBar()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> StatusBar
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type TableViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:TableView) props =
+        ()
+
+    override _.name = $"TableView"
+
+
+    override this.create () =
+        let el = new TableView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> TableView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type TabViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:TabView) props =
+        ()
+
+    override _.name = $"TabView"
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.create () =
+        let el = new TabView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> TabView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type TextFieldElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:TextField) props =
+        ()
+
+    override _.name = $"TextField"
+
+
+    override this.create () =
+        let el = new TextField()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> TextField
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type TextValidateFieldElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:TextValidateField) props =
+        ()
+
+    override _.name = $"TextValidateField"
+
+
+    override this.create () =
+        let el = new TextValidateField()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> TextValidateField
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type TextViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:TextView) props =
+        ()
+
+    override _.name = $"TextView"
+
+
+    override this.create () =
+        let el = new TextView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> TextView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type TimeFieldElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:TimeField) props =
+        ()
+
+    override _.name = $"TimeField"
+
+
+    override this.create () =
+        let el = new TimeField()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> TimeField
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type TreeViewElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:TreeView) props =
+        ()
+
+    override _.name = $"TreeView"
+
+
+    override this.create () =
+        let el = new TreeView()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> TreeView
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type DialogElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:Dialog) props =
+        ()
+
+    override _.name = $"Dialog"
+
+
+    override this.create () =
+        let el = new Dialog()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> Dialog
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type FileDialogElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:FileDialog) props =
+        ()
+
+    override _.name = $"FileDialog"
+
+
+    override this.create () =
+        let el = new FileDialog()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> FileDialog
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type SaveDialogElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:SaveDialog) props =
+        ()
+
+    override _.name = $"SaveDialog"
+
+
+    override this.create () =
+        let el = new SaveDialog()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> SaveDialog
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
+
+
+
+type OpenDialogElement(props:IProperty list) =
+    inherit TerminalElement(props) 
+
+    let setProps (element:OpenDialog) props =
+        ()
+
+    override _.name = $"OpenDialog"
+
+
+    override this.create () =
+        let el = new OpenDialog()
+        ViewElement.setProps el props
+        setProps el props
+        this.element <- el
+
+
+    override this.canUpdate prevElement oldProps =
+        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+
+    override this.update prevElement oldProps =
+        let element = prevElement :?> OpenDialog
+        let changedProps = Interop.filterProps oldProps props
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement
 
 
 
 
+
+
+(*
+
+Window
+
+Button
+
+CheckBox
+
+ColorPicker
+
+ComboBox
+
+DateField
+
+FrameView
+
+GraphView
+
+HexView
+
+Label
+
+LineView
+
+ListView
+
+Menu
+
+MenuBar
+
+PanelView
+
+ProgressBar
+
+RadioGroup
+
+ScrollBarView
+
+ScrollView
+
+StatusBar
+
+TableView
+
+TabView
+
+TextField
+
+TextValidateField
+
+TextView
+
+TimeField
+
+TreeView
+
+TreeView`1
+
+Dialog
+
+DirListView
+
+FileDialog
+
+SaveDialog
+
+OpenDialog
+
+Popup
+
+ToplevelContainer
+
+ChildContentView
+
+ContentView
+
+ContentView
+
+ChildContentView
+
+TabRowView
+
+
+*)
 
 
 

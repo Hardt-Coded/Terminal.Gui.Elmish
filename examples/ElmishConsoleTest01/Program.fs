@@ -120,6 +120,18 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             prop.text "Minus"
                             button.onclick (fun () -> dispatch Msg.Dec)
                         ]
+
+                        View.checkbox [
+                            prop.position.x.at 14
+                            prop.position.y.at 11
+                            prop.text "Minus"
+                        ]
+
+                        View.colorpicker [
+                            prop.position.x.at 14
+                            prop.position.y.at 12
+                            prop.text "Minus"
+                        ]
                     ]
                 ]
             ]

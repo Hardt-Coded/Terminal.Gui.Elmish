@@ -35,14 +35,25 @@ module Differ =
     let rec update (rootTree:TerminalElement) (newTree:TerminalElement) =
         match rootTree, newTree with
         | rt, nt when rt.name <> nt.name ->
-            initializeTree None newTree
+            let parent = rootTree.element |> Option.ofObj
+            initializeTree parent newTree
         | OnlyPropsChanged ->
-            newTree.update rootTree.element rootTree.properties
+            if newTree.canUpdate rootTree.element rootTree.properties then
+                newTree.update rootTree.element rootTree.properties
+            else
+                let parent = rootTree.element |> Option.ofObj
+                initializeTree parent newTree
+
             let sortedRootChildren = rootTree.children |> List.sortBy (fun v -> v.name)
             let sortedNewChildren = newTree.children |> List.sortBy (fun v -> v.name)
             (sortedRootChildren,sortedNewChildren) ||> List.iter2 (fun rt nt -> update rt nt)
         | ChildsDifferent ->
-            newTree.update rootTree.element rootTree.properties
+            if newTree.canUpdate rootTree.element rootTree.properties then
+                newTree.update rootTree.element rootTree.properties
+            else
+                let parent = rootTree.element |> Option.ofObj
+                initializeTree parent newTree
+
             let sortedRootChildren = rootTree.children |> List.sortBy (fun v -> v.name)
             let sortedNewChildren = newTree.children |> List.sortBy (fun v -> v.name)
             let groupedRootType = sortedRootChildren |> List.map (fun v -> v.name) |> List.distinct
