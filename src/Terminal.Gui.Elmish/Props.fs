@@ -3,6 +3,7 @@
 open Terminal.Gui
 
 
+
 type style =
     static member inline color (colorscheme:ColorScheme) = Interop.mkstyle "color" colorscheme
 
@@ -11,6 +12,18 @@ type prop =
     static member inline style (children:IStyle list) = Interop.mkprop "style" children
     static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
     static member inline text (text:string) = Interop.mkprop "text" text
+
+    // events
+    static member inline onEnabledChanged   (f:unit->unit)                                  = Interop.mkprop "onEnabledChanged" f
+    static member inline onEnter            (f:Terminal.Gui.View.FocusEventArgs->unit)      = Interop.mkprop "onEnter" f
+    static member inline onKeyDown          (f:Terminal.Gui.View.KeyEventEventArgs->unit)   = Interop.mkprop "onKeyDown" f
+    static member inline onKeyPress         (f:Terminal.Gui.View.KeyEventEventArgs->unit)   = Interop.mkprop "onKeyPress" f
+    static member inline onKeyUp            (f:Terminal.Gui.View.KeyEventEventArgs->unit)   = Interop.mkprop "onKeyUp" f
+    static member inline onLeave            (f:Terminal.Gui.View.FocusEventArgs->unit)      = Interop.mkprop "onLeave" f
+    static member inline onMouseClick       (f:Terminal.Gui.View.MouseEventArgs->unit)      = Interop.mkprop "onMouseClick" f
+    static member inline onMouseEnter       (f:Terminal.Gui.View.MouseEventArgs->unit)      = Interop.mkprop "onMouseEnter" f
+    static member inline onMouseLeave       (f:Terminal.Gui.View.MouseEventArgs->unit)      = Interop.mkprop "onMouseLeave" f
+    static member inline onVisibleChanged   (f:unit->unit)                                  = Interop.mkprop "onVisibleChanged" f
 
 module prop =
 
@@ -45,5 +58,5 @@ type window =
     static member inline title (p:string) = Interop.mkprop "title" p
 
 type button =
-    static member inline onclick (f:unit->unit) = Interop.mkprop "onclick" f
+    static member inline onClick (f:unit->unit) = Interop.mkprop "onClick" f
 

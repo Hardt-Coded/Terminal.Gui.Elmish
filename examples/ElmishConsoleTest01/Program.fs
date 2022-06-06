@@ -111,20 +111,21 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             prop.position.x.at 4
                             prop.position.y.at 5
                             prop.text "Plus"
-                            button.onclick (fun () -> dispatch Msg.Inc)
+                            button.onClick (fun () -> dispatch Msg.Inc)
                         ]
 
                         View.button [
                             prop.position.x.at 14
                             prop.position.y.at 5
                             prop.text "Minus"
-                            button.onclick (fun () -> dispatch Msg.Dec)
+                            button.onClick (fun () -> dispatch Msg.Dec)
                         ]
 
                         View.checkbox [
                             prop.position.x.at 14
                             prop.position.y.at 11
                             prop.text "Minus"
+                            prop.onMouseEnter (fun e -> System.Diagnostics.Debug.WriteLine($"mouse enter event"))
                         ]
 
                         View.colorpicker [

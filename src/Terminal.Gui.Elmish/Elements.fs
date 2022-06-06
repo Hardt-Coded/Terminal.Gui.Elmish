@@ -29,7 +29,43 @@ type TerminalElement (props:IProperty list) =
 [<RequireQualifiedAccess>]
 module ViewElement =
 
+    let setEvents (view:View) props =
+        let onEnabledChanged = props |> Interop.getValue<unit->unit> "onEnabledChanged"
+        let onEnter          = props |> Interop.getValue<Terminal.Gui.View.FocusEventArgs->unit> "onEnter"
+        let onKeyDown        = props |> Interop.getValue<Terminal.Gui.View.KeyEventEventArgs->unit> "onKeyDown"
+        let onKeyPress       = props |> Interop.getValue<Terminal.Gui.View.KeyEventEventArgs->unit> "onKeyPress"
+        let onKeyUp          = props |> Interop.getValue<Terminal.Gui.View.KeyEventEventArgs->unit> "onKeyUp"
+        let onLeave          = props |> Interop.getValue<Terminal.Gui.View.FocusEventArgs->unit> "onLeave"
+        let onMouseClick     = props |> Interop.getValue<Terminal.Gui.View.MouseEventArgs->unit> "onMouseClick"
+        let onMouseEnter     = props |> Interop.getValue<Terminal.Gui.View.MouseEventArgs->unit> "onMouseEnter"
+        let onMouseLeave     = props |> Interop.getValue<Terminal.Gui.View.MouseEventArgs->unit> "onMouseLeave"
+        let onVisibleChanged = props |> Interop.getValue<unit->unit> "onVisibleChanged"
+
+        Interop.removeEventHandlerIfNecessary "EnabledChanged" view
+        onEnabledChanged |> Option.iter (fun onEnabledChanged -> view.add_EnabledChanged onEnabledChanged)
+        Interop.removeEventHandlerIfNecessary "Enter" view
+        onEnter |> Option.iter (fun onEnter -> view.add_Enter onEnter)
+        Interop.removeEventHandlerIfNecessary "KeyDown" view
+        onKeyDown |> Option.iter (fun onKeyDown -> view.add_KeyDown onKeyDown)
+        Interop.removeEventHandlerIfNecessary "KeyPress" view
+        onKeyPress |> Option.iter (fun onKeyPress -> view.add_KeyPress onKeyPress)
+        Interop.removeEventHandlerIfNecessary "KeyUp" view
+        onKeyUp |> Option.iter (fun onKeyUp -> view.add_KeyUp onKeyUp)
+        Interop.removeEventHandlerIfNecessary "Leave" view
+        onLeave |> Option.iter (fun onLeave -> view.add_Leave onLeave)
+        Interop.removeEventHandlerIfNecessary "MouseClick" view
+        onMouseClick |> Option.iter (fun onMouseClick -> view.add_MouseClick onMouseClick)
+        Interop.removeEventHandlerIfNecessary "MouseEnter" view
+        onMouseEnter |> Option.iter (fun onMouseEnter -> view.add_MouseEnter onMouseEnter)
+        Interop.removeEventHandlerIfNecessary "MouseLeave" view
+        onMouseLeave |> Option.iter (fun onMouseLeave -> view.add_MouseLeave onMouseLeave)
+        Interop.removeEventHandlerIfNecessary "VisibleChanged" view
+        onVisibleChanged |> Option.iter (fun onVisibleChanged -> view.add_VisibleChanged onVisibleChanged)
+        
+        
+
     let setProps (view:View) props =
+        setEvents view props
         let x = props |> Interop.getValueDefault<Pos> "x" view.X
         view.X <- x
         let y = props |> Interop.getValueDefault<Pos> "y" view.Y
@@ -157,7 +193,7 @@ type ButtonElement(props:IProperty list) =
     let setProps (element:Button) props =
         let text = props |> Interop.getValueDefault "text" (element.Text |> Interop.str)
         element.Text <- text
-        let onClick = props |> Interop.getValue<unit->unit> "onclick"
+        let onClick = props |> Interop.getValue<unit->unit> "onClick"
         Interop.removeEventHandlerIfNecessary "Clicked" element
         match onClick with
         | None -> ()
