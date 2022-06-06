@@ -12,8 +12,15 @@ module internal EventHelpers =
         //if eventInfo |> isNull then
         //    []
         //else
-        let field = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic)
-        let eventDelegate = if field |> isNull |> not then field.GetValue(o) :?> MulticastDelegate else null
+        
+        let field = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
+        let baseField = o.GetType().BaseType.GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
+        let eventDelegate = 
+            if field |> isNull |> not then 
+                field.GetValue(o) :?> MulticastDelegate 
+            elif baseField |> isNull |> not then 
+                baseField.GetValue(o) :?> MulticastDelegate 
+            else null
         if (eventDelegate |> isNull) then
             []
         else
@@ -25,7 +32,13 @@ module internal EventHelpers =
             ()
         else
             let field = o.GetType().GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic)
-            let eventDelegate = if field |> isNull |> not then field.GetValue(o) :?> MulticastDelegate else null
+            let baseField = o.GetType().BaseType.GetField(eventName, BindingFlags.Instance ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
+            let eventDelegate = 
+                if field |> isNull |> not then 
+                    field.GetValue(o) :?> MulticastDelegate 
+                elif baseField |> isNull |> not then 
+                    baseField.GetValue(o) :?> MulticastDelegate 
+                else null
             if (eventDelegate |> isNull) then
                 ()
             else
@@ -89,20 +102,36 @@ module Interop =
 
 
     let inline filterProps (oldprops:IProperty list) (newprops:IProperty list) =
-        ([],newprops)
-        ||> List.fold (fun resultProps newProp ->
-            let kv = newProp :?> KeyValue
-            let get (KeyValue (a,b)) = (a,b)
-            let (name,newValue) = kv |> get
-            let oldValue = oldprops |> getValue name
-            match oldValue with
-            | None ->
-                resultProps @ [ newProp ]
-            | Some oldValue when oldValue = newValue ->
-                resultProps
-            | Some _ ->
-                resultProps @ [ newProp ]
-        )
+        let get (KeyValue (a,b)) = (a,b)
+        let changedProps = 
+            ([],newprops)
+            ||> List.fold (fun resultProps newProp ->
+                let kv = newProp :?> KeyValue
+                let (name,newValue) = kv |> get
+                let oldValue = oldprops |> getValue name
+                match oldValue with
+                | None ->
+                    resultProps @ [ newProp ]
+                | Some oldValue when oldValue = newValue ->
+                    resultProps
+                | Some _ ->
+                    resultProps @ [ newProp ]
+            )
+
+        let removedProps =
+            ([],oldprops)
+            ||> List.fold (fun resultProps oldProp ->
+                let op = oldProp :?> KeyValue
+                let (name,_) = op |> get
+                let newProp = newprops |> valueExists name
+                match newProp with
+                | true ->
+                    resultProps
+                | false ->
+                    resultProps @ [ oldProp ]
+                
+            )
+        (changedProps, removedProps)
 
 
     let ustr (s:string) = ustring.Make s

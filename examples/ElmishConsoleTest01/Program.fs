@@ -9,6 +9,9 @@ open System.IO
 
 
 
+
+
+
 type RadioSelectItem =
     | RadioItem1
     | RadioItem2
@@ -28,6 +31,7 @@ type Model = {
     CheckBoxChecked:bool
     ListItems: (ListSelectItem * string) list
     RadioItems: (RadioSelectItem * string) list
+    IsVisible: bool
 }
 
 type Msg =
@@ -38,6 +42,7 @@ type Msg =
     | RadioChanged of RadioSelectItem
     | ListChanged of ListSelectItem
     | CheckBoxChanged of bool
+    | ChangeVisibility of bool
 
 
 let init () =
@@ -58,6 +63,7 @@ let init () =
             (ListItem2,"List Item 2")
             (ListItem3,"List Item 3")
         ]
+        IsVisible = false
     }, Cmd.none
 
 let update (msg:Msg) (model:Model) =
@@ -76,6 +82,8 @@ let update (msg:Msg) (model:Model) =
         {model with SelectedListItem = str}, Cmd.none
     | CheckBoxChanged b ->
         {model with CheckBoxChecked = b}, Cmd.none
+    | ChangeVisibility b ->
+        { model with IsVisible = b }, Cmd.none
 
 
 
@@ -88,30 +96,36 @@ let view (state:Model) (dispatch:Msg -> unit) =
             prop.width.filled
             prop.height.filled
             window.title "Toller Titel!"
+            window.borderStyle.rounded
             prop.children [
                 View.window [
                     prop.position.x.at 4
                     prop.position.y.at 4
                     prop.width.fill 4
                     prop.height.sized 20
-                    window.title "Anderer toller Titel"
+                    window.title "Anderer toller Titel"  
+                    window.borderStyle.double
+                    window.effect3D
                     prop.children [
-                        View.label [
-                            prop.text $"Hello Counter: {state.Count}"
+                        if state.IsVisible then
+                            View.label [
+                                prop.text $"Hello Counter: {state.Count}"
 
-                            let c = (state.Count |> float) / 100.0
-                            let x = (16.0 * Math.Cos(c)) |> int 
-                            let y = (8.0 * Math.Sin(c)) |> int
+                                let c = (state.Count |> float) / 100.0
+                                let x = (16.0 * Math.Cos(c)) |> int 
+                                let y = (8.0 * Math.Sin(c)) |> int
 
-                            prop.position.x.at (x + 20)
-                            prop.position.y.at (y + 10)
+                                prop.position.x.at (x + 20)
+                                prop.position.y.at (y + 10)
+                                prop.textAlignment.centered
                             
-                        ]
+                            ]
                         View.button [
                             prop.position.x.at 4
                             prop.position.y.at 5
                             prop.text "Plus"
                             button.onClick (fun () -> dispatch Msg.Inc)
+                            if state.IsVisible then prop.enabled else prop.disabled
                         ]
 
                         View.button [
@@ -125,13 +139,36 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             prop.position.x.at 14
                             prop.position.y.at 11
                             prop.text "Minus"
-                            prop.onMouseEnter (fun e -> System.Diagnostics.Debug.WriteLine($"mouse enter event"))
+                            if state.IsVisible then
+                                prop.onMouseEnter (fun e -> System.Diagnostics.Debug.WriteLine($"mouse enter event"))
+                            checkbox.onToggled (fun t -> System.Diagnostics.Debug.WriteLine($"check toggeld {t}"))
+                            checkbox.isChecked true
                         ]
 
                         View.colorpicker [
                             prop.position.x.at 14
                             prop.position.y.at 12
                             prop.text "Minus"
+                            colorpicker.selectedColor Terminal.Gui.Color.BrightCyan
+                            colorpicker.onColorChanged (fun color -> System.Diagnostics.Debug.WriteLine($"color changed {color}"))
+                        ]
+
+                        View.button [
+                            prop.position.x.at 34
+                            prop.position.y.at 5
+                            prop.text "Visible"
+                            button.onClick (fun () -> dispatch <| Msg.ChangeVisibility (state.IsVisible |> not))
+                        ]
+
+
+                        View.combobox [
+                            prop.position.x.at 34
+                            prop.position.y.at 8
+                            prop.width.sized 10
+                            prop.text "Combobox"
+                            combobox.source [ "Hallo"; "Dies"; "Ist"; "Eine"; "ComboBox" ]
+                            combobox.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"open selected item {t.Value}"))
+                            combobox.onSelectedItemChanged (fun t ->  System.Diagnostics.Debug.WriteLine($"selected item changed {t.Value}"))
                         ]
                     ]
                 ]
