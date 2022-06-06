@@ -165,10 +165,28 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             prop.position.x.at 34
                             prop.position.y.at 8
                             prop.width.sized 10
+                            prop.height.fill 0
                             prop.text "Combobox"
                             combobox.source [ "Hallo"; "Dies"; "Ist"; "Eine"; "ComboBox" ]
                             combobox.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"open selected item {t.Value}"))
                             combobox.onSelectedItemChanged (fun t ->  System.Diagnostics.Debug.WriteLine($"selected item changed {t.Value}"))
+                        ]
+
+                        View.datefield [
+                            prop.position.x.at 49
+                            prop.position.y.at 8
+                            prop.width.sized 10
+                            prop.text "DateField"
+                            datefield.date DateTime.Now
+
+                        ]
+
+                        View.timefield [
+                            prop.position.x.at 65
+                            prop.position.y.at 8
+                            prop.width.sized 10
+                            prop.text "Timefield"
+                            timefield.time DateTime.Now.TimeOfDay
                         ]
                     ]
                 ]

@@ -494,10 +494,10 @@ type ComboBoxElement(props:IProperty list) =
         |> Interop.getValue<string list> "source" 
         |> Option.iter (fun v -> 
             element.SetSource(v |> System.Linq.Enumerable.ToList)
-            let (_,height) = element.GetCurrentHeight()
-            if height < 3 then 
-                let height = Math.Min(7,v.Length + 1)
-                element.Height <- height
+            //let (_,height) = element.GetCurrentHeight()
+            //if height < 3 then 
+            //    let height = Math.Min(7,v.Length + 1)
+            //    element.Height <- height
             
         )
         //
@@ -585,6 +585,8 @@ type DateFieldElement(props:IProperty list) =
         let el = new DateField()
         ViewElement.setProps el props
         setProps el props
+        // cursor to the end
+        el.CursorPosition <- 10
         this.element <- el
 
 

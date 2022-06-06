@@ -127,7 +127,7 @@ type datefield =
 
 
 type timefield =
-    static member inline date (time:TimeSpan) = Interop.mkprop "time" time
+    static member inline time (time:TimeSpan) = Interop.mkprop "time" time
     static member inline isShortFormat (b:bool) = Interop.mkprop "isShortFormat" b
     static member inline onTimeChanged (f:Terminal.Gui.DateTimeEventArgs<TimeSpan>->unit) = Interop.mkprop "onTimeChanged" f
     
