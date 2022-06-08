@@ -130,5 +130,43 @@ type timefield =
     static member inline time (time:TimeSpan) = Interop.mkprop "time" time
     static member inline isShortFormat (b:bool) = Interop.mkprop "isShortFormat" b
     static member inline onTimeChanged (f:Terminal.Gui.DateTimeEventArgs<TimeSpan>->unit) = Interop.mkprop "onTimeChanged" f
-    
 
+  
+type frameview =
+    static member inline effect3D = Interop.mkprop "effect3D" true
+
+module frameview =
+    type borderStyle =
+        static member inline double = Interop.mkprop    "borderStyle" BorderStyle.Double
+        static member inline none = Interop.mkprop      "borderStyle" BorderStyle.None
+        static member inline rounded = Interop.mkprop   "borderStyle" BorderStyle.Rounded
+        static member inline single = Interop.mkprop    "borderStyle" BorderStyle.Single
+
+
+type graphview =
+    static member inline series (series: Graphs.ISeries list)           = Interop.mkprop "series" series
+    static member inline scrollOffset(value:PointF)                     = Interop.mkprop "scrollOffset" value
+    static member inline marginLeft  (value:uint32)                     = Interop.mkprop "marginLeft" value
+    static member inline marginBottom(value:uint32)                     = Interop.mkprop "marginBottom" value
+    static member inline graphColor  (value:Attribute option)           = Interop.mkprop "graphColor" value
+    static member inline cellSize    (value:PointF)                     = Interop.mkprop "cellSize" value
+    static member inline axisY       (value:Graphs.VerticalAxis)        = Interop.mkprop "axisY" value
+    static member inline axisX       (value:Graphs.HorizontalAxis)      = Interop.mkprop "axisX" value
+    static member inline annotations (value:Graphs.IAnnotation list)    = Interop.mkprop "annotations" value
+
+
+type hexview =
+    static member inline source (value: System.IO.Stream)               = Interop.mkprop "source" value
+    static member inline displayStart (value:int64)                     = Interop.mkprop "displayStart" value
+    static member inline allowEdits  (value:bool)                       = Interop.mkprop "allowEdits" value
+    static member inline onEdited (value:System.Collections.Generic.KeyValuePair<int64,byte>->unit)  = Interop.mkprop "cellSize" value
+    static member inline onPositionChanged (value:HexView.HexViewEventArgs->unit)        = Interop.mkprop "axisY" value
+
+
+type lineview =
+    static member inline startingAnchor (value:System.Rune option)  = Interop.mkprop "startingAnchor" value
+    static member inline endingAnchor   (value:System.Rune option)  = Interop.mkprop "endingAnchor" value
+    static member inline lineRune       (value:System.Rune)         = Interop.mkprop "lineRune" value
+    static member inline orientation    (value:Graphs.Orientation)  = Interop.mkprop "orientation" value
+    
+    

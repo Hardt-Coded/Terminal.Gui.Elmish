@@ -383,7 +383,6 @@ type ButtonElement(props:IProperty list) =
         this.element <- prevElement
 
 
-
 type CheckBoxElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
@@ -434,7 +433,6 @@ type CheckBoxElement(props:IProperty list) =
         this.element <- prevElement
 
 
-
 type ColorPickerElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
@@ -482,7 +480,6 @@ type ColorPickerElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement
-
 
 
 type ComboBoxElement(props:IProperty list) =
@@ -555,7 +552,6 @@ type ComboBoxElement(props:IProperty list) =
         this.element <- prevElement
 
 
-
 type DateFieldElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
@@ -607,12 +603,12 @@ type DateFieldElement(props:IProperty list) =
         this.element <- prevElement
 
 
-
 type FrameViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:FrameView) props =
-        ()
+        props |> Interop.getValue<BorderStyle> "borderStyle" |> Option.iter (fun v -> element.Border.BorderStyle <- v)
+        props |> Interop.getValue<bool> "effect3D" |> Option.iter (fun v -> element.Border.Effect3D <- v)
 
     let removeProps (element:FrameView) props =
         ()
@@ -644,12 +640,30 @@ type FrameViewElement(props:IProperty list) =
         this.element <- prevElement
 
 
-
+// Seems incomplete
 type GraphViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
+
+    (*
+    series (series: Graphs.ISeries list)       
+    scrollOffset(value:PointF)                 
+    marginLeft  (value:uint32)                 
+    marginBottom(value:uint32)                 
+    graphColor  (value:Attribute option)       
+    cellSize    (value:PointF)                 
+    axisY       (value:Graphs.VerticalAxis)    
+    axisX       (value:Graphs.HorizontalAxis)  
+    annotations (value:Graphs.IAnnotation list)
+    *)
     let setProps (element:GraphView) props =
-        ()
+        props |> Interop.getValue<PointF> "scrollOffset"                    |> Option.iter (fun v -> element.ScrollOffset <- v)
+        props |> Interop.getValue<uint32> "marginLeft"                      |> Option.iter (fun v -> element.MarginLeft <- v)
+        props |> Interop.getValue<uint32> "marginBottom"                    |> Option.iter (fun v -> element.MarginBottom <- v)
+        props |> Interop.getValue<Attribute option> "graphColor"            |> Option.iter (fun v -> element.GraphColor <- v |> Option.toNullable)
+        props |> Interop.getValue<PointF> "cellSize"                        |> Option.iter (fun v -> element.CellSize <- v)
+        props |> Interop.getValue<Graphs.VerticalAxis> "axisY"              |> Option.iter (fun v -> element.AxisY <- v)
+        props |> Interop.getValue<Graphs.HorizontalAxis> "axisX"            |> Option.iter (fun v -> element.AxisX <- v)
 
     let removeProps (element:GraphView) props =
         ()
@@ -685,11 +699,39 @@ type GraphViewElement(props:IProperty list) =
 type HexViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
+
     let setProps (element:HexView) props =
-        ()
+        props |> Interop.getValue<System.IO.Stream> "source"    |> Option.iter (fun v -> element.Source <- v)
+        props |> Interop.getValue<int64> "displayStart"         |> Option.iter (fun v -> element.DisplayStart <- v)
+        props |> Interop.getValue<bool> "allowEdits"            |> Option.iter (fun v -> element.AllowEdits <- v)
+        // onEdited
+        props 
+        |> Interop.getValue<System.Collections.Generic.KeyValuePair<int64,byte>->unit> "onEdited" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Edited" element
+            element.add_Edited v
+        )
+        // onPositionChanged
+        props 
+        |> Interop.getValue<HexView.HexViewEventArgs->unit> "onPositionChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "PositionChanged" element
+            element.add_PositionChanged v
+        )
 
     let removeProps (element:HexView) props =
-        ()
+        // onEdited
+        props 
+        |> Interop.getValue<System.Collections.Generic.KeyValuePair<int64,byte>->unit> "onEdited" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Edited" element
+        )
+        // onPositionChanged
+        props 
+        |> Interop.getValue<HexView.HexViewEventArgs->unit> "onPositionChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "PositionChanged" element
+        )
 
     override _.name = $"HexView"
 
@@ -723,7 +765,10 @@ type LineViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:LineView) props =
-        ()
+        props |> Interop.getValue<System.Rune option> "startingAnchor"  |> Option.iter (fun v -> element.StartingAnchor <- v |> Option.toNullable)
+        props |> Interop.getValue<System.Rune option> "endingAnchor"    |> Option.iter (fun v -> element.EndingAnchor <- v |> Option.toNullable)
+        props |> Interop.getValue<System.Rune> "lineRune"               |> Option.iter (fun v -> element.LineRune <- v)
+        props |> Interop.getValue<Graphs.Orientation> "orientation"     |> Option.iter (fun v -> element.Orientation <- v)
 
     let removeProps (element:LineView) props =
         ()

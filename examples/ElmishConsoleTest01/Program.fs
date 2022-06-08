@@ -9,9 +9,6 @@ open System.IO
 
 
 
-
-
-
 type RadioSelectItem =
     | RadioItem1
     | RadioItem2
@@ -91,18 +88,18 @@ let update (msg:Msg) (model:Model) =
 let view (state:Model) (dispatch:Msg -> unit) =
     View.page [
         View.window [
-            prop.position.x.at 1
-            prop.position.y.at 2
+            prop.position.x.at 0
+            prop.position.y.at 0
             prop.width.filled
             prop.height.filled
             window.title "Toller Titel!"
             window.borderStyle.rounded
             prop.children [
                 View.window [
-                    prop.position.x.at 4
-                    prop.position.y.at 4
+                    prop.position.x.at 1
+                    prop.position.y.at 1
                     prop.width.fill 4
-                    prop.height.sized 20
+                    prop.height.sized 21
                     window.title "Anderer toller Titel"  
                     window.borderStyle.double
                     window.effect3D
@@ -146,8 +143,8 @@ let view (state:Model) (dispatch:Msg -> unit) =
                         ]
 
                         View.colorpicker [
-                            prop.position.x.at 14
-                            prop.position.y.at 12
+                            prop.position.x.at 54
+                            prop.position.y.at 2
                             prop.text "Minus"
                             colorpicker.selectedColor Terminal.Gui.Color.BrightCyan
                             colorpicker.onColorChanged (fun color -> System.Diagnostics.Debug.WriteLine($"color changed {color}"))
@@ -187,6 +184,32 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             prop.width.sized 10
                             prop.text "Timefield"
                             timefield.time DateTime.Now.TimeOfDay
+                        ]
+
+                        View.frameview [
+                            prop.position.x.at 5
+                            prop.position.y.at 12
+                            prop.width.sized 20
+                            prop.height.sized 7
+                            prop.text "FrameView"
+                            frameview.borderStyle.rounded
+                            frameview.effect3D
+                        ]
+
+                        View.hexview [
+                            prop.position.x.at 30
+                            prop.position.y.at 12
+                            prop.width.sized 20
+                            prop.height.sized 7
+                            prop.text "Hex"
+                            hexview.source (new MemoryStream(System.Text.ASCIIEncoding.UTF8.GetBytes("Hello World")))
+                        ]
+
+                        View.lineview [
+                            prop.position.y.at 1
+                            lineview.lineRune (Rune('~'))
+                            lineview.startingAnchor (Some <| Rune('>'))
+                            lineview.endingAnchor (Some <| Rune('<'))
                         ]
                     ]
                 ]

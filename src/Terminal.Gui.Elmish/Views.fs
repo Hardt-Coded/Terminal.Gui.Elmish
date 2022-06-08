@@ -62,9 +62,7 @@ type View =
         HexViewElement(props) :> TerminalElement
 
     static member inline lineview (props:IProperty list) = LineViewElement(props) :> TerminalElement
-    static member inline lineview (children:TerminalElement list) = 
-        let props = [ prop.children children ]
-        LineViewElement(props) :> TerminalElement
+    
 
     static member inline listview (props:IProperty list) = ListViewElement(props) :> TerminalElement
     static member inline listview (children:TerminalElement list) = 

@@ -139,6 +139,9 @@ module Interop =
     let str (s:ustring) = s.ToString()
 
 
+    let inline csharpList (list:'a list) = System.Linq.Enumerable.ToList list
+
+
     let removeEventHandlerIfNecessary evName element =
         let eventDel = EventHelpers.getEventDelegates evName element
         if (eventDel.Length > 0) then
