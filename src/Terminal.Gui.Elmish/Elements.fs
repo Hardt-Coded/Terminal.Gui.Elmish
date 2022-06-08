@@ -805,10 +805,56 @@ type ListViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:ListView) props =
-        ()
+        props |> Interop.getValue<int> "selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v)
+        props |> Interop.getValue<int> "topItem" |> Option.iter (fun v -> element.TopItem <- v)
+        props |> Interop.getValue<bool> "allowsMultipleSelection" |> Option.iter (fun v -> element.AllowsMultipleSelection <- v)
+        props |> Interop.getValue<bool> "allowsMarking" |> Option.iter (fun v -> element.AllowsMarking <- v)
+        props 
+        |> Interop.getValue<string list> "source" 
+        |> Option.iter (fun v -> 
+            element.SetSource(v |> System.Linq.Enumerable.ToList)
+        )
+        // onOpenSelectedItem
+        props 
+        |> Interop.getValue<ListViewItemEventArgs->unit> "onOpenSelectedItem" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "OpenSelectedItem" element
+            element.add_OpenSelectedItem v
+        )
+        // onSelectedItemChanged
+        props 
+        |> Interop.getValue<ListViewItemEventArgs->unit> "onSelectedItemChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectedItemChanged" element
+            element.add_SelectedItemChanged v
+        )
+        // onRowRender
+        props 
+        |> Interop.getValue<ListViewRowEventArgs->unit> "onRowRender" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "RowRender" element
+            element.add_RowRender v
+        )
 
     let removeProps (element:ListView) props =
-        ()
+        // onOpenSelectedItem
+        props 
+        |> Interop.getValue<ListViewItemEventArgs->unit> "onOpenSelectedItem" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "OpenSelectedItem" element
+        )
+        // onSelectedItemChanged
+        props 
+        |> Interop.getValue<ListViewItemEventArgs->unit> "onSelectedItemChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectedItemChanged" element
+        )
+        // onRowRender
+        props 
+        |> Interop.getValue<ListViewRowEventArgs->unit> "onRowRender" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "RowRender" element
+        )
 
     override _.name = $"ListView"
 

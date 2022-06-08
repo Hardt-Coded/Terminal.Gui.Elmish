@@ -168,5 +168,13 @@ type lineview =
     static member inline endingAnchor   (value:System.Rune option)  = Interop.mkprop "endingAnchor" value
     static member inline lineRune       (value:System.Rune)         = Interop.mkprop "lineRune" value
     static member inline orientation    (value:Graphs.Orientation)  = Interop.mkprop "orientation" value
+
+
+type listview =
+    static member inline selectedItem (index:int) = Interop.mkprop "selectedItem" index
+    static member inline onOpenSelectedItem (f:Terminal.Gui.ListViewItemEventArgs->unit) = Interop.mkprop "onOpenSelectedItem" f
+    static member inline onSelectedItemChanged (f:Terminal.Gui.ListViewItemEventArgs->unit) = Interop.mkprop "onSelectedItemChanged" f
+    static member inline onRowRender (f:Terminal.Gui.ListViewRowEventArgs->unit) = Interop.mkprop "onRowRender" f
+    static member inline source (items:string list) = Interop.mkprop "source" items
     
     
