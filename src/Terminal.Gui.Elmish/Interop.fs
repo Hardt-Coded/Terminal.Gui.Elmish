@@ -182,6 +182,18 @@ module Interop =
     let inline csharpList (list:'a list) = System.Linq.Enumerable.ToList list
 
 
+    let rec getParent (view:View) =
+        view.SuperView 
+        |> Option.ofObj
+        |> Option.bind (fun p ->
+            if p.GetType().Name.Contains("Content") then
+                getParent p
+            else
+                Some p
+        )
+
+
+
     let removeEventHandlerIfNecessary evName element =
         let eventDel = EventHelpers.getEventDelegates evName element
         if (eventDel.Length > 0) then

@@ -221,6 +221,18 @@ module menu =
             static member inline noCheck = Interop.mkMenuProp "itemstyle" MenuItemCheckStyle.NoCheck
             static member inline check = Interop.mkMenuProp "itemstyle" MenuItemCheckStyle.Checked
             static member inline radio = Interop.mkMenuProp "itemstyle" MenuItemCheckStyle.Radio
+
+type panelview =
+    static member inline child (child:TerminalElement) = Interop.mkprop "child" child
+    static member inline usePanelFrame (b:bool) = Interop.mkprop "usePanelFrame" b
+    static member inline effect3D = Interop.mkprop "effect3D" true
+
+module panelview =
+    type borderStyle =
+        static member inline double = Interop.mkprop    "borderStyle" BorderStyle.Double
+        static member inline none = Interop.mkprop      "borderStyle" BorderStyle.None
+        static member inline rounded = Interop.mkprop   "borderStyle" BorderStyle.Rounded
+        static member inline single = Interop.mkprop    "borderStyle" BorderStyle.Single
             
     
 

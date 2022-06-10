@@ -12,10 +12,12 @@ open Terminal.Gui.Elmish
 [<AbstractClass>]
 type TerminalElement (props:IProperty list) =
     let mutable view: View = null
+    let mutable addProps = []
     let c = props |> Interop.getValueDefault<TerminalElement list> "children" []
 
     member this.element with get() = view and set v = view <- v
-    member _.properties = props
+    member this.additionalProps with get() = addProps and set v = addProps <- v
+    member _.properties = props @ addProps
     member _.children   = c
 
     abstract create: unit -> unit
@@ -227,6 +229,9 @@ module MenuElements =
     
     
         override this.create parent =
+            #if DEBUG
+            Diagnostics.Debug.WriteLine ($"{this.name} created!")
+            #endif
             let el = new MenuItem()
             setProps el props
             this.element <- el   
@@ -270,6 +275,9 @@ module MenuElements =
     
     
         override this.create parent =
+            #if DEBUG
+            Diagnostics.Debug.WriteLine ($"{this.name} created!")
+            #endif
             let el = 
                 match parent with
                 | None ->
@@ -366,6 +374,9 @@ type MenuBarElement(props:IMenuBarProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new MenuBar()        
         setProps el props
         this.element <- el
@@ -407,6 +418,9 @@ type PageElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = Toplevel.Create()
         ViewElement.setProps el props
         setProps el props
@@ -449,6 +463,9 @@ type WindowElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new Window(title |> Interop.ustr)
         ViewElement.setProps el props
         setProps el props
@@ -509,6 +526,9 @@ type LabelElement(props:IProperty list) =
         canUpdateView && canUpdateElement
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new Label(text |> Interop.ustr)
         ViewElement.setProps el props
         setProps el props
@@ -554,6 +574,9 @@ type ButtonElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         System.Diagnostics.Debug.WriteLine($"button created!")
         let el = new Button(text |> Interop.ustr)
         ViewElement.setProps el props
@@ -606,6 +629,9 @@ type CheckBoxElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new CheckBox()
         ViewElement.setProps el props
         setProps el props
@@ -655,6 +681,9 @@ type ColorPickerElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new ColorPicker()
         ViewElement.setProps el props
         setProps el props
@@ -724,6 +753,9 @@ type ComboBoxElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new ComboBox()
         ViewElement.setProps el props
         setProps el props
@@ -773,6 +805,9 @@ type DateFieldElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new DateField()
         ViewElement.setProps el props
         setProps el props
@@ -812,6 +847,9 @@ type FrameViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new FrameView()
         ViewElement.setProps el props
         setProps el props
@@ -839,18 +877,6 @@ type FrameViewElement(props:IProperty list) =
 type GraphViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
-
-    (*
-    series (series: Graphs.ISeries list)       
-    scrollOffset(value:PointF)                 
-    marginLeft  (value:uint32)                 
-    marginBottom(value:uint32)                 
-    graphColor  (value:Attribute option)       
-    cellSize    (value:PointF)                 
-    axisY       (value:Graphs.VerticalAxis)    
-    axisX       (value:Graphs.HorizontalAxis)  
-    annotations (value:Graphs.IAnnotation list)
-    *)
     let setProps (element:GraphView) props =
         props |> Interop.getValue<PointF> "scrollOffset"                    |> Option.iter (fun v -> element.ScrollOffset <- v)
         props |> Interop.getValue<uint32> "marginLeft"                      |> Option.iter (fun v -> element.MarginLeft <- v)
@@ -867,6 +893,9 @@ type GraphViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new GraphView()
         ViewElement.setProps el props
         setProps el props
@@ -888,7 +917,6 @@ type GraphViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement
-
 
 
 type HexViewElement(props:IProperty list) =
@@ -933,6 +961,9 @@ type HexViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new HexView()
         ViewElement.setProps el props
         setProps el props
@@ -956,7 +987,6 @@ type HexViewElement(props:IProperty list) =
         this.element <- prevElement
 
 
-
 type LineViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
@@ -973,6 +1003,9 @@ type LineViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new LineView()
         ViewElement.setProps el props
         setProps el props
@@ -994,7 +1027,6 @@ type LineViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement
-
 
 
 type ListViewElement(props:IProperty list) =
@@ -1059,6 +1091,9 @@ type ListViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new ListView()
         ViewElement.setProps el props
         setProps el props
@@ -1082,25 +1117,65 @@ type ListViewElement(props:IProperty list) =
         this.element <- prevElement
 
 
+type PanelViewElement(props:IProperty list) as self =
+    inherit TerminalElement(props)
 
+    let createChild (element:PanelView) =
+        props 
+        |> Interop.getValue<TerminalElement> "child" 
+        |> Option.iter (fun child -> 
+            self.additionalProps <- [
+                Interop.mkprop "child" child
+            ]
+            child.create ()
+            element.Child <- child.element
+        )
 
-  
+    let updateChild (element:PanelView) oldProps =
+        props 
+        |> Interop.getValue<TerminalElement> "child" 
+        |> Option.iter (fun child -> 
+            let prevChild = 
+                oldProps 
+                |> Interop.getValue<TerminalElement> "child"
 
+            match prevChild with
+            | None ->
+                element.Child.Dispose()
+                createChild element
+            | Some prevChild when prevChild.name <> child.name ->
+                element.Child.Dispose()
+                createChild element
+            | Some prevChild ->
+                if child.canUpdate prevChild.element prevChild.properties then
+                    child.update prevChild.element prevChild.properties
+                else
+                    element.Child.Dispose()
+                    createChild element
+                
+        )
 
-type PanelViewElement(props:IProperty list) =
-    inherit TerminalElement(props) 
 
     let setProps (element:PanelView) props =
-        ()
+        props |> Interop.getValue<BorderStyle> "borderStyle" |> Option.iter (fun v -> 
+            element.Border.BorderStyle <- v)
+        props |> Interop.getValue<bool> "usePanelFrame" |> Option.iter (fun v -> element.UsePanelFrame <- v)
+        props |> Interop.getValue<bool> "effect3D" |> Option.iter (fun v -> 
+            element.Border.Effect3D <- v)
 
     let removeProps (element:PanelView) props =
-        ()
+        props |> Interop.getValue<bool> "usePanelFrame" |> Option.iter (fun v -> element.UsePanelFrame <- false)
+        props |> Interop.getValue<bool> "effect3D" |> Option.iter (fun v -> element.Border.Effect3D <- false)
 
     override _.name = $"PanelView"
 
-
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new PanelView()
+        
+        createChild el
         ViewElement.setProps el props
         setProps el props
         this.element <- el
@@ -1118,8 +1193,10 @@ type PanelViewElement(props:IProperty list) =
         let (changedProps,removedProps) = Interop.filterProps oldProps props
         ViewElement.removeProps prevElement removedProps
         removeProps element removedProps
+        updateChild element oldProps
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
+        
         this.element <- prevElement
 
 
@@ -1137,6 +1214,9 @@ type ProgressBarElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new ProgressBar()
         ViewElement.setProps el props
         setProps el props
@@ -1174,6 +1254,9 @@ type RadioGroupElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new RadioGroup()
         ViewElement.setProps el props
         setProps el props
@@ -1211,6 +1294,9 @@ type ScrollBarViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new ScrollBarView()
         ViewElement.setProps el props
         setProps el props
@@ -1248,6 +1334,9 @@ type ScrollViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new ScrollView()
         ViewElement.setProps el props
         setProps el props
@@ -1285,6 +1374,9 @@ type StatusBarElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new StatusBar()
         ViewElement.setProps el props
         setProps el props
@@ -1322,6 +1414,9 @@ type TableViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new TableView()
         ViewElement.setProps el props
         setProps el props
@@ -1366,6 +1461,9 @@ type TabViewElement(props:IProperty list) =
         canUpdateView && canUpdateElement
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new TabView()
         ViewElement.setProps el props
         setProps el props
@@ -1396,6 +1494,9 @@ type TextFieldElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new TextField()
         ViewElement.setProps el props
         setProps el props
@@ -1433,6 +1534,9 @@ type TextValidateFieldElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new TextValidateField()
         ViewElement.setProps el props
         setProps el props
@@ -1470,6 +1574,9 @@ type TextViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new TextView()
         ViewElement.setProps el props
         setProps el props
@@ -1520,6 +1627,9 @@ type TimeFieldElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new TimeField()
         ViewElement.setProps el props
         setProps el props
@@ -1557,6 +1667,9 @@ type TreeViewElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new TreeView()
         ViewElement.setProps el props
         setProps el props
@@ -1594,6 +1707,9 @@ type DialogElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new Dialog()
         ViewElement.setProps el props
         setProps el props
@@ -1631,6 +1747,9 @@ type FileDialogElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new FileDialog()
         ViewElement.setProps el props
         setProps el props
@@ -1668,6 +1787,9 @@ type SaveDialogElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new SaveDialog()
         ViewElement.setProps el props
         setProps el props
@@ -1705,6 +1827,9 @@ type OpenDialogElement(props:IProperty list) =
 
 
     override this.create () =
+        #if DEBUG
+        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        #endif
         let el = new OpenDialog()
         ViewElement.setProps el props
         setProps el props

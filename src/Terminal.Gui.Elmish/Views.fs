@@ -70,9 +70,10 @@ type View =
         let props = [ prop.children children ]
         ListViewElement(props) :> TerminalElement
 
-    static member inline panelview (props:IProperty list) = PanelViewElement(props) :> TerminalElement
-    static member inline panelview (children:TerminalElement list) = 
-        let props = [ prop.children children ]
+    static member inline panelview (props:IProperty list) = 
+        PanelViewElement(props) :> TerminalElement
+    static member inline panelview (child:TerminalElement) = 
+        let props = [ panelview.child child ]
         PanelViewElement(props) :> TerminalElement
 
     static member inline progressbar (props:IProperty list) = ProgressBarElement(props) :> TerminalElement

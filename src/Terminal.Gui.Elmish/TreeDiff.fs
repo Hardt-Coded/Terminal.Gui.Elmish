@@ -36,13 +36,23 @@ module Differ =
     let rec update (rootTree:TerminalElement) (newTree:TerminalElement) =
         match rootTree, newTree with
         | rt, nt when rt.name <> nt.name ->
-            let parent = rootTree.element |> Option.ofObj
+            let parent = rootTree.element |> Interop.getParent
+            parent |> Option.iter (fun p -> p.Remove rootTree.element)
+            rootTree.element.Dispose()
+        #if DEBUG
+            System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")
+        #endif
             initializeTree parent newTree
         | OnlyPropsChanged ->
             if newTree.canUpdate rootTree.element rootTree.properties then
                 newTree.update rootTree.element rootTree.properties
             else
-                let parent = rootTree.element |> Option.ofObj
+                let parent = rootTree.element |> Interop.getParent
+                parent |> Option.iter (fun p -> p.Remove rootTree.element)
+                rootTree.element.Dispose()
+                #if DEBUG
+                System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")
+                #endif
                 initializeTree parent newTree
 
             let sortedRootChildren = rootTree.children |> List.sortBy (fun v -> v.name)
@@ -52,7 +62,12 @@ module Differ =
             if newTree.canUpdate rootTree.element rootTree.properties then
                 newTree.update rootTree.element rootTree.properties
             else
-                let parent = rootTree.element |> Option.ofObj
+                let parent = rootTree.element |> Interop.getParent
+                parent |> Option.iter (fun p -> p.Remove rootTree.element)
+                rootTree.element.Dispose()
+            #if DEBUG
+                System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")
+            #endif
                 initializeTree parent newTree
 
             let sortedRootChildren = rootTree.children |> List.sortBy (fun v -> v.name)
@@ -84,6 +99,9 @@ module Differ =
                         else
                             // the rest we remove
                             re.element |> rootTree.element.Remove |> ignore
+                        #if DEBUG
+                            System.Diagnostics.Debug.WriteLine ($"{re.element} removed and disposed!")
+                        #endif
                             ()
                     
                     )

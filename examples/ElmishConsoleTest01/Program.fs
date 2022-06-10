@@ -121,7 +121,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                         prop.position.x.at 1
                         prop.position.y.at 1
                         prop.width.fill 4
-                        prop.height.sized 21
+                        prop.height.sized 23
                         window.title "Anderer toller Titel"  
                         window.borderStyle.double
                         window.effect3D
@@ -236,18 +236,25 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             ]
 
 
-                            View.listview [
+                            View.panelview [
                                 prop.position.x.at 45
                                 prop.position.y.at 12
-                                prop.width.sized 30
-                                prop.height.sized 5
-                                prop.text "List"
-                                listview.topItem 3
-                                listview.leftItem 2
-                                listview.source [ "Hallo"; "Dies"; "Ist"; "Eine"; "ListBox" ]
-                                listview.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: open selected item {t.Value}"))
-                                listview.onSelectedItemChanged (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: selected item changed {t.Value}"))
+                                panelview.borderStyle.rounded
+                                panelview.effect3D
+                                panelview.child <|
+                                    View.listview [
+                                    prop.width.sized 15
+                                    prop.height.sized 5
+                                    prop.text "List"
+                                    listview.topItem 3
+                                    listview.leftItem 2
+                                    listview.source [ "Hallo"; "Dies"; "Ist"; "Eine"; "ListBox" ]
+                                    listview.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: open selected item {t.Value}"))
+                                    listview.onSelectedItemChanged (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: selected item changed {t.Value}"))
+                                ]
                             ]
+
+                            
                         ]
                     ]
                 ]
