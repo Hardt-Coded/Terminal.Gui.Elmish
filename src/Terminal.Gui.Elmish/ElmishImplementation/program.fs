@@ -11,6 +11,7 @@ Core abstractions for creating and running the dispatch loop.
 namespace Terminal.Gui.Elmish
 
 open Terminal.Gui
+open Terminal.Gui.Elmish.Elements
 
 
 open Terminal.Gui

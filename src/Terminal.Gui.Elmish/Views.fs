@@ -1,6 +1,7 @@
 ﻿namespace Terminal.Gui.Elmish
 
 open Terminal.Gui
+open Terminal.Gui.Elmish.Elements
 
 
 
@@ -68,11 +69,6 @@ type View =
     static member inline listview (children:TerminalElement list) = 
         let props = [ prop.children children ]
         ListViewElement(props) :> TerminalElement
-    
-    static member inline menubar (props:IProperty list) = MenuBarElement(props) :> TerminalElement
-    static member inline menubar (children:TerminalElement list) = 
-        let props = [ prop.children children ]
-        MenuBarElement(props) :> TerminalElement
 
     static member inline panelview (props:IProperty list) = PanelViewElement(props) :> TerminalElement
     static member inline panelview (children:TerminalElement list) = 

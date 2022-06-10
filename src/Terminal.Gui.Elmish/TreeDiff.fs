@@ -3,6 +3,7 @@
 module Differ =
 
     open Terminal.Gui
+    open Terminal.Gui.Elmish.Elements
 
     let (|OnlyPropsChanged|_|) (ve1:TerminalElement,ve2:TerminalElement) =
         let cve1 = ve1.children |> List.map (fun e -> e.name) |> List.sort

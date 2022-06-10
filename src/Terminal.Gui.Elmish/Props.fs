@@ -1,6 +1,7 @@
 ﻿namespace Terminal.Gui.Elmish
 
 open Terminal.Gui
+open Terminal.Gui.Elmish.Elements
 open System
 
 
@@ -15,10 +16,9 @@ type prop =
 
     static member inline text (text:string) = Interop.mkprop "text" text
 
-    static member inline autoSizeEnabled = Interop.mkprop "autoSize" true
-    static member inline autoSizeDisabled = Interop.mkprop "autoSize" false
+    static member inline autoSize (value:bool) = Interop.mkprop "autoSize" value
     static member inline tabIndex (i:int) = Interop.mkprop "tabIndex" i
-    static member inline tabStop = Interop.mkprop "tabStop" true
+    static member inline tabStop (value:bool) = Interop.mkprop "tabStop" value
 
     static member inline enabled = Interop.mkprop "enabled" true
     static member inline disabled = Interop.mkprop "enabled" false
@@ -87,7 +87,8 @@ module prop =
         static member inline top =          Interop.mkprop "textAlignment" VerticalTextAlignment.Top
         
 
-
+type page =
+    static member inline menubar (props:IMenuBarProperty list) = Interop.mkprop "menubar" props
 
 type window =
     static member inline title (p:string) = Interop.mkprop "title" p
@@ -118,6 +119,7 @@ type combobox =
     static member inline onOpenSelectedItem (f:Terminal.Gui.ListViewItemEventArgs->unit) = Interop.mkprop "onOpenSelectedItem" f
     static member inline onSelectedItemChanged (f:Terminal.Gui.ListViewItemEventArgs->unit) = Interop.mkprop "onSelectedItemChanged" f
     static member inline source (items:string list) = Interop.mkprop "source" items
+    static member inline readonly (value:bool) = Interop.mkprop "readonly" value
 
 
 type datefield =
@@ -176,5 +178,53 @@ type listview =
     static member inline onSelectedItemChanged (f:Terminal.Gui.ListViewItemEventArgs->unit) = Interop.mkprop "onSelectedItemChanged" f
     static member inline onRowRender (f:Terminal.Gui.ListViewRowEventArgs->unit) = Interop.mkprop "onRowRender" f
     static member inline source (items:string list) = Interop.mkprop "source" items
+    static member inline allowsMarking (value:bool) = Interop.mkprop "allowsMarking" value
+    static member inline allowsMultipleSelection (value:bool) = Interop.mkprop "allowsMultipleSelection" value
+    static member inline leftItem (value:int) = Interop.mkprop "leftItem" value
+    static member inline topItem (value:int) = Interop.mkprop "topItem" value
+
+
+type menubar =
+    static member inline menus (menus:IMenuBarItem list) =                              Interop.mkMenuBarProp "menus" menus
+    static member inline useKeysUpDownAsKeysLeftRight (value:bool) =                    Interop.mkMenuBarProp "useKeysUpDownAsKeysLeftRight" value
+    static member inline useSubMenusSingleFrame (value:bool) =                          Interop.mkMenuBarProp "useSubMenusSingleFrame" value
+    static member inline onMenuAllClosed (f:unit->unit) =                               Interop.mkMenuBarProp "onMenuAllClosed" f    
+    static member inline onMenuClosing (f:Terminal.Gui.MenuClosingEventArgs->unit) =    Interop.mkMenuBarProp "onMenuClosing" f    
+    static member inline onMenuOpened (f:Terminal.Gui.MenuItem->unit) =                 Interop.mkMenuBarProp "onMenuOpened" f    
+    static member inline onMenuOpening (f:Terminal.Gui.MenuOpeningEventArgs->unit) =    Interop.mkMenuBarProp "onMenuOpening" f
+
+type menu =
+    static member inline menuBarItem (props:IMenuProperty list) =   (KeyValue ("menubar", props)) :> IMenuBarItem // MenuElements.MenuBarItemElement(props) :> IMenuBarItem
+    static member inline submenuItem (props:IMenuProperty list) =   (KeyValue ("submenuItem", props)) :> IMenu
+    static member inline menuItem (props:IMenuProperty list) =      (KeyValue ("menuItem", props)) :> IMenu
+    static member inline menuItem (title:string, action:unit->unit) = 
+        let props = [
+            Interop.mkMenuProp "title" title
+            Interop.mkMenuProp "action" action
+        ]
+        (KeyValue ("menuItem", props)) :> IMenu
+
+module menu =
+    type prop =
+        static member inline children (children: IMenu list) = Interop.mkMenuProp "children" children
+        static member inline title (title:string) = Interop.mkMenuProp "title" title
+        
+
+    type item =
+        static member inline action (action:unit->unit) = Interop.mkMenuProp "action" action
+        static member inline isChecked (b:bool) = Interop.mkMenuProp "checked" b
+        static member inline shortcut (key:Key) = Interop.mkMenuProp "shortcut" key
+
+    module item =
+        
+        type itemstyle =
+            static member inline noCheck = Interop.mkMenuProp "itemstyle" MenuItemCheckStyle.NoCheck
+            static member inline check = Interop.mkMenuProp "itemstyle" MenuItemCheckStyle.Checked
+            static member inline radio = Interop.mkMenuProp "itemstyle" MenuItemCheckStyle.Radio
+            
+    
+
+        
+    
     
     

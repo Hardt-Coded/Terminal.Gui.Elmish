@@ -2,6 +2,7 @@
 
 open NStack
 open System
+open Terminal.Gui
 
 module internal EventHelpers =
 
@@ -63,6 +64,7 @@ module Interop =
         |> Seq.cast<KeyValue>
         |> Seq.exists (function | KeyValue (pname,_) -> name = pname)
 
+
     let inline getValue<'a> name (props:IProperty list) =
         props
         |> Seq.cast<KeyValue>
@@ -71,6 +73,40 @@ module Interop =
 
 
     let inline getValueDefault<'a> name defaultVal (props:IProperty list) =
+        props
+        |> Seq.cast<KeyValue>
+        |> Seq.tryFind (function | KeyValue (pname, _) -> name = pname)
+        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
+        |> Option.defaultValue defaultVal
+
+
+    let inline mkMenuProp (name:string) (data:obj) : IMenuProperty = KeyValue (name, data)
+
+    let inline getMenuValue<'a> name (props:IMenuProperty list) =
+        props
+        |> Seq.cast<KeyValue>
+        |> Seq.tryFind (function | KeyValue (pname,_) -> name = pname)
+        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
+
+
+    let inline getMenuValueDefault<'a> name defaultVal (props:IMenuProperty list) =
+        props
+        |> Seq.cast<KeyValue>
+        |> Seq.tryFind (function | KeyValue (pname, _) -> name = pname)
+        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
+        |> Option.defaultValue defaultVal
+
+
+    let inline mkMenuBarProp (name:string) (data:obj) : IMenuBarProperty = KeyValue (name, data)
+
+    let inline getMenuBarValue<'a> name (props:IMenuBarProperty list) =
+        props
+        |> Seq.cast<KeyValue>
+        |> Seq.tryFind (function | KeyValue (pname,_) -> name = pname)
+        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
+
+
+    let inline getMenuBarValueDefault<'a> name defaultVal (props:IMenuBarProperty list) =
         props
         |> Seq.cast<KeyValue>
         |> Seq.tryFind (function | KeyValue (pname, _) -> name = pname)
@@ -112,6 +148,10 @@ module Interop =
                 match oldValue with
                 | None ->
                     resultProps @ [ newProp ]
+                //| Some oldValue when name = "menubar" ->
+                //    let oldValue = (oldValue :?> MenuBarElement) 
+                //    let newValue = (newValue :?> MenuBarElement)
+                //    resultProps
                 | Some oldValue when oldValue = newValue ->
                     resultProps
                 | Some _ ->
