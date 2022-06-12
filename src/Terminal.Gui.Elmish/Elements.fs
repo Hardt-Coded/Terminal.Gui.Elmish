@@ -5,6 +5,7 @@ open System.Collections
 open System
 open Terminal.Gui
 open Terminal.Gui.Elmish
+open System.Data
 
 
 
@@ -119,6 +120,7 @@ module ViewElement =
         props |> Interop.getValue<bool> "tabStop"   |> Option.iter (fun v -> view.TabStop <- v)
 
         props |> Interop.getValue<bool> "enabled" |> Option.iter (fun v -> view.Enabled <- v)
+        props |> Interop.getValue<ColorScheme> "color" |> Option.iter (fun v -> view.ColorScheme <- v)
         
 
 
@@ -395,7 +397,7 @@ type PageElement(props:IProperty list) =
 
     let setProps (element:Toplevel) props =
         props 
-        |> Interop.getValue<IMenuBarProperty list> "menubar" 
+        |> Interop.getValue<IMenuBarProperty list> "menuBar" 
         |> Option.iter (fun menubarProperties -> 
             let menubar = MenuBarElement(menubarProperties)
             menubar.create()
@@ -403,15 +405,242 @@ type PageElement(props:IProperty list) =
             element.Add (menubar.element :?> MenuBar)
         )
         
-        // todo: StatusBar
-        // toplevel.StatusBar
-        ()
+        props |> Interop.getValue<bool> "running"         |> Option.iter (fun v -> element.Running <- v)
+        props |> Interop.getValue<bool> "modal"         |> Option.iter (fun v -> element.Modal <- v)
+        // Todo:
+        props |> Interop.getValue<StatusBar> "statusBar"         |> Option.iter (fun v -> element.StatusBar <- v)
+        props |> Interop.getValue<bool> "isMdiContainer"         |> Option.iter (fun v -> element.IsMdiContainer <- v)
+        
+        // onLoaded
+        props 
+        |> Interop.getValue<unit->unit> "onLoaded" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Loaded" element
+            element.add_Loaded v
+        )
+        
+        // onReady
+        props 
+        |> Interop.getValue<unit->unit> "onReady" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Ready" element
+            element.add_Ready v
+        )
+        
+        // onUnloaded
+        props 
+        |> Interop.getValue<unit->unit> "onUnloaded" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Unloaded" element
+            element.add_Unloaded v
+        )
+        
+        // onActivate
+        props 
+        |> Interop.getValue<Toplevel->unit> "onActivate" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Activate" element
+            element.add_Activate v
+        )
+        
+        // onDeactivate
+        props 
+        |> Interop.getValue<Toplevel->unit> "onDeactivate" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Deactivate" element
+            element.add_Deactivate v
+        )
+        
+        // onChildClosed
+        props 
+        |> Interop.getValue<Toplevel->unit> "onChildClosed" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "ChildClosed" element
+            element.add_ChildClosed v
+        )
+        
+        // onAllChildClosed
+        props 
+        |> Interop.getValue<unit->unit> "onAllChildClosed" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "AllChildClosed" element
+            element.add_AllChildClosed v
+        )
+        
+        // onClosing
+        props 
+        |> Interop.getValue<ToplevelClosingEventArgs->unit> "onClosing" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Closing" element
+            element.add_Closing v
+        )
+        
+        // onClosed
+        props 
+        |> Interop.getValue<Toplevel->unit> "onClosed" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Closed" element
+            element.add_Closed v
+        )
+        
+        // onChildLoaded
+        props 
+        |> Interop.getValue<Toplevel->unit> "onChildLoaded" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "ChildLoaded" element
+            element.add_ChildLoaded v
+        )
+        
+        // onChildUnloaded
+        props 
+        |> Interop.getValue<Toplevel->unit> "onChildUnloaded" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "ChildUnloaded" element
+            element.add_ChildUnloaded v
+        )
+        
+        // onResized
+        props 
+        |> Interop.getValue<Size->unit> "onResized" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Resized" element
+            element.add_Resized v
+        )
+        
+        // onAlternateForwardKeyChanged
+        props 
+        |> Interop.getValue<Key->unit> "onAlternateForwardKeyChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "AlternateForwardKeyChanged" element
+            element.add_AlternateForwardKeyChanged v
+        )
+        
+        // onAlternateBackwardKeyChanged
+        props 
+        |> Interop.getValue<Key->unit> "onAlternateBackwardKeyChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "AlternateBackwardKeyChanged" element
+            element.add_AlternateBackwardKeyChanged v
+        )
+        
+        // onQuitKeyChanged
+        props 
+        |> Interop.getValue<Key->unit> "onQuitKeyChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "QuitKeyChanged" element
+            element.add_QuitKeyChanged v
+        )
+        
 
     let removeProps (element:Toplevel) props =
         props 
-        |> Interop.getValue<IMenuBarProperty list> "menubar" 
+        |> Interop.getValue<IMenuBarProperty list> "menuBar" 
         |> Option.iter (fun menubarProperties -> 
             element.MenuBar <- null
+        )
+        // onLoaded
+        props 
+        |> Interop.getValue<unit->unit> "onLoaded" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Loaded" element
+        )
+        
+        // onReady
+        props 
+        |> Interop.getValue<unit->unit> "onReady" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Ready" element
+        )
+        
+        // onUnloaded
+        props 
+        |> Interop.getValue<unit->unit> "onUnloaded" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Unloaded" element
+        )
+        
+        // onActivate
+        props 
+        |> Interop.getValue<Toplevel->unit> "onActivate" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Activate" element
+        )
+        
+        // onDeactivate
+        props 
+        |> Interop.getValue<Toplevel->unit> "onDeactivate" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Deactivate" element
+        )
+        
+        // onChildClosed
+        props 
+        |> Interop.getValue<Toplevel->unit> "onChildClosed" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "ChildClosed" element
+        )
+        
+        // onAllChildClosed
+        props 
+        |> Interop.getValue<unit->unit> "onAllChildClosed" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "AllChildClosed" element
+        )
+        
+        // onClosing
+        props 
+        |> Interop.getValue<ToplevelClosingEventArgs->unit> "onClosing" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Closing" element
+        )
+        
+        // onClosed
+        props 
+        |> Interop.getValue<Toplevel->unit> "onClosed" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Closed" element
+        )
+        
+        // onChildLoaded
+        props 
+        |> Interop.getValue<Toplevel->unit> "onChildLoaded" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "ChildLoaded" element
+        )
+        
+        // onChildUnloaded
+        props 
+        |> Interop.getValue<Toplevel->unit> "onChildUnloaded" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "ChildUnloaded" element
+        )
+        
+        // onResized
+        props 
+        |> Interop.getValue<Size->unit> "onResized" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "Resized" element
+        )
+        
+        // onAlternateForwardKeyChanged
+        props 
+        |> Interop.getValue<Key->unit> "onAlternateForwardKeyChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "AlternateForwardKeyChanged" element
+        )
+        
+        // onAlternateBackwardKeyChanged
+        props 
+        |> Interop.getValue<Key->unit> "onAlternateBackwardKeyChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "AlternateBackwardKeyChanged" element
+        )
+        
+        // onQuitKeyChanged
+        props 
+        |> Interop.getValue<Key->unit> "onQuitKeyChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "QuitKeyChanged" element
         )
 
     override _.name = "Page"
@@ -711,8 +940,9 @@ type ComboBoxElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:ComboBox) props =
-        props |> Interop.getValue<int> "selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v)
-        props |> Interop.getValue<bool> "readonly" |> Option.iter (fun v -> element.ReadOnly <- v)
+        props |> Interop.getValue<int> "selectedItem"   |> Option.iter (fun v -> element.SelectedItem <- v)
+        props |> Interop.getValue<bool> "readonly"      |> Option.iter (fun v -> element.ReadOnly <- v)
+        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> element.Text <- v)
         
         props 
         |> Interop.getValue<string list> "source" 
@@ -756,7 +986,11 @@ type ComboBoxElement(props:IProperty list) =
         #if DEBUG
         Diagnostics.Debug.WriteLine ($"{this.name} created!")
         #endif
-        let el = new ComboBox()
+        let dropDownHeight = props |> Interop.getValueDefault<int> "dropdownHeight" 5
+        let source = props |> Interop.getValueDefault<string list> "source" [] |> Linq.Enumerable.ToList
+        let width = source |> Seq.map (fun i -> i.Length)|> Seq.max
+        let el = new ComboBox(Rect(0,0,width + 2,dropDownHeight), source)
+        el.ColorScheme <- Colors.Base
         ViewElement.setProps el props
         setProps el props
         this.element <- el
@@ -1038,6 +1272,8 @@ type ListViewElement(props:IProperty list) =
         props |> Interop.getValue<int> "topItem" |> Option.iter (fun v -> element.TopItem <- v)
         props |> Interop.getValue<bool> "allowsMultipleSelection" |> Option.iter (fun v -> element.AllowsMultipleSelection <- v)
         props |> Interop.getValue<bool> "allowsMarking" |> Option.iter (fun v -> element.AllowsMarking <- v)
+        props |> Interop.getValue<string> "text"                        |> Option.iter (fun v -> element.Text <- v)
+
         props 
         |> Interop.getValue<string list> "source" 
         |> Option.iter (fun v -> 
@@ -1205,10 +1441,15 @@ type ProgressBarElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:ProgressBar) props =
-        ()
+        props |> Interop.getValue<bool> "bidirectionalMarquee"          |> Option.iter (fun v -> element.BidirectionalMarquee <- v)
+        props |> Interop.getValue<float> "fraction"                     |> Option.iter (fun v -> element.Fraction <- (v |> float32))
+        props |> Interop.getValue<ProgressBarFormat> "progressBarFormat"|> Option.iter (fun v -> element.ProgressBarFormat <- v)
+        props |> Interop.getValue<ProgressBarStyle> "progressBarStyle"  |> Option.iter (fun v -> element.ProgressBarStyle <- v)
+        props |> Interop.getValue<Rune> "segmentCharacter"              |> Option.iter (fun v -> element.SegmentCharacter <- v)
+        props |> Interop.getValue<string> "text"                        |> Option.iter (fun v -> element.Text <- v)
 
     let removeProps (element:ProgressBar) props =
-        ()
+        props |> Interop.getValue<bool> "bidirectionalMarquee" |> Option.iter (fun v -> element.BidirectionalMarquee <- false)
 
     override _.name = $"ProgressBar"
 
@@ -1245,10 +1486,26 @@ type RadioGroupElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:RadioGroup) props =
-        ()
+        props |> Interop.getValue<#seq<string>> "radioLabels"       |> Option.iter (fun v -> element.RadioLabels <- (v |> Seq.map Interop.ustr |> Seq.toArray) )
+        
+        props |> Interop.getValue<DisplayModeLayout> "displayMode"  |> Option.iter (fun v -> element.DisplayMode <- v)
+        props |> Interop.getValue<int> "horizontalSpace"            |> Option.iter (fun v -> element.HorizontalSpace <- v)
+        
+        // onSelectedItemChanged
+        props 
+        |> Interop.getValue<SelectedItemChangedArgs->unit> "onSelectedItemChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectedItemChanged" element
+            element.add_SelectedItemChanged v
+        )
+        props |> Interop.getValue<int> "selectedItem"               |> Option.iter (fun v -> element.SelectedItem <- v)
 
     let removeProps (element:RadioGroup) props =
-        ()
+        props 
+        |> Interop.getValue<SelectedItemChangedArgs->unit> "onSelectedItemChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectedItemChanged" element
+        )
 
     override _.name = $"RadioGroup"
 
@@ -1280,44 +1537,67 @@ type RadioGroupElement(props:IProperty list) =
         this.element <- prevElement
 
 
+// not working yet
+//type ScrollBarViewElement(props:IProperty list) =
+//    inherit TerminalElement(props) 
 
-type ScrollBarViewElement(props:IProperty list) =
-    inherit TerminalElement(props) 
+//    let setProps (element:ScrollBarView) props =
+//        props |> Interop.getValue<bool> "autoHideScrollBars"         |> Option.iter (fun v -> element.AutoHideScrollBars <- v)
+//        props |> Interop.getValue<bool> "isVertical"                 |> Option.iter (fun v -> element.IsVertical <- v)
+//        props |> Interop.getValue<bool> "keepContentAlwaysInViewport"|> Option.iter (fun v -> element.KeepContentAlwaysInViewport <- v)
+//        //props |> Interop.getValue<int>  "otherScrollBarView"         |> Option.iter (fun v -> element.OtherScrollBarView <- v)
+//        props |> Interop.getValue<int>  "position"                   |> Option.iter (fun v -> element.Position <- v)
+//        props |> Interop.getValue<bool> "showScrollIndicator"        |> Option.iter (fun v -> element.ShowScrollIndicator <- v)
+//        props |> Interop.getValue<int>  "size"                       |> Option.iter (fun v -> element.Size <- v)
+        
+//        // onChangedPosition
+//        props 
+//        |> Interop.getValue<unit->unit> "onChangedPosition" 
+//        |> Option.iter (fun v -> 
+//            Interop.removeEventHandlerIfNecessary "ChangedPosition" element
+//            element.add_ChangedPosition v
+//        )
 
-    let setProps (element:ScrollBarView) props =
-        ()
+//    let removeProps (element:ScrollBarView) props =
+//        props |> Interop.getValue<bool> "autoHideScrollBars"         |> Option.iter (fun v -> element.AutoHideScrollBars <- true)
+//        props |> Interop.getValue<bool> "isVertical"                 |> Option.iter (fun v -> element.IsVertical <- false)
+//        props |> Interop.getValue<bool> "keepContentAlwaysInViewport"|> Option.iter (fun v -> element.KeepContentAlwaysInViewport <- true)
+//        props |> Interop.getValue<bool> "showScrollIndicator"        |> Option.iter (fun v -> element.ShowScrollIndicator <- false)
+//        // onChangedPosition
+//        props 
+//        |> Interop.getValue<unit->unit> "onChangedPosition" 
+//        |> Option.iter (fun v -> 
+//            Interop.removeEventHandlerIfNecessary "ChangedPosition" element
+//        )
 
-    let removeProps (element:ScrollBarView) props =
-        ()
-
-    override _.name = $"ScrollBarView"
-
-
-    override this.create () =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        let el = new ScrollBarView()
-        ViewElement.setProps el props
-        setProps el props
-        this.element <- el
+//    override _.name = $"ScrollBarView"
 
 
-    override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
-        let canUpdateElement =
-            true
+//    override this.create () =
+//        #if DEBUG
+//        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+//        #endif
+//        let el = new ScrollBarView()
+//        ViewElement.setProps el props
+//        setProps el props
+//        this.element <- el
 
-        canUpdateView && canUpdateElement
 
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> ScrollBarView
-        let (changedProps,removedProps) = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement
+//    override this.canUpdate prevElement oldProps =
+//        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+//        let canUpdateElement =
+//            true
+
+//        canUpdateView && canUpdateElement
+
+//    override this.update prevElement oldProps = 
+//        let element = prevElement :?> ScrollBarView
+//        let (changedProps,removedProps) = Interop.filterProps oldProps props
+//        ViewElement.removeProps prevElement removedProps
+//        removeProps element removedProps
+//        ViewElement.setProps prevElement changedProps
+//        setProps element changedProps
+//        this.element <- prevElement
 
 
 
@@ -1325,10 +1605,19 @@ type ScrollViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:ScrollView) props =
-        ()
+        props |> Interop.getValue<bool> "autoHideScrollBars"         |> Option.iter (fun v -> element.AutoHideScrollBars <- v)
+        props |> Interop.getValue<bool> "keepContentAlwaysInViewport"|> Option.iter (fun v -> element.KeepContentAlwaysInViewport <- v)
+        props |> Interop.getValue<bool> "showVerticalScrollIndicator"   |> Option.iter (fun v -> element.ShowVerticalScrollIndicator <- v)
+        props |> Interop.getValue<bool> "showHorizontalScrollIndicator" |> Option.iter (fun v -> element.ShowHorizontalScrollIndicator <- v)
+        props |> Interop.getValue<Size> "contentSize"                   |> Option.iter (fun v -> element.ContentSize <- v)
+        props |> Interop.getValue<Point>"contentOffset"                 |> Option.iter (fun v -> element.ContentOffset <- v)
+        
 
     let removeProps (element:ScrollView) props =
-        ()
+        props |> Interop.getValue<bool> "autoHideScrollBars"         |> Option.iter (fun v -> element.AutoHideScrollBars <- true)
+        props |> Interop.getValue<bool> "keepContentAlwaysInViewport"|> Option.iter (fun v -> element.KeepContentAlwaysInViewport <- true)
+        props |> Interop.getValue<bool> "showVerticalScrollIndicator"   |> Option.iter (fun v -> element.ShowVerticalScrollIndicator <- false)
+        props |> Interop.getValue<bool> "showHorizontalScrollIndicator" |> Option.iter (fun v -> element.ShowHorizontalScrollIndicator <- false)
 
     override _.name = $"ScrollView"
 
@@ -1360,7 +1649,7 @@ type ScrollViewElement(props:IProperty list) =
         this.element <- prevElement
 
 
-
+//Todo
 type StatusBarElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
@@ -1405,10 +1694,52 @@ type TableViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:TableView) props =
-        ()
+        props |> Interop.getValue<DataTable> "table"            |> Option.iter (fun v -> element.Table <- v)
+        props |> Interop.getValue<TableView.TableStyle> "style" |> Option.iter (fun v -> element.Style <- v)
+        props |> Interop.getValue<bool> "fullRowSelect"         |> Option.iter (fun v -> element.FullRowSelect <- v)
+        props |> Interop.getValue<bool> "multiSelect"           |> Option.iter (fun v -> element.MultiSelect <- v)
+        props |> Interop.getValue<int> "columnOffset"           |> Option.iter (fun v -> element.ColumnOffset <- v)
+        props |> Interop.getValue<int> "rowOffset"              |> Option.iter (fun v -> element.RowOffset <- v)
+        props |> Interop.getValue<int> "selectedColumn"         |> Option.iter (fun v -> element.SelectedColumn <- v)
+        props |> Interop.getValue<int> "selectedRow"            |> Option.iter (fun v -> element.SelectedRow <- v)
+        props |> Interop.getValue<int> "maxCellWidth"           |> Option.iter (fun v -> element.MaxCellWidth <- v)
+        props |> Interop.getValue<string> "nullSymbol"          |> Option.iter (fun v -> element.NullSymbol <- v)
+        props |> Interop.getValue<char> "separatorSymbol"       |> Option.iter (fun v -> element.SeparatorSymbol <- v)
+        
+        // onSelectedCellChanged
+        props 
+        |> Interop.getValue<TableView.SelectedCellChangedEventArgs->unit> "onSelectedCellChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectedCellChanged" element
+            element.add_SelectedCellChanged v
+        )
+        
+        // onCellActivated
+        props 
+        |> Interop.getValue<TableView.CellActivatedEventArgs->unit> "onCellActivated" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "CellActivated" element
+            element.add_CellActivated v
+        )
+        props |> Interop.getValue<Key> "cellActivationKey" |> Option.iter (fun v -> element.CellActivationKey <- v)
+        
 
     let removeProps (element:TableView) props =
-        ()
+        props |> Interop.getValue<bool> "fullRowSelect" |> Option.iter (fun v -> element.FullRowSelect <- false)
+        props |> Interop.getValue<bool> "multiSelect"   |> Option.iter (fun v -> element.MultiSelect <- false)
+        // onSelectedCellChanged
+        props 
+        |> Interop.getValue<TableView.SelectedCellChangedEventArgs->unit> "onSelectedCellChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectedCellChanged" element
+        )
+        
+        // onCellActivated
+        props 
+        |> Interop.getValue<TableView.CellActivatedEventArgs->unit> "onCellActivated" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "CellActivated" element
+        )
 
     override _.name = $"TableView"
 
@@ -1445,10 +1776,26 @@ type TabViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:TabView) props =
-        ()
+        props |> Interop.getValue<int> "tabScrollOffset"    |> Option.iter (fun v -> element.TabScrollOffset <- v)
+        props |> Interop.getValue<UInt32> "maxTabTextWidth" |> Option.iter (fun v -> element.MaxTabTextWidth <- v)
+        props |> Interop.getValue<TabView.Tab> "selectedTab"|> Option.iter (fun v -> element.SelectedTab <- v)
+        props |> Interop.getValue<TabView.TabStyle> "style" |> Option.iter (fun v -> element.Style <- v)
+
+        // onSelectedTabChanged
+        props 
+        |> Interop.getValue<EventHandler<TabView.TabChangedEventArgs>> "onSelectedTabChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectedTabChanged" element
+            element.add_SelectedTabChanged v
+        )
 
     let removeProps (element:TabView) props =
-        ()
+        // onSelectedTabChanged
+        props 
+        |> Interop.getValue<EventHandler<TabView.TabChangedEventArgs>> "onSelectedTabChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectedTabChanged" element
+        )
 
     override _.name = $"TabView"
 
@@ -1485,10 +1832,58 @@ type TextFieldElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:TextField) props =
-        ()
+        props |> Interop.getValue<bool> "used"          |> Option.iter (fun v -> element.Used <- v)
+        props |> Interop.getValue<bool> "readOnly"      |> Option.iter (fun v -> element.ReadOnly <- v)
+        props |> Interop.getValue<Rect> "frame"         |> Option.iter (fun v -> element.Frame <- v)
+        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> element.Text <- v)
+        props |> Interop.getValue<bool> "secret"        |> Option.iter (fun v -> element.Secret <- v)
+        props |> Interop.getValue<int> "cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v)
+        props |> Interop.getValue<bool> "canFocus"      |> Option.iter (fun v -> element.CanFocus <- v)
+        props |> Interop.getValue<int> "selectedStart"  |> Option.iter (fun v -> element.SelectedStart <- v)
+        props |> Interop.getValue<CursorVisibility> "desiredCursorVisibility"   |> Option.iter (fun v -> element.DesiredCursorVisibility <- v)
+        // onTextChanging
+        props 
+        |> Interop.getValue<TextChangingEventArgs->unit> "onTextChanging" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "TextChanging" element
+            element.add_TextChanging v
+        )
+        // onTextChanging
+        props 
+        |> Interop.getValue<string->unit> "onTextChangingString" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "TextChanging" element
+            let action (ev:TextChangingEventArgs) = v (ev.NewText |> Interop.str)
+            element.add_TextChanging action
+        )
+        // onTextChanged
+        props 
+        |> Interop.getValue<string->unit> "onTextChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "TextChanged" element
+            let action ustr = v (ustr |> Interop.str)
+            element.add_TextChanged action
+        )
 
     let removeProps (element:TextField) props =
-        ()
+        props |> Interop.getValue<bool> "used"          |> Option.iter (fun v -> element.Used <- false)
+        props |> Interop.getValue<bool> "readOnly"      |> Option.iter (fun v -> element.ReadOnly <- false)
+        props |> Interop.getValue<bool> "secret"        |> Option.iter (fun v -> element.Secret <- false)
+        props |> Interop.getValue<bool> "canFocus"      |> Option.iter (fun v -> element.CanFocus <- true)
+
+        // onTextChanging
+        props 
+        |> Interop.getValue<TextChangingEventArgs->unit> "onTextChanging" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "TextChanging" element
+        )
+        
+        // onTextChanged
+        props 
+        |> Interop.getValue<string->unit> "onTextChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "TextChanged" element
+        )
 
     override _.name = $"TextField"
 

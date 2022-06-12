@@ -5,29 +5,26 @@ open System
 open NStack
 open Terminal.Gui.Elmish
 open System.IO
+open Terminal.Gui
+open Terminal.Gui
+open Terminal.Gui
 
 
 
 
-type RadioSelectItem =
-    | RadioItem1
-    | RadioItem2
-    | RadioItem3
 
-type ListSelectItem =
-    | ListItem1
-    | ListItem2
-    | ListItem3
+
+
 
 type Model = {
     Count:int
     Text:string
     LastSelectedMenuItem:string
-    SelectedRadioItem:RadioSelectItem
-    SelectedListItem:ListSelectItem
+    SelectedRadioItem:int
+    SelectedListItem:int
     CheckBoxChecked:bool
-    ListItems: (ListSelectItem * string) list
-    RadioItems: (RadioSelectItem * string) list
+    ListItems: string list
+    RadioItems: string list
     IsVisible: bool
 }
 
@@ -36,29 +33,164 @@ type Msg =
     | Dec
     | ChangeText of string
     | MenuItemSelected of string
-    | RadioChanged of RadioSelectItem
-    | ListChanged of ListSelectItem
+    | RadioChanged of int
+    | ListChanged of int
     | CheckBoxChanged of bool
     | ChangeVisibility of bool
 
+
+module Data =
+
+    open System.Data
+
+    let xml = """
+
+<NewDataSet>
+<xs:schema xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="NewDataSet">
+<xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="RecentMatter" msdata:UseCurrentLocale="true">
+<xs:complexType>
+<xs:choice minOccurs="0" maxOccurs="unbounded">
+<xs:element name="RecentMatter">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="UserLogin">
+<xs:simpleType>
+<xs:restriction base="xs:string">
+<xs:maxLength value="2147483647"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:element>
+<xs:element name="MatterNumber">
+<xs:simpleType>
+<xs:restriction base="xs:string">
+<xs:maxLength value="2147483647"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:element>
+<xs:element name="ClientName">
+<xs:simpleType>
+<xs:restriction base="xs:string">
+<xs:maxLength value="2147483647"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:element>
+<xs:element name="MatterName">
+<xs:simpleType>
+<xs:restriction base="xs:string">
+<xs:maxLength value="2147483647"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:element>
+<xs:element name="ClientCode" minOccurs="0">
+<xs:simpleType>
+<xs:restriction base="xs:string">
+<xs:maxLength value="2147483647"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:element>
+<xs:element name="OfficeCode" minOccurs="0">
+<xs:simpleType>
+<xs:restriction base="xs:string">
+<xs:maxLength value="2147483647"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:element>
+<xs:element name="OfficeName" minOccurs="0">
+<xs:simpleType>
+<xs:restriction base="xs:string">
+<xs:maxLength value="2147483647"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:element>
+<xs:element name="Billable" type="xs:boolean"/>
+<xs:element name="ReferenceId" minOccurs="0">
+<xs:simpleType>
+<xs:restriction base="xs:string">
+<xs:maxLength value="2147483647"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:element>
+<xs:element name="LastUsed" type="xs:dateTime"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:choice>
+</xs:complexType>
+<xs:unique name="Constraint1" msdata:PrimaryKey="true">
+<xs:selector xpath=".//RecentMatter"/>
+<xs:field xpath="UserLogin"/>
+<xs:field xpath="MatterNumber"/>
+</xs:unique>
+</xs:element>
+</xs:schema>
+
+<RecentMatter>
+  <UserLogin>PSLTP6\RJK</UserLogin>
+  <MatterNumber>99999-2302</MatterNumber>
+  <ClientName>Test Matters</ClientName>
+  <MatterName>DP Test Matter</MatterName>
+  <ClientCode>99999</ClientCode>
+  <OfficeCode/>
+  <OfficeName/>
+  <Billable>true</Billable>
+  <ReferenceId/>
+  <LastUsed>2011-08-23T23:40:24.13+01:00</LastUsed>
+</RecentMatter>
+<RecentMatter>
+  <UserLogin>PSLTP6\RJK</UserLogin>
+  <MatterNumber>999991.0002</MatterNumber>
+  <ClientName>Lathe 1</ClientName>
+  <MatterName>LW Test 2</MatterName>
+  <ClientCode/>
+  <OfficeCode/>
+  <OfficeName/>
+  <Billable>true</Billable>
+  <ReferenceId/>
+  <LastUsed>2011-07-12T16:57:27.173+01:00</LastUsed>
+</RecentMatter>
+<RecentMatter>
+  <UserLogin>PSLTP6\RJK</UserLogin>
+  <MatterNumber>999991-0001</MatterNumber>
+  <ClientName>Lathe 1</ClientName>
+  <MatterName>LW Test 1</MatterName>
+  <ClientCode/>
+  <OfficeCode/>
+  <OfficeName/>
+  <Billable>false</Billable>
+  <ReferenceId/>
+  <LastUsed>2011-07-12T01:59:06.887+01:00</LastUsed>
+</RecentMatter>
+</NewDataSet>
+
+    """
+
+    let table = 
+        use sr = new StringReader(xml)
+        let dt = new DataTable()
+        dt.ReadXml(sr) |> ignore
+        dt
 
 let init () =
     { 
         Count = 1 
         Text = "Muh!"
         LastSelectedMenuItem = ""        
-        SelectedRadioItem = RadioItem2
-        SelectedListItem = ListItem3
+        SelectedRadioItem = 1
+        SelectedListItem = 1
         CheckBoxChecked=false
         RadioItems=[
-            (RadioItem1,"Radio Item 1")
-            (RadioItem2,"Radio Item 2")
-            (RadioItem3,"Radio Item 3")
+            "Hello"
+            "this"
+            "is"
+            "a"
+            "RadioGroup"
         ]
         ListItems=[
-            (ListItem1,"List Item 1")
-            (ListItem2,"List Item 2")
-            (ListItem3,"List Item 3")
+            "Hello"
+            "this"
+            "is"
+            "a"
+            "List"
         ]
         IsVisible = false
     }, Cmd.none
@@ -83,11 +215,13 @@ let update (msg:Msg) (model:Model) =
         { model with IsVisible = b }, Cmd.none
 
 
-
+let myColorScheme () =
+    let color = Attribute.Make(Color.BrightYellow,Color.Green)
+    ColorScheme(Focus=color,Normal=color)
 
 let view (state:Model) (dispatch:Msg -> unit) =
     View.page [
-        page.menubar [
+        page.menuBar [
             menubar.menus [
                 menu.menuBarItem [
                     menu.prop.title "Menu 1"
@@ -154,107 +288,186 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 button.onClick (fun () -> dispatch Msg.Dec)
                             ]
 
-                            View.checkbox [
+                            View.checkBox [
                                 prop.position.x.at 14
                                 prop.position.y.at 11
-                                prop.text "Minus"
+                                prop.text "Checkbox"
                                 if state.IsVisible then
                                     prop.onMouseEnter (fun e -> System.Diagnostics.Debug.WriteLine($"mouse enter event"))
-                                checkbox.onToggled (fun t -> System.Diagnostics.Debug.WriteLine($"check toggeld {t}"))
-                                checkbox.isChecked true
+                                checkBox.onToggled (fun t -> System.Diagnostics.Debug.WriteLine($"check toggeld {t}"))
+                                checkBox.isChecked true
                             ]
 
-                            View.colorpicker [
-                                prop.position.x.at 54
+                            View.colorPicker [
+                                prop.position.x.at 34
                                 prop.position.y.at 2
-                                prop.text "Minus"
-                                colorpicker.selectedColor Terminal.Gui.Color.BrightCyan
-                                colorpicker.onColorChanged (fun color -> System.Diagnostics.Debug.WriteLine($"color changed {color}"))
+                                prop.text "Color"
+                                colorPicker.selectedColor Terminal.Gui.Color.BrightCyan
+                                colorPicker.onColorChanged (fun color -> System.Diagnostics.Debug.WriteLine($"color changed {color}"))
                             ]
 
                             View.button [
-                                prop.position.x.at 34
+                                prop.position.x.at 24
                                 prop.position.y.at 5
                                 prop.text "Visible"
                                 button.onClick (fun () -> dispatch <| Msg.ChangeVisibility (state.IsVisible |> not))
                             ]
 
-
-                            View.combobox [
+                            
+                            View.comboBox [
                                 prop.position.x.at 34
                                 prop.position.y.at 8
                                 prop.width.sized 10
                                 prop.text "Combobox"
-                                combobox.source [ "Hallo"; "Dies"; "Ist"; "Eine"; "ComboBox" ]
-                                combobox.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"open selected item {t.Value}"))
-                                combobox.onSelectedItemChanged (fun t ->  System.Diagnostics.Debug.WriteLine($"selected item changed {t.Value}"))
-                                
-                                combobox.readonly state.IsVisible
+                                prop.color Colors.Base
+                                comboBox.source state.ListItems
+                                comboBox.selectedItem state.SelectedListItem
+                                comboBox.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"open selected item {t.Value}"))
+                                comboBox.onSelectedItemChanged (fun e -> dispatch <| ListChanged e.Item)
+                                comboBox.readonly state.IsVisible
                             ]
 
-                            View.datefield [
+                            View.dateField [
                                 prop.position.x.at 49
                                 prop.position.y.at 8
                                 prop.width.sized 10
                                 prop.text "DateField"
-                                datefield.date DateTime.Now
+                                dateField.date DateTime.Now
 
                             ]
 
-                            View.timefield [
+                            View.timeField [
                                 prop.position.x.at 65
                                 prop.position.y.at 8
                                 prop.width.sized 10
                                 prop.text "Timefield"
-                                timefield.time DateTime.Now.TimeOfDay
+                                timeField.time DateTime.Now.TimeOfDay
                             ]
 
-                            View.frameview [
+                            View.frameView [
                                 prop.position.x.at 5
                                 prop.position.y.at 12
                                 prop.width.sized 20
                                 prop.height.sized 7
                                 prop.text "FrameView"
-                                frameview.borderStyle.rounded
-                                frameview.effect3D
+                                frameView.borderStyle.rounded
+                                frameView.effect3D
                             ]
 
-                            View.hexview [
+                            View.hexView [
                                 prop.position.x.at 30
                                 prop.position.y.at 12
                                 prop.width.sized 20
                                 prop.height.sized 7
                                 prop.text "Hex"
-                                hexview.source (new MemoryStream(System.Text.ASCIIEncoding.UTF8.GetBytes("Hello World")))
+                                hexView.source (new MemoryStream(System.Text.ASCIIEncoding.UTF8.GetBytes("Hello World")))
                             ]
 
-                            View.lineview [
+                            View.lineView [
                                 prop.position.y.at 1
-                                lineview.lineRune (Rune('~'))
-                                lineview.startingAnchor (Some <| Rune('>'))
-                                lineview.endingAnchor (Some <| Rune('<'))
+                                lineView.lineRune (Rune('~'))
+                                lineView.startingAnchor (Some <| Rune('>'))
+                                lineView.endingAnchor (Some <| Rune('<'))
                             ]
 
 
-                            View.panelview [
+                            View.panelView [
                                 prop.position.x.at 45
                                 prop.position.y.at 12
-                                panelview.borderStyle.rounded
-                                panelview.effect3D
-                                panelview.child <|
-                                    View.listview [
+                                panelView.borderStyle.rounded
+                                panelView.effect3D
+                                panelView.child <|
+                                    View.listView [
                                     prop.width.sized 15
                                     prop.height.sized 5
                                     prop.text "List"
-                                    listview.topItem 3
-                                    listview.leftItem 2
-                                    listview.source [ "Hallo"; "Dies"; "Ist"; "Eine"; "ListBox" ]
-                                    listview.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: open selected item {t.Value}"))
-                                    listview.onSelectedItemChanged (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: selected item changed {t.Value}"))
+                                    listView.topItem 3
+                                    listView.leftItem 2
+                                    listView.source state.ListItems
+                                    listView.selectedItem state.SelectedListItem
+                                    listView.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: open selected item {t.Value}"))
+                                    listView.onSelectedItemChanged (fun e -> dispatch <| ListChanged e.Item)
                                 ]
                             ]
 
-                            
+                            View.progressBar [
+                                prop.position.x.at 65
+                                prop.position.y.at 9
+                                prop.width.sized 15
+                                prop.text "Progress"
+                                progressBar.format.simplePlusPercentage
+                                progressBar.style.blocks
+                                progressBar.bidirectionalMarquee true
+                                progressBar.fraction ((DateTime.Now.Second |> float) / 60.0)
+                            ]
+
+                            View.progressBar [
+                                prop.position.x.at 65
+                                prop.position.y.at 11
+                                prop.width.sized 15
+                                prop.text "Progress"
+                                progressBar.format.framedProgressPadded
+                                progressBar.style.marqueeBlocks
+                                progressBar.fraction ((DateTime.Now.Second |> float) / 60.0)
+                            ]
+
+                            View.progressBar [
+                                prop.position.x.at 65
+                                prop.position.y.at 17
+                                prop.width.sized 15
+                                prop.text "Progress"
+                                progressBar.format.framed
+                                progressBar.style.marqueeContinuous
+                                progressBar.fraction ((DateTime.Now.Second |> float) / 60.0)
+                            ]
+
+
+                            View.radioGroup [
+                                prop.position.x.at 82
+                                prop.position.y.at 2
+                                prop.text "Progress"
+                                radioGroup.displayMode.vertical
+                                radioGroup.radioLabels state.RadioItems
+                                radioGroup.onSelectedItemChanged (fun e -> dispatch <| RadioChanged e.SelectedItem)
+                                radioGroup.selectedItem state.SelectedRadioItem
+                            ]
+
+
+                            View.scrollView [
+                                prop.position.x.at 68
+                                prop.position.y.at 2
+                                prop.width.sized 12
+                                prop.height.sized 5
+                                scrollView.showHorizontalScrollIndicator true
+                                scrollView.showVerticalScrollIndicator true
+                                scrollView.contentSize (Size(10,10))
+                                prop.children [
+                                    View.radioGroup [
+                                        prop.text "Scroll"
+                                        radioGroup.displayMode.vertical
+                                        radioGroup.radioLabels (state.RadioItems @ state.ListItems)
+                                        radioGroup.onSelectedItemChanged (fun e -> dispatch <| RadioChanged e.SelectedItem)
+                                        radioGroup.selectedItem state.SelectedRadioItem
+                                    ]
+                                
+                                ]
+                            ]
+
+                            View.tableView [
+                                prop.position.x.at 82
+                                prop.position.y.at 8
+                                prop.width.sized 30
+                                prop.height.sized 8
+                                tableView.table Data.table
+                            ]
+
+                            View.textField [
+                                prop.position.x.at 82
+                                prop.position.y.at 18
+                                prop.width.sized 20
+                                prop.text state.Text
+                                textField.onTextChanging (fun (newText:string) -> dispatch <| Msg.ChangeText newText)
+                            ]
                         ]
                     ]
                 ]
