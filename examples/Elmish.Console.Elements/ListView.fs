@@ -42,56 +42,54 @@ let update (msg:Msg) (model:Model) =
         {model with VoteResult = vr}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
+let view (model:Model) (dispatch:Msg -> unit) =
     [
-        label [
-            Styles [
-                Pos (CenterPos,AbsPos 1)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Terminal.Gui.Color.BrightYellow,Terminal.Gui.Color.Green)
-            ]
-            Text "List View"
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 1
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.BrightYellow, Color.Green)
+            prop.text "List View"
         ] 
 
-        label [
-            Styles [
-                Pos (CenterPos,AbsPos 5)
-                Dim (Fill,AbsDim 1)  
-                TextAlignment Centered
-            ]
-            Text "Please Vote!"
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 5
+            prop.width.filled
+            prop.textAlignment.centered
+            prop.text "Please Vote!"
         ]
 
 
-        frameView [
-            Styles [
-                Pos (AbsPos 1,AbsPos 4)
-                Dim (FillMargin 1,FillMargin 5)                                
+        View.frameView [
+            prop.position.x.at 1
+            prop.position.y.at 4
+            prop.width.fill 1
+            prop.height.fill 5
+            frameView.title "TextView"
+            frameView.children [
+                View.listView [
+                    prop.position.x.at 0
+                    prop.position.y.at 0
+                    prop.width.filled
+                    prop.height.filled
+                    listView.selectedItem (model.VoteResultItems |> List.findIndex (fun (i,_) -> i = model.VoteResult))
+                    listView.source (model.VoteResultItems |> List.map snd)
+                    listView.onSelectedItemChanged 
+                        (fun r -> 
+                            let v = fst model.VoteResultItems.[r.Item]
+                            dispatch (ItemSelected v)
+                        )
+                ]
             ]
-            Text "TextView"
-        ] [
-            
-            //listView [
-            //    Styles [
-            //        Pos (AbsPos 0,AbsPos 0)                
-            //        Dim (Fill,Fill)
-
-            //    ]
-            //    Value model.VoteResult
-            //    Items model.VoteResultItems
-            //    OnChanged (fun r -> dispatch (ItemSelected r))
-            //]
-            
         ]
         
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 18)
-                Dim (AbsDim 1,AbsDim 1)                
-                Colors (Color.BrightYellow,Color.Red)
-            ]
-            Text (sprintf "The Vote says: %s" (model.VoteResult.ToString()))
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 18              
+            prop.color (Color.BrightYellow,Color.Red)
+            label.text (sprintf "The Vote says: %s" (model.VoteResult.ToString()))
         ]
 
         

@@ -3,6 +3,8 @@
 
 open Terminal.Gui
 open Terminal.Gui.Elmish
+open Terminal.Gui.Elmish
+open Terminal.Gui.Elmish
 
 type Model = {
     Text:string 
@@ -55,49 +57,46 @@ let update (msg:Msg) (model:Model) =
         {model with Text = txt}, Cmd.none   
 
 
-let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
+let view (model:Model) (dispatch:Msg -> unit) =
     [
-        yield label [
-            Styles [
-                Pos (CenterPos,AbsPos 1)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Terminal.Gui.Color.BrightYellow,Terminal.Gui.Color.Green)
-            ]
-            Text "Scrollbars"
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 1
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.BrightYellow, Color.Green)
+            prop.text "Scrollbars"
         ] 
 
         
 
-        yield frameView [
-            Styles [
-                Pos (AbsPos 1,AbsPos 4)
-                Dim (FillMargin 1,FillMargin 1)                                
-            ]
-            Text "TextView"
-        ] [
-            scrollView [
-                Styles [
-                    Pos (AbsPos 0,AbsPos 0)
-                    Dim (Fill,Fill)
-                ]
-                Frame (0,0,80,12)
-                ScrollContentSize (120,120)
-                ScrollBar BothBars
-            ] [
-                label [
-                    Styles [
-                        Pos (AbsPos 0,AbsPos 0)
-                        Dim (AbsDim 120,AbsDim 120)                  
-                        Colors (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
+        View.frameView [
+            prop.position.x.at 1
+            prop.position.y.at 4
+            prop.width.fill 1
+            prop.height.fill 5
+            frameView.title "ScrollView"
+            frameView.children [
+        
+                View.scrollView [
+                    prop.position.x.at 0
+                    prop.position.y.at 0
+                    prop.width.filled
+                    prop.height.filled
+                    scrollView.contentSize (Size(120,120))
+                    scrollView.showHorizontalScrollIndicator true
+                    scrollView.showVerticalScrollIndicator true
+                    scrollView.children [
+                        View.label [
+                            prop.position.x.at 0
+                            prop.position.y.at 0
+                            prop.width.sized 120
+                            prop.height.sized 120
+                            prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
+                            label.text model.Text
+                        ]
                     ]
-                    Text model.Text
                 ]
             ]
-            
-            
         ]
-        
-
-        
     ]

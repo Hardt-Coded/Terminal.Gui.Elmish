@@ -3,94 +3,75 @@
 open Terminal.Gui
 open Terminal.Gui.Elmish
 
-let view : ViewElement list =
+let view =
     [
-        label [
-            Styles [
-                Pos (AbsPos 0,AbsPos 1)
-                Dim (FillMargin 1,AbsDim 1)
-                TextAlignment Centered
-                
-            ]
-            
-            Text "Welcome to The Elmish Terminal Show"
+        View.label [
+            prop.position.x.at 0
+            prop.position.y.at 1
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.text "Welcome to The Elmish Terminal Show"
         ] 
 
-        label [
-            Styles [
-                Pos (AbsPos 0,AbsPos 2)
-                Dim (FillMargin 1,AbsDim 1)
-                TextAlignment Left                
-            ]
-            
-            Text "And Left"
+        View.label [
+            prop.position.x.at 0
+            prop.position.y.at 2
+            prop.width.fill 1
+            prop.textAlignment.left
+            prop.text "And Left"
         ] 
 
-        label [
-            Styles [
-                Pos (AbsPos 0,AbsPos 3)
-                Dim (FillMargin 1,AbsDim 1)
-                TextAlignment Right
-                
-            ]
-            
-            Text "And Right"
+        View.label [
+            prop.position.x.at 0
+            prop.position.y.at 3
+            prop.width.fill 1
+            prop.textAlignment.right
+            prop.text "And Right"
         ] 
 
-        label [
-            Styles [
-                Pos (AbsPos 0,AbsPos 4)
-                Dim (FillMargin 1,AbsDim 1)
-                TextAlignment Centered
-                
-            ]
-            
-            Text "And Centered"
+        View.label [
+            prop.position.x.at 0
+            prop.position.y.at 4
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.text "And Centered"
         ] 
 
-        label [
-            Styles [
-                Pos (AbsPos 0,AbsPos 5)
-                Dim (FillMargin 1,AbsDim 3)
-                TextAlignment Justified
-                
-            ]
-            
-            Text "And some justified text alignment. Lorem ipsum dolor sit amet"
+        View.label [
+            prop.position.x.at 0
+            prop.position.y.at 5
+            prop.width.fill 1
+            prop.textAlignment.justified
+            prop.text "And some justified text alignment. Lorem ipsum dolor sit amet"
         ] 
 
-        label [
-            Styles [
-                Pos (AbsPos 0,AbsPos 9)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Color.BrightCyan ,Color.Magenta)
-            ]
+        View.label [
             
-            Text "And Colors"
+            prop.position.x.at 0
+            prop.position.y.at 9
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.BrightCyan ,Color.Magenta)
+            prop.text "And Colors"
         ] 
 
-        label [
-            Styles [
-                Pos (AbsPos 0,AbsPos 10)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Color.BrightGreen,Color.Red)
-            ]
-            
-            Text "And Colors"
+        View.label [
+            prop.position.x.at 0
+            prop.position.y.at 10
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.BrightGreen,Color.Red)
+            prop.text "And Colors"
+
         ] 
 
-        label [
-            Styles [
-                Pos (AbsPos 0,AbsPos 11)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Color.Magenta,Color.BrightYellow)
-                
-            ]
-            
-            Text "And Colors"
+        View.label [
+            prop.position.x.at 0
+            prop.position.y.at 11
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.Magenta,Color.BrightYellow)
+            prop.text "And Colors"
         ] 
 
     ]

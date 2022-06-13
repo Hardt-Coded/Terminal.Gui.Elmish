@@ -4,11 +4,12 @@ open Terminal.Gui
 open Terminal.Gui.Elmish.Elements
 open System
 open System.Data
+open Terminal.Gui.Trees
 
 
 type prop =
-    static member inline style (children:IStyle list) = Interop.mkprop "style" children
     static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
+    static member inline ref (reference:View->unit) = Interop.mkprop "ref" reference
 
     static member inline text (text:string) = Interop.mkprop "text" text
 
@@ -19,7 +20,13 @@ type prop =
     static member inline enabled = Interop.mkprop "enabled" true
     static member inline disabled = Interop.mkprop "enabled" false
 
-    static member inline color (colorscheme:ColorScheme) = Interop.mkprop "color" colorscheme
+    static member inline colorScheme    (colorscheme:ColorScheme)           = Interop.mkprop "colorScheme" colorscheme
+    static member inline colorDisabled  (forground:Color,background:Color)  = Interop.mkprop "colorDisabled" <| Attribute.Make(forground,background)
+    static member inline colorFocus     (forground:Color,background:Color)  = Interop.mkprop "colorFocus" <| Attribute.Make(forground,background)
+    static member inline colorHotFocus  (forground:Color,background:Color)  = Interop.mkprop "colorHotFocus" <| Attribute.Make(forground,background)
+    static member inline colorHotNormal (forground:Color,background:Color)  = Interop.mkprop "colorHotNormal" <| Attribute.Make(forground,background)
+    static member inline colorNormal    (forground:Color,background:Color)  = Interop.mkprop "colorNormal" <| Attribute.Make(forground,background)
+    static member inline color          (forground:Color,background:Color)  = Interop.mkprop "color" <| Attribute.Make(forground,background)
 
     // events
     static member inline onEnabledChanged   (f:unit->unit)                                  = Interop.mkprop "onEnabledChanged" f
@@ -39,14 +46,14 @@ module prop =
 
         type x =
             static member inline at (i:int) = Interop.mkprop "x" (Pos.At i)
-            static member inline bottom = Interop.mkprop "x" Pos.Bottom
-            static member inline center = Interop.mkprop "x" Pos.Center
+            //static member inline bottom = Interop.mkprop "x" (Pos.Bottom())
+            static member inline center = Interop.mkprop "x" (Pos.Center())
             static member inline percent (i:double) = Interop.mkprop "x" (Pos.Percent (i |> float32))
 
         type y =
             static member inline at (i:int) = Interop.mkprop "y" (Pos.At i)
-            static member inline bottom = Interop.mkprop "y" Pos.Bottom
-            static member inline center = Interop.mkprop "y" Pos.Center
+            //static member inline bottom = Interop.mkprop "y" (Pos.Bottom())
+            static member inline center = Interop.mkprop "y" (Pos.Center())
             static member inline percent (i:double) = Interop.mkprop "y" (Pos.Percent (i |> float32))
 
     
@@ -54,12 +61,14 @@ module prop =
         static member inline sized (i:int) = Interop.mkprop "width" (Dim.Sized i)
         static member inline filled = Interop.mkprop "width" (Dim.Fill 0)
         static member inline fill (margin:int) = Interop.mkprop "width" (Dim.Fill margin)
+        static member inline percent (percent:float) = Interop.mkprop "width" (Dim.Percent (percent |> float32))
 
 
     type height =
         static member inline sized (i:int) = Interop.mkprop "height" (Dim.Sized i)
         static member inline filled = Interop.mkprop "height" (Dim.Fill 0)
         static member inline fill (margin:int) = Interop.mkprop "height" (Dim.Fill margin)
+        static member inline percent (percent:float) = Interop.mkprop "height" (Dim.Percent (percent |> float32))
 
 
     type textAlignment =
@@ -109,11 +118,14 @@ type page =
     static member inline menuBar (props:IMenuBarProperty list) = Interop.mkprop "menuBar" props
     static member inline statusBar (value:StatusBar)  = Interop.mkprop "statusBar" value
 
+    static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
+
     
 
 type window =
     static member inline title (p:string) = Interop.mkprop "title" p
     static member inline effect3D = Interop.mkprop "effect3D" true
+    static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
 
 module window =
     type borderStyle =
@@ -124,11 +136,17 @@ module window =
 
 type button =
     static member inline onClick (f:unit->unit) = Interop.mkprop "onClick" f
+    static member inline text (value:string)  = Interop.mkprop "text" value
+    static member inline isDefault (value:bool)  = Interop.mkprop "isDefault" value
+    static member inline hotKey (value:Key)  = Interop.mkprop "hotKey" value
+    static member inline hotKeySpecifier (value:Rune)  = Interop.mkprop "hotKeySpecifier" value
+    static member inline autoSize (value:bool)  = Interop.mkprop "autoSize" value
 
 
 type checkBox =
     static member inline onToggled (f:bool->unit) = Interop.mkprop "toggled" f
     static member inline isChecked (v:bool) = Interop.mkprop "checked" v
+    static member inline text (text:string) = Interop.mkprop "text" text
 
 
 type colorPicker =
@@ -142,6 +160,7 @@ type comboBox =
     static member inline source (items:string list) = Interop.mkprop "source" items
     static member inline readonly (value:bool) = Interop.mkprop "readonly" value
     static member inline dropdownHeight (value:int) = Interop.mkprop "dropdownHeight" value
+    static member inline text (text:string) = Interop.mkprop "text" text
 
 
 type dateField =
@@ -157,7 +176,10 @@ type timeField =
 
   
 type frameView =
+    static member inline title (value:string)  = Interop.mkprop "title" value
+    static member inline text (value:string)  = Interop.mkprop "text" value
     static member inline effect3D = Interop.mkprop "effect3D" true
+    static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
 
 module frameView =
     type borderStyle =
@@ -165,6 +187,12 @@ module frameView =
         static member inline none = Interop.mkprop      "borderStyle" BorderStyle.None
         static member inline rounded = Interop.mkprop   "borderStyle" BorderStyle.Rounded
         static member inline single = Interop.mkprop    "borderStyle" BorderStyle.Single
+
+    type textAlignment =
+        static member inline centered =     Interop.mkprop "textAlignment" TextAlignment.Centered
+        static member inline left =         Interop.mkprop "textAlignment" TextAlignment.Left
+        static member inline right =        Interop.mkprop "textAlignment" TextAlignment.Right
+        static member inline justified =    Interop.mkprop "textAlignment" TextAlignment.Justified
 
 
 type graphView =
@@ -186,6 +214,10 @@ type hexView =
     static member inline onEdited (value:System.Collections.Generic.KeyValuePair<int64,byte>->unit)  = Interop.mkprop "cellSize" value
     static member inline onPositionChanged (value:HexView.HexViewEventArgs->unit)        = Interop.mkprop "axisY" value
 
+
+type label =
+    static member inline text (value:string)  = Interop.mkprop "text" value
+    static member inline onClicked (value:unit->unit)  = Interop.mkprop "onClicked" value
 
 type lineView =
     static member inline startingAnchor (value:System.Rune option)  = Interop.mkprop "startingAnchor" value
@@ -299,6 +331,7 @@ module radioGroup =
 
 
 type scrollView =
+    static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
     static member inline autoHideScrollBars (value:bool)  = Interop.mkprop "autoHideScrollBars" value
     static member inline keepContentAlwaysInViewport (value:bool)  = Interop.mkprop "keepContentAlwaysInViewport" value
     static member inline showVerticalScrollIndicator (value:bool)  = Interop.mkprop "showVerticalScrollIndicator" value
@@ -348,9 +381,48 @@ type textField =
     static member inline desiredCursorVisibility (value:CursorVisibility)  = Interop.mkprop "desiredCursorVisibility" value
 
 
+type textValidateField =
+    static member inline provider (value:TextValidateProviders.ITextValidateProvider)  = Interop.mkprop "provider" value
+    static member inline text (value:string)  = Interop.mkprop "text" value
+
+type textView =
+    static member inline canFocus (value:bool)  = Interop.mkprop "canFocus" value
+    static member inline onTextChanged (value:string->unit)  = Interop.mkprop "onTextChanged" value
+    static member inline used (value:bool)  = Interop.mkprop "used" value
+    static member inline text (value:string)  = Interop.mkprop "text" value
+    static member inline frame (value:Rect)  = Interop.mkprop "frame" value
+    static member inline topRow (value:int)  = Interop.mkprop "topRow" value
+    static member inline leftColumn (value:int)  = Interop.mkprop "leftColumn" value
+    static member inline cursorPosition (value:Point)  = Interop.mkprop "cursorPosition" value
+    static member inline selectionStartColumn (value:int)  = Interop.mkprop "selectionStartColumn" value
+    static member inline selectionStartRow (value:int)  = Interop.mkprop "selectionStartRow" value
+    static member inline selecting (value:bool)  = Interop.mkprop "selecting" value
+    static member inline wordWrap (value:bool)  = Interop.mkprop "wordWrap" value
+    static member inline bottomOffset (value:int)  = Interop.mkprop "bottomOffset" value
+    static member inline rightOffset (value:int)  = Interop.mkprop "rightOffset" value
+    static member inline allowsReturn (value:bool)  = Interop.mkprop "allowsReturn" value
+    static member inline allowsTab (value:bool)  = Interop.mkprop "allowsTab" value
+    static member inline tabWidth (value:int)  = Interop.mkprop "tabWidth" value
+    static member inline multiline (value:bool)  = Interop.mkprop "multiline" value
+    static member inline readOnly (value:bool)  = Interop.mkprop "readOnly" value
+    static member inline desiredCursorVisibility (value:CursorVisibility)  = Interop.mkprop "desiredCursorVisibility" value
 
 
-        
-    
-    
-    
+type treeView =
+    static member inline treeBuilder (value:ITreeBuilder<Trees.ITreeNode>)  = Interop.mkprop "treeBuilder" value
+    static member inline style (value:TreeStyle)  = Interop.mkprop "style" value
+    static member inline multiSelect (value:bool)  = Interop.mkprop "multiSelect" value
+    static member inline allowLetterBasedNavigation (value:bool)  = Interop.mkprop "allowLetterBasedNavigation" value
+    static member inline selectedObject (value:ITreeNode)  = Interop.mkprop "selectedObject" value
+    static member inline onObjectActivated (value:ObjectActivatedEventArgs<ITreeNode>->unit)  = Interop.mkprop "onObjectActivated" value
+    static member inline objectActivationKey (value:Key)  = Interop.mkprop "objectActivationKey" value
+    static member inline objectActivationButton (value:Nullable<MouseFlags>)  = Interop.mkprop "objectActivationButton" value
+    static member inline colorGetter (value:ITreeNode->ColorScheme)  = Interop.mkprop "colorGetter" value
+    static member inline onSelectionChanged (value:SelectionChangedEventArgs<ITreeNode>->unit)  = Interop.mkprop "onSelectionChanged" value
+    static member inline scrollOffsetVertical (value:int)  = Interop.mkprop "scrollOffsetVertical" value
+    static member inline scrollOffsetHorizontal (value:int)  = Interop.mkprop "scrollOffsetHorizontal" value
+    static member inline aspectGetter (value:AspectGetterDelegate<ITreeNode>)  = Interop.mkprop "aspectGetter" value
+    static member inline desiredCursorVisibility (value:CursorVisibility)  = Interop.mkprop "desiredCursorVisibility" value
+
+
+

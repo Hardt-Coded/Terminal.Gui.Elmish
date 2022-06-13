@@ -45,68 +45,65 @@ let update (msg:Msg) (model:Model) =
         {model with IsHappy = b}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
+let view (model:Model) (dispatch:Msg -> unit) =
     [
-        label [
-            Styles [
-                Pos (CenterPos,AbsPos 1)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Terminal.Gui.Color.BrightYellow,Terminal.Gui.Color.Green)
-            ]
-            Text "Radio and Check..."
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 1
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.BrightYellow, Color.Green)
+            prop.text "Radio and Check..."
         ] 
 
-        label [
-            Styles [
-                Pos (CenterPos,AbsPos 5)
-                Dim (Fill,AbsDim 1)  
-                TextAlignment Centered
-            ]
-            Text "Please Vote!"
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 5
+            prop.width.filled
+            prop.textAlignment.centered
+            prop.text "Please Vote!"
         ]
 
-        //radioGroup [
-        //    Styles [
-        //        Pos (CenterPos,AbsPos 7)                
-
-        //    ]
-        //    Value model.VoteResult
-        //    Items model.VoteResultItems
-        //    OnChanged (fun r -> dispatch (ChangeVoteResult r))
-        //]
+        View.radioGroup [
+            prop.position.x.center
+            prop.position.y.at 7
+            radioGroup.selectedItem (model.VoteResultItems |> List.findIndex (fun (i,_) -> i = model.VoteResult))
+            radioGroup.radioLabels (model.VoteResultItems |> List.map snd)
+            radioGroup.onSelectedItemChanged 
+                (fun r -> 
+                    let v = fst model.VoteResultItems.[r.SelectedItem]
+                    dispatch (ChangeVoteResult v)
+                
+                )
+        ]
                 
 
-        checkBox [
-            Styles [
-                Pos (CenterPos,AbsPos 16)               
-
-            ]
-            Value model.IsHappy
-            Text "Are you happy?"
-            OnChanged (fun b -> dispatch (ChangeHappy b))            
+        View.checkBox [
+            prop.position.x.center
+            prop.position.y.at 16
+            //prop.autoSize true
+            checkBox.isChecked model.IsHappy
+            checkBox.text "Are you happy?"
+            checkBox.onToggled (fun b -> dispatch (ChangeHappy b))            
         ]
 
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 18)
-                Dim (AbsDim 1,AbsDim 1)                
-                Colors (Color.BrightYellow,Color.Red)
-            ]
-            Text (sprintf "The Vote says: %s" (model.VoteResult.ToString()))
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 18
+            //prop.autoSize true
+            prop.color (Color.BrightYellow,Color.Red)
+            prop.text $"The Vote says: {model.VoteResult}"
         ]
 
-        label [
-            yield Styles [
-                Pos (AbsPos 1,AbsPos 19)
-                Dim (AbsDim 1,AbsDim 1)
-                Colors (Color.BrightYellow,Color.Red)
-            ]
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 19
+            prop.color (Color.BrightYellow,Color.Red)
             match model.IsHappy with
             | true ->
-                yield Text "You are Happy!"
+                prop.text "You are Happy!"
             | false ->
-                yield Text "you are not Happy!"
+                prop.text "you are not Happy!"
         ]
     ]
 

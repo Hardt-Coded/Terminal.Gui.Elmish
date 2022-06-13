@@ -24,7 +24,7 @@ let openFileDialogCmd () =
     Cmd.OfAsync.perform (
         fun () ->
             async {
-                let file = openDialog "Open TextFile" "Select Textfile to Open"            
+                let file = Dialogs.openFileDialog "Open TextFile" "Select Textfile to Open"            
                 match file with
                 | None ->
                     return ""
@@ -49,47 +49,40 @@ let update (msg:Msg) (model:Model) =
         {model with Text = fileContent}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
+let view (model:Model) (dispatch:Msg -> unit) =
     [
-        yield label [
-            Styles [
-                Pos (CenterPos,AbsPos 1)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Terminal.Gui.Color.BrightYellow,Terminal.Gui.Color.Green)
-            ]
-            Text "TextView with File Dialog..."
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 1
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.BrightYellow, Color.Green)
+            prop.text "TextView with File Dialog..."
         ] 
 
-        yield button [
-            Styles [
-                Pos (CenterPos, AbsPos 3)
-            ]
-            Text "Open Textfile"
-            OnClicked (fun () -> dispatch OpenFileDialog)
+        View.button [
+            prop.position.x.center
+            prop.position.y.at 3
+            button.text "Open Textfile"
+            button.onClick (fun () -> dispatch OpenFileDialog)
         ]
 
-        yield frameView [
-            Styles [
-                Pos (AbsPos 1,AbsPos 4)
-                Dim (FillMargin 1,FillMargin 1)                                
-            ]
-            Text "TextView"
-        ] [
-            
-            textView [
-                Styles [
-                    Pos (AbsPos 0,AbsPos 0)
-                    Dim (Fill,Fill)                    
-                    Colors (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
-                   
+        View.frameView [
+            prop.position.x.at 1
+            prop.position.y.at 5
+            prop.width.fill 1
+            prop.height.fill 1
+            frameView.title "TextView"
+            frameView.children [
+                View.textView [
+                    prop.position.x.at 0
+                    prop.position.y.at 0
+                    prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
+                    textView.text model.Text
+                    textView.onTextChanged (fun e -> dispatch (ChangeText e))
                 ]
-                Text model.Text
-                OnChanged (fun e -> dispatch (ChangeText e))
+                
             ]
-            
         ]
-        
-
         
     ]

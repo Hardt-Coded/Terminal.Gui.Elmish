@@ -6,6 +6,7 @@ open System
 open Terminal.Gui
 open Terminal.Gui.Elmish
 open System.Data
+open Terminal.Gui.Trees
 
 
 
@@ -111,7 +112,7 @@ module ViewElement =
         props |> Interop.getValue<Dim> "width"  |> Option.iter (fun v -> view.Width <- v)
         props |> Interop.getValue<Dim> "height" |> Option.iter (fun v -> view.Height <- v)
 
-        props |> Interop.getValue<string> "text"                    |> Option.iter (fun v -> view.Text <- v)
+        props |> Interop.getValue<string> "text"                    |> Option.iter (fun v -> if Checker.textChanged view v then view.Text <- v)
         props |> Interop.getValue<TextAlignment> "textAlignment"    |> Option.iter (fun v -> view.TextAlignment <- v)
         props |> Interop.getValue<TextDirection> "textDirection"    |> Option.iter (fun v -> view.TextDirection <- v)
             
@@ -120,7 +121,65 @@ module ViewElement =
         props |> Interop.getValue<bool> "tabStop"   |> Option.iter (fun v -> view.TabStop <- v)
 
         props |> Interop.getValue<bool> "enabled" |> Option.iter (fun v -> view.Enabled <- v)
-        props |> Interop.getValue<ColorScheme> "color" |> Option.iter (fun v -> view.ColorScheme <- v)
+        props |> Interop.getValue<ColorScheme> "colorScheme" |> Option.iter (fun v -> view.ColorScheme <- v)
+        props 
+        |> Interop.getValue<Attribute> "colorDisabled" 
+        |> Option.iter (fun v -> 
+            let colorScheme =
+                view.ColorScheme |> Option.ofObj |> Option.defaultValue Colors.TopLevel
+            let cloned = Interop.cloneColorScheme colorScheme
+            cloned.Normal <- v
+            view.ColorScheme <- cloned
+        )
+        props 
+        |> Interop.getValue<Attribute> "colorFocus" 
+        |> Option.iter (fun v -> 
+            let colorScheme =
+                view.ColorScheme |> Option.ofObj |> Option.defaultValue Colors.TopLevel
+            let cloned = Interop.cloneColorScheme colorScheme
+            cloned.Normal <- v
+            view.ColorScheme <- cloned
+        )
+        props 
+        |> Interop.getValue<Attribute> "colorHotFocus" 
+        |> Option.iter (fun v -> 
+            let colorScheme =
+                view.ColorScheme |> Option.ofObj |> Option.defaultValue Colors.TopLevel
+            let cloned = Interop.cloneColorScheme colorScheme
+            cloned.Normal <- v
+            view.ColorScheme <- cloned
+        )
+        props 
+        |> Interop.getValue<Attribute> "colorHotNormal" 
+        |> Option.iter (fun v -> 
+            let colorScheme =
+                view.ColorScheme |> Option.ofObj |> Option.defaultValue Colors.TopLevel
+            let cloned = Interop.cloneColorScheme colorScheme
+            cloned.Normal <- v
+            view.ColorScheme <- cloned
+        )
+        props 
+        |> Interop.getValue<Attribute> "colorNormal" 
+        |> Option.iter (fun v -> 
+            let colorScheme =
+                view.ColorScheme |> Option.ofObj |> Option.defaultValue Colors.TopLevel
+            let cloned = Interop.cloneColorScheme colorScheme
+            cloned.Normal <- v
+            view.ColorScheme <- cloned
+        )
+
+        props 
+        |> Interop.getValue<Attribute> "color" 
+        |> Option.iter (fun v -> 
+            let colorScheme =
+                view.ColorScheme |> Option.ofObj |> Option.defaultValue Colors.TopLevel
+            let cloned = Interop.cloneColorScheme colorScheme
+            cloned.Focus <- v
+            cloned.Normal <- v
+            view.ColorScheme <- cloned
+        )
+
+        
         
 
 
@@ -129,6 +188,8 @@ module ViewElement =
         props |> Interop.getValue<bool> "autoSize"  |> Option.iter (fun v -> view.AutoSize <- false)
         props |> Interop.getValue<bool> "tabStop"   |> Option.iter (fun v -> view.TabStop <- false)
         props |> Interop.getValue<bool> "enabled" |> Option.iter (fun v -> view.Enabled <- true)
+        props |> Interop.getValue<Dim> "width"  |> Option.iter (fun v -> view.AutoSize <- true)
+        props |> Interop.getValue<Dim> "height"  |> Option.iter (fun v -> view.AutoSize <- true)
 
         let onEnabledChanged = props |> Interop.getValue<unit->unit> "onEnabledChanged"
         let onEnter          = props |> Interop.getValue<Terminal.Gui.View.FocusEventArgs->unit> "onEnter"
@@ -198,7 +259,31 @@ module ViewElement =
 
 
     let canUpdate (view:View) props =
-        true
+        let isPosCompatible (a:Pos) (b:Pos) =
+            let nameA = a.GetType().Name
+            let nameB = b.GetType().Name
+            nameA = nameB ||
+            (nameA = "PosAbsolute" && nameB = "PosAbsolute") ||
+            (nameA <> "PosAbsolute" && nameB <> "PosAbsolute")
+
+        let isDimCompatible (a:Dim) (b:Dim) =
+            let nameA = a.GetType().Name
+            let nameB = b.GetType().Name
+            nameA = nameB ||
+            (nameA = "DimAbsolute" && nameB = "DimAbsolute") ||
+            (nameA <> "DimAbsolute" && nameB <> "DimAbsolute")
+
+            
+        let positionX = props |> Interop.getValue<Pos> "x"      |> Option.map (fun v -> isPosCompatible view.X v) |> Option.defaultValue true
+        let positionY = props |> Interop.getValue<Pos> "y"      |> Option.map (fun v -> isPosCompatible view.Y v) |> Option.defaultValue true
+        let width = props |> Interop.getValue<Dim> "width"      |> Option.map (fun v -> isDimCompatible view.Width v) |> Option.defaultValue true
+        let height = props |> Interop.getValue<Dim> "height"      |> Option.map (fun v -> isDimCompatible view.Height v) |> Option.defaultValue true
+
+        positionX &&
+        positionY &&
+        width &&
+        height
+        
 
 
 
@@ -286,7 +371,7 @@ module MenuElements =
                     new MenuBarItem()    
                 | Some parent ->
                     new MenuBarItem("", [||],parent)
-            setProps el props
+            setProps el props            
             this.element <- el
     
         
@@ -653,10 +738,12 @@ type PageElement(props:IProperty list) =
         let el = Toplevel.Create()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -698,11 +785,13 @@ type WindowElement(props:IProperty list) =
         let el = new Window(title |> Interop.ustr)
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -725,7 +814,7 @@ type LabelElement(props:IProperty list) =
     
 
     let setProps (element:Label) props =
-        props |> Interop.getValue<string> "text" |> Option.iter (fun v -> element.Text <- v)
+        props |> Interop.getValue<string> "text" |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
         
         // onCLick
         props 
@@ -748,7 +837,8 @@ type LabelElement(props:IProperty list) =
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -761,6 +851,7 @@ type LabelElement(props:IProperty list) =
         let el = new Label(text |> Interop.ustr)
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
@@ -780,7 +871,11 @@ type ButtonElement(props:IProperty list) =
     let text = props |> Interop.getValueDefault "text" ""
 
     let setProps (element:Button) props =
-        props |> Interop.getValue<string> "text" |> Option.iter (fun v -> element.Text <- v)
+        props |> Interop.getValue<string> "text"            |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
+        props |> Interop.getValue<bool> "isDefault"         |> Option.iter (fun v -> element.IsDefault <- v)
+        props |> Interop.getValue<Key> "hotKey"             |> Option.iter (fun v -> element.HotKey <- v)
+        props |> Interop.getValue<Rune> "hotKeySpecifier"   |> Option.iter (fun v -> element.HotKeySpecifier <- v)
+        props |> Interop.getValue<bool> "autoSize"          |> Option.iter (fun v -> element.AutoSize <- v)
         // onCLick
         props 
         |> Interop.getValue<unit->unit> "onClick" 
@@ -792,6 +887,7 @@ type ButtonElement(props:IProperty list) =
             
 
     let removeProps (element:Button) props =
+        props |> Interop.getValue<bool> "isDefault"         |> Option.iter (fun v -> element.IsDefault <- false)
         // onCLick
         props 
         |> Interop.getValue<unit->unit> "onClick" 
@@ -810,11 +906,13 @@ type ButtonElement(props:IProperty list) =
         let el = new Button(text |> Interop.ustr)
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -834,7 +932,7 @@ type CheckBoxElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:CheckBox) props =
-        props |> Interop.getValue<string> "text" |> Option.iter (fun v -> element.Text <- v)
+        props |> Interop.getValue<string> "text" |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
         props |> Interop.getValue<bool> "checked" |> Option.iter (fun v -> element.Checked <- v)
         // onToggled
         props 
@@ -864,11 +962,13 @@ type CheckBoxElement(props:IProperty list) =
         let el = new CheckBox()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -916,11 +1016,13 @@ type ColorPickerElement(props:IProperty list) =
         let el = new ColorPicker()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -942,7 +1044,7 @@ type ComboBoxElement(props:IProperty list) =
     let setProps (element:ComboBox) props =
         props |> Interop.getValue<int> "selectedItem"   |> Option.iter (fun v -> element.SelectedItem <- v)
         props |> Interop.getValue<bool> "readonly"      |> Option.iter (fun v -> element.ReadOnly <- v)
-        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> element.Text <- v)
+        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
         
         props 
         |> Interop.getValue<string list> "source" 
@@ -993,11 +1095,13 @@ type ComboBoxElement(props:IProperty list) =
         el.ColorScheme <- Colors.Base
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1047,11 +1151,13 @@ type DateFieldElement(props:IProperty list) =
         setProps el props
         // cursor to the end
         el.CursorPosition <- 10
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1071,8 +1177,11 @@ type FrameViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:FrameView) props =
-        props |> Interop.getValue<BorderStyle> "borderStyle" |> Option.iter (fun v -> element.Border.BorderStyle <- v)
-        props |> Interop.getValue<bool> "effect3D" |> Option.iter (fun v -> element.Border.Effect3D <- v)
+        props |> Interop.getValue<BorderStyle> "borderStyle"    |> Option.iter (fun v -> element.Border.BorderStyle <- v)
+        props |> Interop.getValue<bool> "effect3D"              |> Option.iter (fun v -> element.Border.Effect3D <- v)
+        props |> Interop.getValue<string> "title"               |> Option.iter (fun v -> element.Title <- v)
+        props |> Interop.getValue<string> "text"                |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
+        props |> Interop.getValue<TextAlignment> "textAlignment"|> Option.iter (fun v -> element.TextAlignment <- v)
 
     let removeProps (element:FrameView) props =
         props |> Interop.getValue<bool> "effect3D" |> Option.iter (fun v -> element.Border.Effect3D <- false)
@@ -1087,11 +1196,13 @@ type FrameViewElement(props:IProperty list) =
         let el = new FrameView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1133,11 +1244,13 @@ type GraphViewElement(props:IProperty list) =
         let el = new GraphView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1201,11 +1314,13 @@ type HexViewElement(props:IProperty list) =
         let el = new HexView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1243,11 +1358,13 @@ type LineViewElement(props:IProperty list) =
         let el = new LineView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1267,12 +1384,12 @@ type ListViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:ListView) props =
-        props |> Interop.getValue<int> "selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v)
-        props |> Interop.getValue<int> "leftItem" |> Option.iter (fun v -> element.LeftItem <- v)
-        props |> Interop.getValue<int> "topItem" |> Option.iter (fun v -> element.TopItem <- v)
-        props |> Interop.getValue<bool> "allowsMultipleSelection" |> Option.iter (fun v -> element.AllowsMultipleSelection <- v)
-        props |> Interop.getValue<bool> "allowsMarking" |> Option.iter (fun v -> element.AllowsMarking <- v)
-        props |> Interop.getValue<string> "text"                        |> Option.iter (fun v -> element.Text <- v)
+        props |> Interop.getValue<int> "selectedItem"               |> Option.iter (fun v -> element.SelectedItem <- v)
+        props |> Interop.getValue<int> "leftItem"                   |> Option.iter (fun v -> element.LeftItem <- v)
+        props |> Interop.getValue<int> "topItem"                    |> Option.iter (fun v -> element.TopItem <- v)
+        props |> Interop.getValue<bool> "allowsMultipleSelection"   |> Option.iter (fun v -> element.AllowsMultipleSelection <- v)
+        props |> Interop.getValue<bool> "allowsMarking"             |> Option.iter (fun v -> element.AllowsMarking <- v)
+        props |> Interop.getValue<string> "text"                    |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
 
         props 
         |> Interop.getValue<string list> "source" 
@@ -1333,11 +1450,13 @@ type ListViewElement(props:IProperty list) =
         let el = new ListView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1364,6 +1483,8 @@ type PanelViewElement(props:IProperty list) as self =
                 Interop.mkprop "child" child
             ]
             child.create ()
+            
+            child.properties |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v child.element)
             element.Child <- child.element
         )
 
@@ -1414,11 +1535,14 @@ type PanelViewElement(props:IProperty list) as self =
         createChild el
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1446,7 +1570,7 @@ type ProgressBarElement(props:IProperty list) =
         props |> Interop.getValue<ProgressBarFormat> "progressBarFormat"|> Option.iter (fun v -> element.ProgressBarFormat <- v)
         props |> Interop.getValue<ProgressBarStyle> "progressBarStyle"  |> Option.iter (fun v -> element.ProgressBarStyle <- v)
         props |> Interop.getValue<Rune> "segmentCharacter"              |> Option.iter (fun v -> element.SegmentCharacter <- v)
-        props |> Interop.getValue<string> "text"                        |> Option.iter (fun v -> element.Text <- v)
+        props |> Interop.getValue<string> "text"                        |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
 
     let removeProps (element:ProgressBar) props =
         props |> Interop.getValue<bool> "bidirectionalMarquee" |> Option.iter (fun v -> element.BidirectionalMarquee <- false)
@@ -1461,11 +1585,13 @@ type ProgressBarElement(props:IProperty list) =
         let el = new ProgressBar()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1517,11 +1643,13 @@ type RadioGroupElement(props:IProperty list) =
         let el = new RadioGroup()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1580,11 +1708,13 @@ type RadioGroupElement(props:IProperty list) =
 //        let el = new ScrollBarView()
 //        ViewElement.setProps el props
 //        setProps el props
+//        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
 //        this.element <- el
 
 
 //    override this.canUpdate prevElement oldProps =
-//        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+//        let (changedProps,_) = Interop.filterProps oldProps props
+//        let canUpdateView = ViewElement.canUpdate prevElement changedProps
 //        let canUpdateElement =
 //            true
 
@@ -1611,7 +1741,6 @@ type ScrollViewElement(props:IProperty list) =
         props |> Interop.getValue<bool> "showHorizontalScrollIndicator" |> Option.iter (fun v -> element.ShowHorizontalScrollIndicator <- v)
         props |> Interop.getValue<Size> "contentSize"                   |> Option.iter (fun v -> element.ContentSize <- v)
         props |> Interop.getValue<Point>"contentOffset"                 |> Option.iter (fun v -> element.ContentOffset <- v)
-        
 
     let removeProps (element:ScrollView) props =
         props |> Interop.getValue<bool> "autoHideScrollBars"         |> Option.iter (fun v -> element.AutoHideScrollBars <- true)
@@ -1629,11 +1758,13 @@ type ScrollViewElement(props:IProperty list) =
         let el = new ScrollView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1669,11 +1800,13 @@ type StatusBarElement(props:IProperty list) =
         let el = new StatusBar()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1751,11 +1884,13 @@ type TableViewElement(props:IProperty list) =
         let el = new TableView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1780,7 +1915,7 @@ type TabViewElement(props:IProperty list) =
         props |> Interop.getValue<UInt32> "maxTabTextWidth" |> Option.iter (fun v -> element.MaxTabTextWidth <- v)
         props |> Interop.getValue<TabView.Tab> "selectedTab"|> Option.iter (fun v -> element.SelectedTab <- v)
         props |> Interop.getValue<TabView.TabStyle> "style" |> Option.iter (fun v -> element.Style <- v)
-
+        
         // onSelectedTabChanged
         props 
         |> Interop.getValue<EventHandler<TabView.TabChangedEventArgs>> "onSelectedTabChanged" 
@@ -1801,7 +1936,8 @@ type TabViewElement(props:IProperty list) =
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1814,6 +1950,8 @@ type TabViewElement(props:IProperty list) =
         let el = new TabView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+        
         this.element <- el
 
 
@@ -1835,7 +1973,7 @@ type TextFieldElement(props:IProperty list) =
         props |> Interop.getValue<bool> "used"          |> Option.iter (fun v -> element.Used <- v)
         props |> Interop.getValue<bool> "readOnly"      |> Option.iter (fun v -> element.ReadOnly <- v)
         props |> Interop.getValue<Rect> "frame"         |> Option.iter (fun v -> element.Frame <- v)
-        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> element.Text <- v)
+        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
         props |> Interop.getValue<bool> "secret"        |> Option.iter (fun v -> element.Secret <- v)
         props |> Interop.getValue<int> "cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v)
         props |> Interop.getValue<bool> "canFocus"      |> Option.iter (fun v -> element.CanFocus <- v)
@@ -1895,11 +2033,13 @@ type TextFieldElement(props:IProperty list) =
         let el = new TextField()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1920,7 +2060,8 @@ type TextValidateFieldElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:TextValidateField) props =
-        ()
+        props |> Interop.getValue<TextValidateProviders.ITextValidateProvider> "provider" |> Option.iter (fun v -> element.Provider <- v)
+        props |> Interop.getValue<string> "text"|> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
 
     let removeProps (element:TextValidateField) props =
         ()
@@ -1935,11 +2076,13 @@ type TextValidateFieldElement(props:IProperty list) =
         let el = new TextValidateField()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -1960,10 +2103,50 @@ type TextViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:TextView) props =
-        ()
+        props |> Interop.getValue<string> "text"                |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
+        props |> Interop.getValue<Rect> "frame"                 |> Option.iter (fun v -> element.Frame <- v)
+        props |> Interop.getValue<int> "topRow"                 |> Option.iter (fun v -> element.TopRow <- v)
+        props |> Interop.getValue<int> "leftColumn"             |> Option.iter (fun v -> element.LeftColumn <- v)
+        props |> Interop.getValue<Point> "cursorPosition"       |> Option.iter (fun v -> element.CursorPosition <- v)
+        props |> Interop.getValue<int> "selectionStartColumn"   |> Option.iter (fun v -> element.SelectionStartColumn <- v)
+        props |> Interop.getValue<int> "selectionStartRow"      |> Option.iter (fun v -> element.SelectionStartRow <- v)
+        props |> Interop.getValue<int> "bottomOffset"           |> Option.iter (fun v -> element.BottomOffset <- v)
+        props |> Interop.getValue<int> "rightOffset"            |> Option.iter (fun v -> element.RightOffset <- v)
+        props |> Interop.getValue<int> "tabWidth"               |> Option.iter (fun v -> element.TabWidth <- v)
+        props |> Interop.getValue<bool> "allowsReturn"          |> Option.iter (fun v -> element.AllowsReturn <- v)
+        props |> Interop.getValue<bool> "allowsTab"             |> Option.iter (fun v -> element.AllowsTab <- v)
+        props |> Interop.getValue<bool> "multiline"             |> Option.iter (fun v -> element.Multiline <- v)
+        props |> Interop.getValue<bool> "readOnly"              |> Option.iter (fun v -> element.ReadOnly <- v)
+        props |> Interop.getValue<bool> "selecting"             |> Option.iter (fun v -> element.Selecting <- v)
+        props |> Interop.getValue<bool> "wordWrap"              |> Option.iter (fun v -> element.WordWrap <- v)
+        props |> Interop.getValue<bool> "canFocus"              |> Option.iter (fun v -> element.CanFocus <- v)
+        props |> Interop.getValue<bool> "used"                  |> Option.iter (fun v -> element.Used <- v)
+        props |> Interop.getValue<CursorVisibility> "desiredCursorVisibility" |> Option.iter (fun v -> element.DesiredCursorVisibility <- v)
+        // onTextChanged
+        props 
+        |> Interop.getValue<string->unit> "onTextChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "TextChanged" element
+            let action () = v (element.Text |> Interop.str)
+            element.add_TextChanged action
+        )
 
     let removeProps (element:TextView) props =
-        ()
+        props |> Interop.getValue<bool> "allowsReturn"          |> Option.iter (fun v -> element.AllowsReturn <- true)
+        props |> Interop.getValue<bool> "allowsTab"             |> Option.iter (fun v -> element.AllowsTab <- true)
+        props |> Interop.getValue<bool> "multiline"             |> Option.iter (fun v -> element.Multiline <- true)
+        props |> Interop.getValue<bool> "readOnly"              |> Option.iter (fun v -> element.ReadOnly <- false)
+        props |> Interop.getValue<bool> "selecting"             |> Option.iter (fun v -> element.Selecting <- false)
+        props |> Interop.getValue<bool> "wordWrap"              |> Option.iter (fun v -> element.WordWrap <- false)
+        props |> Interop.getValue<bool> "canFocus"              |> Option.iter (fun v -> element.CanFocus <- true)
+        props |> Interop.getValue<bool> "used"                  |> Option.iter (fun v -> element.Used <- true)
+        props |> Interop.getValue<int> "tabWidth"               |> Option.iter (fun v -> element.TabWidth <- 4)
+        // onTextChanged
+        props 
+        |> Interop.getValue<unit->unit> "onTextChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "TextChanged" element
+        )
 
     override _.name = $"TextView"
 
@@ -1975,11 +2158,13 @@ type TextViewElement(props:IProperty list) =
         let el = new TextView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -2028,11 +2213,13 @@ type TimeFieldElement(props:IProperty list) =
         let el = new TimeField()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -2053,7 +2240,32 @@ type TreeViewElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:TreeView) props =
-        ()
+        props |> Interop.getValue<ITreeBuilder<Trees.ITreeNode>> "treeBuilder"      |> Option.iter (fun v -> element.TreeBuilder <- v)
+        props |> Interop.getValue<TreeStyle> "style"                                |> Option.iter (fun v -> element.Style <- v)
+        props |> Interop.getValue<bool> "multiSelect"                               |> Option.iter (fun v -> element.MultiSelect <- v)
+        props |> Interop.getValue<bool> "allowLetterBasedNavigation"                |> Option.iter (fun v -> element.AllowLetterBasedNavigation <- v)
+        props |> Interop.getValue<ITreeNode> "selectedObject"                       |> Option.iter (fun v -> element.SelectedObject <- v)
+        props |> Interop.getValue<Key> "objectActivationKey"                        |> Option.iter (fun v -> element.ObjectActivationKey <- v)
+        props |> Interop.getValue<Nullable<MouseFlags>> "objectActivationButton"    |> Option.iter (fun v -> element.ObjectActivationButton <- v)
+        props |> Interop.getValue<ITreeNode->ColorScheme> "colorGetter"             |> Option.iter (fun v -> element.ColorGetter <- v)
+        props |> Interop.getValue<int> "scrollOffsetVertical"                       |> Option.iter (fun v -> element.ScrollOffsetVertical <- v)
+        props |> Interop.getValue<int> "scrollOffsetHorizontal"                     |> Option.iter (fun v -> element.ScrollOffsetHorizontal <- v)
+        props |> Interop.getValue<AspectGetterDelegate<ITreeNode>> "aspectGetter"   |> Option.iter (fun v -> element.AspectGetter <- v)
+        props |> Interop.getValue<CursorVisibility> "desiredCursorVisibility"       |> Option.iter (fun v -> element.DesiredCursorVisibility <- v)
+        // onObjectActivated
+        props 
+        |> Interop.getValue<ObjectActivatedEventArgs<ITreeNode>->unit> "onObjectActivated" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "ObjectActivated" element
+            element.add_ObjectActivated v
+        )
+        // onSelectionChanged
+        props 
+        |> Interop.getValue<SelectionChangedEventArgs<ITreeNode>->unit> "onSelectionChanged" 
+        |> Option.iter (fun v -> 
+            Interop.removeEventHandlerIfNecessary "SelectionChanged" element
+            element.SelectionChanged.Add v
+        )
 
     let removeProps (element:TreeView) props =
         ()
@@ -2068,11 +2280,13 @@ type TreeViewElement(props:IProperty list) =
         let el = new TreeView()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -2108,11 +2322,13 @@ type DialogElement(props:IProperty list) =
         let el = new Dialog()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -2148,11 +2364,13 @@ type FileDialogElement(props:IProperty list) =
         let el = new FileDialog()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -2188,11 +2406,13 @@ type SaveDialogElement(props:IProperty list) =
         let el = new SaveDialog()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 
@@ -2228,11 +2448,13 @@ type OpenDialogElement(props:IProperty list) =
         let el = new OpenDialog()
         ViewElement.setProps el props
         setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
 
     override this.canUpdate prevElement oldProps =
-        let canUpdateView = ViewElement.canUpdate prevElement oldProps
+        let (changedProps,_) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps
         let canUpdateElement =
             true
 

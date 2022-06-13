@@ -224,15 +224,14 @@ let update (msg:Msg) (model:Model) =
         
 
 let view (model:Model) (dispatch:Msg->unit) =
-    styledPage [
-        Styles [
-            Colors (Terminal.Gui.Color.White, Terminal.Gui.Color.Gray)
-            FocusColors (Terminal.Gui.Color.Red, Terminal.Gui.Color.DarkGray)
-            HotNormalColors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Green)
-            HotFocusedColors (Terminal.Gui.Color.BrightMagenta, Terminal.Gui.Color.BrightGreen)
-            DisabledColors (Terminal.Gui.Color.Brown, Terminal.Gui.Color.White)
-        ]
-    ] [
+    View.page [
+        //Styles [
+        //    Colors (Terminal.Gui.Color.White, Terminal.Gui.Color.Gray)
+        //    FocusColors (Terminal.Gui.Color.Red, Terminal.Gui.Color.DarkGray)
+        //    HotNormalColors (Terminal.Gui.Color.Blue, Terminal.Gui.Color.Green)
+        //    HotFocusedColors (Terminal.Gui.Color.BrightMagenta, Terminal.Gui.Color.BrightGreen)
+        //    DisabledColors (Terminal.Gui.Color.Brown, Terminal.Gui.Color.White)
+        //]
 
         //statusBar [
         //    statusItem "Counter (F2)"           Terminal.Gui.Key.F2     (fun () -> dispatch (ChangePage Counter))
@@ -270,138 +269,123 @@ let view (model:Model) (dispatch:Msg->unit) =
 
         
 
-        window [
-            Styles [
-                Pos (AbsPos 0,AbsPos 1)
-                Dim (Fill,Fill)
-            ]
-            Title (sprintf "Elmish Console Demo - %s" <| model.CurrentLocalTime.ToString("yyyy-MM-dd HH:mm:ss.ms"))
-        ] [
+        View.window [
+            prop.position.x.at 0
+            prop.position.y.at 0
+            prop.width.filled
+            prop.height.filled
+            window.title $"Elmish Console Demo - {model.CurrentLocalTime:``yyyy-MM-dd HH:mm:ss.ms``}"
+            window.children [
 
-            
+                View.window [
+                    prop.position.x.at 0
+                    prop.position.y.at 0
+                    prop.width.percent 20.0
+                    prop.height.fill 2
+                    window.title "Choose"
+                    window.children [
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 1
+                            button.text "Start"
+                            button.onClick (fun () -> dispatch (ChangePage Start))
+                        ]
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 2
+                            button.text "Counter"
+                            button.onClick (fun () -> dispatch (ChangePage Counter))
+                        ] 
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 3
+                            button.text "TextFields"
+                            button.onClick (fun () -> dispatch (ChangePage TextFields))
+                        ] 
 
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 4
+                            button.text "Radio and Check"
+                            button.onClick (fun () -> dispatch (ChangePage RadioCheck))
+                        ] 
 
-            window [
-                Styles [
-                    Pos (AbsPos 2,AbsPos 2)
-                    Dim (PercentDim 20.0,FillMargin 2)
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 5
+                            button.text "Text File View"
+                            button.onClick (fun () -> dispatch (ChangePage TextView))
+                        ] 
+
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 6
+                            button.text "List View"
+                            button.onClick (fun () -> dispatch (ChangePage ListView))
+                        ]                
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 7
+                            button.text "Scroll View"
+                            button.onClick (fun () -> dispatch (ChangePage ScrollView))
+                        ] 
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 8
+                            button.text "Message Boxes"
+                            button.onClick (fun () -> dispatch (ChangePage MessageBoxes))
+                        ] 
+                    ]
                 ]
-                Title "Choose"
-            ] [
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 1)   
-                        
+
+                View.window [
+                    prop.position.x.percent 25.0
+                    prop.position.y.at 2
+                    prop.width.fill 2
+                    prop.height.fill 2
+                    window.title "Demo"
+                    window.children [
+                        match model.Page with
+                        | Start ->
+                            yield! Start.view
+                        | Counter ->
+                            match model.CounterModel with
+                            | None -> ()
+                            | Some cmodel ->
+                                yield! Counter.view cmodel (CounterMsg >> dispatch)
+                        | TextFields ->
+                            match model.TextFieldsModel with
+                            | None -> ()
+                            | Some tfmodel ->
+                                yield! TextFields.view tfmodel (TextFieldsMsg >> dispatch)
+                        | RadioCheck ->
+                            match model.RadioCheckModel with
+                            | None -> ()
+                            | Some rcmodel ->
+                                yield! RadioCheck.view rcmodel (RadioCheckMsg >> dispatch)
+                        | TextView ->
+                            match model.TextViewModel with
+                            | None -> ()
+                            | Some tvmodel ->
+                                yield! TextView.view tvmodel (TextViewMsg >> dispatch)
+                        | ListView ->
+                            match model.ListViewModel with
+                            | None -> ()
+                            | Some tvmodel ->
+                                yield! ListView.view tvmodel (ListViewMsg >> dispatch)
+                        | ScrollView ->
+                            match model.ScrollViewModel with
+                            | None -> ()
+                            | Some svmodel ->
+                                yield! ScrollView.view svmodel (ScrollViewMsg >> dispatch)
+                        | MessageBoxes ->
+                            match model.MessageBoxesModel with
+                            | None -> ()
+                            | Some svmodel ->
+                                yield! MessageBoxes.view svmodel (MessageBoxesMsg >> dispatch)
                     ]
-                    Text "Start"
-                    OnClicked (fun () -> dispatch (ChangePage Start))
                 ]
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 2)
-                    ]
-                    Text "Counter"
-                    OnClicked (fun () -> dispatch (ChangePage Counter))
-                ] 
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 3)
-                    ]
-                    Text "TextFields"
-                    OnClicked (fun () -> dispatch (ChangePage TextFields))
-                ] 
-
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 4)
-                    ]
-                    Text "Radio and Check"
-                    OnClicked (fun () -> dispatch (ChangePage RadioCheck))
-                ] 
-
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 5)
-                    ]
-                    Text "Text File View"
-                    OnClicked (fun () -> dispatch (ChangePage TextView))
-                ] 
-
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 6)
-                    ]
-                    Text "List View"
-                    OnClicked (fun () -> dispatch (ChangePage ListView))
-                ]                
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 7)
-                    ]
-                    Text "Scroll View"
-                    OnClicked (fun () -> dispatch (ChangePage ScrollView))
-                ] 
-                button [
-                    Styles [
-                        Pos (AbsPos 1, AbsPos 8)
-                    ]
-                    Text "Message Boxes"
-                    OnClicked (fun () -> dispatch (ChangePage MessageBoxes))
-                ] 
             ]
-
-            window [
-                Styles [
-                    Pos (PercentPos 25.0,AbsPos 2)
-                    Dim (FillMargin 2,FillMargin 2)
-                ]
-                Title "Demo"
-            ] [
-                match model.Page with
-                | Start ->
-                    yield! Start.view
-                | Counter ->
-                    match model.CounterModel with
-                    | None -> ()
-                    | Some cmodel ->
-                        yield! Counter.view cmodel (CounterMsg >> dispatch)
-                | TextFields ->
-                    match model.TextFieldsModel with
-                    | None -> ()
-                    | Some tfmodel ->
-                        yield! TextFields.view tfmodel (TextFieldsMsg >> dispatch)
-                | RadioCheck ->
-                    match model.RadioCheckModel with
-                    | None -> ()
-                    | Some rcmodel ->
-                        yield! RadioCheck.view rcmodel (RadioCheckMsg >> dispatch)
-                | TextView ->
-                    match model.TextViewModel with
-                    | None -> ()
-                    | Some tvmodel ->
-                        yield! TextView.view tvmodel (TextViewMsg >> dispatch)
-                | ListView ->
-                    match model.ListViewModel with
-                    | None -> ()
-                    | Some tvmodel ->
-                        yield! ListView.view tvmodel (ListViewMsg >> dispatch)
-                | ScrollView ->
-                    match model.ScrollViewModel with
-                    | None -> ()
-                    | Some svmodel ->
-                        yield! ScrollView.view svmodel (ScrollViewMsg >> dispatch)
-                | MessageBoxes ->
-                    match model.MessageBoxesModel with
-                    | None -> ()
-                    | Some svmodel ->
-                        yield! MessageBoxes.view svmodel (MessageBoxesMsg >> dispatch)
-
-                
-                
-
-            ]
-
-
         ]
     ]
 

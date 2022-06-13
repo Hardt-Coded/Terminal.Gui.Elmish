@@ -160,6 +160,34 @@ type View =
 
 
 
+module Dialogs =
+    open System
 
+    let openFileDialog title message =
+        use dia = new OpenDialog(title |> Interop.ustr,message |> Interop.ustr)                
+        Application.Run(dia)
+        let file = 
+            dia.FilePath
+            |> Option.ofObj 
+            |> Option.map string
+            |> Option.bind (fun s ->
+                if String.IsNullOrEmpty(s) then None 
+                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+            )
+        file
+
+
+    let messageBox width height title text (buttons:string list) =
+        let result = MessageBox.Query(width,height,title |>Interop.ustr,text |> Interop.ustr,buttons |> List.map Interop.ustr |> List.toArray)
+        match buttons with
+        | [] -> ""
+        | _ -> buttons.[result]
+
+
+    let errorBox width height title text (buttons:string list) =
+        let result = MessageBox.ErrorQuery(width,height,title |>Interop.ustr,text |> Interop.ustr,buttons |> List.map Interop.ustr |> List.toArray)
+        match buttons with
+        | [] -> ""
+        | _ -> buttons.[result]
    
 

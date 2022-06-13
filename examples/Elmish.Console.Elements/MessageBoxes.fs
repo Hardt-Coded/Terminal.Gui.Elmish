@@ -24,7 +24,7 @@ let init () : Model * Cmd<Msg> =
 
 let incrementCmd () =
     Cmd.OfFunc.perform (fun () ->
-        let result = messageBox 60 10 "Increment" "How many do you want to Increment?" ["+10";"+5";"+1";"None"]
+        let result = Dialogs.messageBox 60 10 "Increment" "How many do you want to Increment?" ["+10";"+5";"+1";"None"]
         match result with
         | "+10" -> 10
         | "+5" -> 5
@@ -34,7 +34,7 @@ let incrementCmd () =
 
 let decrementCmd () =
     Cmd.OfFunc.perform (fun () ->
-        let result = errorBox 60 10 "Decrement" "How many do you want to Decrement?" ["-10";"-5";"-1";"None"]
+        let result = Dialogs.errorBox 60 10 "Decrement" "How many do you want to Decrement?" ["-10";"-5";"-1";"None"]
         match result with
         | "-10" -> 10
         | "-5" -> 5
@@ -57,43 +57,38 @@ let update (msg:Msg) (model:Model) =
         {model with Counter = 0}, Cmd.none
 
 
-let view (model:Model) (dispatch:Msg->unit) : ViewElement list=
+let view (model:Model) (dispatch:Msg->unit) =
     [
-        label [
-            Styles [
-                Pos (CenterPos,AbsPos 1)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Terminal.Gui.Color.BrightYellow,Terminal.Gui.Color.Green)
-            ]
-            Text "Counter with Message Boxes!"
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 1
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.BrightYellow, Color.Green)
+            prop.text "Counter with Message Boxes!"
         ] 
 
-        button [
-            Styles [
-                Pos (CenterPos,AbsPos 5)                
-            ]
-            Text "Up"
-            OnClicked (fun () -> dispatch Increment)
+        View.button [
+            prop.position.x.center
+            prop.position.y.at 5
+            prop.text "Up"
+            button.onClick (fun () -> dispatch Increment)
         ] 
 
-        label [
-            Styles [
-                Pos (CenterPos,AbsPos 6)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Terminal.Gui.Color.Magenta,Terminal.Gui.Color.BrightYellow)
-            ]
-            Text (sprintf "The Count of 'Fancyness' is %i" model.Counter)
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 6
+            prop.textAlignment.centered
+            prop.color (Color.Magenta, Color.BrightYellow)
+            prop.text $"The Count of 'Fancyness' is {model.Counter}"
         ] 
 
 
-        button [
-            Styles [
-                Pos (CenterPos,AbsPos 7)                
-            ]
-            Text "Down"
-            OnClicked (fun () -> dispatch Decrement)
+        View.button [
+            prop.position.x.center
+            prop.position.y.at 7
+            prop.text "Down"
+            button.onClick (fun () -> dispatch Decrement)
         ] 
     ]
 

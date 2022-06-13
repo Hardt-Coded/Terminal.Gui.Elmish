@@ -42,141 +42,110 @@ let update (msg:Msg) (model:Model) =
    
 
 
-let view (model:Model) (dispatch:Msg -> unit) : ViewElement list=
+let view (model:Model) (dispatch:Msg -> unit) =
     [
-        label[]
-        
-
-        label [
-            Styles [
-                Pos (CenterPos,AbsPos 1)
-                Dim (Fill,AbsDim 1)
-                TextAlignment Centered
-                Colors (Terminal.Gui.Color.BrightYellow,Terminal.Gui.Color.Green)
-            ]
-            Text "Some Text Fields..."
+        View.label [
+            prop.position.x.center
+            prop.position.y.at 1
+            prop.width.fill 1
+            prop.textAlignment.centered
+            prop.color (Color.BrightYellow, Color.Green)
+            prop.text "Some Text Fields..."
         ] 
 
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 5)
-                Dim (AbsDim 14,AbsDim 1)                
-            ]
-            Text "Text:"
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 5
+            prop.width.sized 14
+            prop.text "Text:"
         ]
 
-        textField [
-            Styles [
-                Pos (AbsPos 14,AbsPos 5)
-                Dim (Fill,AbsDim 1)
-
-            ]
-            Value model.Text
-            OnChanged (fun t -> dispatch (ChangeText t))
+        View.textField [
+            prop.position.x.at 14
+            prop.position.y.at 5
+            prop.width.filled
+            textField.text model.Text
+            textField.onTextChanging (fun t -> dispatch (ChangeText t))
         ]
 
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 7)
-                Dim (AbsDim 14,AbsDim 1)                
-            ]
-            Text "Secret Text:"
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 7
+            prop.width.sized 14
+            prop.text "Secret Text:"
         ]
 
-        textField [
-            Styles [
-                Pos (AbsPos 14,AbsPos 7)
-                Dim (Fill,AbsDim 1)
-
-            ]
-            Value model.SecretText
-            OnChanged (fun t -> dispatch (ChangeSecretText t))
-            Secret
+        View.textField [
+            prop.position.x.at 14
+            prop.position.y.at 7
+            prop.width.filled
+            textField.text  model.SecretText
+            textField.onTextChanging (fun text -> dispatch (ChangeSecretText text))
+            textField.secret
         ]
 
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 9)
-                Dim (AbsDim 1,AbsDim 1)                
-                Colors (Color.BrightYellow,Color.Red)
-            ]
-            Text (sprintf "The Text says: %s" model.Text)
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 9
+            prop.text $"The Text says: {model.Text}"
         ]
 
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 11)
-                Dim (AbsDim 1,AbsDim 1)
-                Colors (Color.BrightYellow,Color.Red)
-            ]
-            Text (sprintf "The Secret Text says: %s" model.SecretText)
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 11
+            prop.text $"The Secret Text says: {model.SecretText}"
         ]
 
 
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 13)
-                Dim (AbsDim 14,AbsDim 1)                
-            ]
-            Text "Time Field:"
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 13
+            prop.width.sized 14
+            prop.text "Time Field:"
         ]
 
-        timeField [
-            Styles [
-                Pos (AbsPos 16,AbsPos 13)
-            ]
-            Value model.CurrentTime
-            OnChanged (fun time -> dispatch <| ChangeTime time)
+        View.timeField [
+            prop.position.x.at 16
+            prop.position.y.at 13
+            timeField.time  model.CurrentTime
+            timeField.onTimeChanged (fun ev -> dispatch <| ChangeTime ev.NewValue)
         ]
 
-        timeField [
-            Styles [
-                Pos (AbsPos 30,AbsPos 13)
-            ]
-            IsShort
-            Value model.CurrentTime
-            OnChanged (fun time -> dispatch <| ChangeTime time)
+        View.timeField [
+            prop.position.x.at 30
+            prop.position.y.at 13
+            timeField.isShortFormat true
+            timeField.time model.CurrentTime
+            timeField.onTimeChanged (fun ev -> dispatch <| ChangeTime ev.NewValue)
         ]
 
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 15)
-                Dim (AbsDim 14,AbsDim 1)                
-            ]
-            Text "Date Field:"
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 15
+            prop.width.sized 14
+            prop.text "Date Field:"
         ]
 
-        dateField [
-            Styles [
-                Pos (AbsPos 16,AbsPos 15)
-            ]
-            Value model.CurrentDate
-            OnChanged (fun time -> dispatch <| ChangeDate time)
+        View.dateField [
+            prop.position.x.at 16
+            prop.position.y.at 15
+            dateField.date model.CurrentDate
+            dateField.onDateChanged (fun ev -> dispatch <| ChangeDate ev.NewValue)
         ]
 
-        dateField [
-            Styles [
-                Pos (AbsPos 30,AbsPos 15)
-            ]
-            IsShort
-            Value model.CurrentDate
-            OnChanged (fun time -> dispatch <| ChangeDate time)
+        View.dateField [
+            prop.position.x.at 30
+            prop.position.y.at 15
+            dateField.isShortFormat true
+            dateField.date model.CurrentDate
+            dateField.onDateChanged (fun ev -> dispatch <| ChangeDate ev.NewValue)
         ]
-        
+ 
 
-
-        
-
-        
-
-
-        label [
-            Styles [
-                Pos (AbsPos 1,AbsPos 17)
-                Dim (AbsDim 1,AbsDim 1)
-                Colors (Color.BrightYellow,Color.Red)
-            ]
-            Text (sprintf "The DateTime (time and date Field) says: %s" <| model.CurrentDate.Add(model.CurrentTime).ToString("ddd, yyyy-MM-dd HH:mm:ss"))
+        View.label [
+            prop.position.x.at 1
+            prop.position.y.at 17
+            prop.text $"The DateTime (time and date Field) says: {model.CurrentDate.Add(model.CurrentTime):``ddd, yyyy-MM-dd HH:mm:ss``}"
         ]
 
     ]

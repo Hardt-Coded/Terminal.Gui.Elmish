@@ -39,136 +39,6 @@ type Msg =
     | ChangeVisibility of bool
 
 
-module Data =
-
-    open System.Data
-
-    let xml = """
-
-<NewDataSet>
-<xs:schema xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="NewDataSet">
-<xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="RecentMatter" msdata:UseCurrentLocale="true">
-<xs:complexType>
-<xs:choice minOccurs="0" maxOccurs="unbounded">
-<xs:element name="RecentMatter">
-<xs:complexType>
-<xs:sequence>
-<xs:element name="UserLogin">
-<xs:simpleType>
-<xs:restriction base="xs:string">
-<xs:maxLength value="2147483647"/>
-</xs:restriction>
-</xs:simpleType>
-</xs:element>
-<xs:element name="MatterNumber">
-<xs:simpleType>
-<xs:restriction base="xs:string">
-<xs:maxLength value="2147483647"/>
-</xs:restriction>
-</xs:simpleType>
-</xs:element>
-<xs:element name="ClientName">
-<xs:simpleType>
-<xs:restriction base="xs:string">
-<xs:maxLength value="2147483647"/>
-</xs:restriction>
-</xs:simpleType>
-</xs:element>
-<xs:element name="MatterName">
-<xs:simpleType>
-<xs:restriction base="xs:string">
-<xs:maxLength value="2147483647"/>
-</xs:restriction>
-</xs:simpleType>
-</xs:element>
-<xs:element name="ClientCode" minOccurs="0">
-<xs:simpleType>
-<xs:restriction base="xs:string">
-<xs:maxLength value="2147483647"/>
-</xs:restriction>
-</xs:simpleType>
-</xs:element>
-<xs:element name="OfficeCode" minOccurs="0">
-<xs:simpleType>
-<xs:restriction base="xs:string">
-<xs:maxLength value="2147483647"/>
-</xs:restriction>
-</xs:simpleType>
-</xs:element>
-<xs:element name="OfficeName" minOccurs="0">
-<xs:simpleType>
-<xs:restriction base="xs:string">
-<xs:maxLength value="2147483647"/>
-</xs:restriction>
-</xs:simpleType>
-</xs:element>
-<xs:element name="Billable" type="xs:boolean"/>
-<xs:element name="ReferenceId" minOccurs="0">
-<xs:simpleType>
-<xs:restriction base="xs:string">
-<xs:maxLength value="2147483647"/>
-</xs:restriction>
-</xs:simpleType>
-</xs:element>
-<xs:element name="LastUsed" type="xs:dateTime"/>
-</xs:sequence>
-</xs:complexType>
-</xs:element>
-</xs:choice>
-</xs:complexType>
-<xs:unique name="Constraint1" msdata:PrimaryKey="true">
-<xs:selector xpath=".//RecentMatter"/>
-<xs:field xpath="UserLogin"/>
-<xs:field xpath="MatterNumber"/>
-</xs:unique>
-</xs:element>
-</xs:schema>
-
-<RecentMatter>
-  <UserLogin>PSLTP6\RJK</UserLogin>
-  <MatterNumber>99999-2302</MatterNumber>
-  <ClientName>Test Matters</ClientName>
-  <MatterName>DP Test Matter</MatterName>
-  <ClientCode>99999</ClientCode>
-  <OfficeCode/>
-  <OfficeName/>
-  <Billable>true</Billable>
-  <ReferenceId/>
-  <LastUsed>2011-08-23T23:40:24.13+01:00</LastUsed>
-</RecentMatter>
-<RecentMatter>
-  <UserLogin>PSLTP6\RJK</UserLogin>
-  <MatterNumber>999991.0002</MatterNumber>
-  <ClientName>Lathe 1</ClientName>
-  <MatterName>LW Test 2</MatterName>
-  <ClientCode/>
-  <OfficeCode/>
-  <OfficeName/>
-  <Billable>true</Billable>
-  <ReferenceId/>
-  <LastUsed>2011-07-12T16:57:27.173+01:00</LastUsed>
-</RecentMatter>
-<RecentMatter>
-  <UserLogin>PSLTP6\RJK</UserLogin>
-  <MatterNumber>999991-0001</MatterNumber>
-  <ClientName>Lathe 1</ClientName>
-  <MatterName>LW Test 1</MatterName>
-  <ClientCode/>
-  <OfficeCode/>
-  <OfficeName/>
-  <Billable>false</Billable>
-  <ReferenceId/>
-  <LastUsed>2011-07-12T01:59:06.887+01:00</LastUsed>
-</RecentMatter>
-</NewDataSet>
-
-    """
-
-    let table = 
-        use sr = new StringReader(xml)
-        let dt = new DataTable()
-        dt.ReadXml(sr) |> ignore
-        dt
 
 let init () =
     { 
@@ -274,23 +144,23 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 
                                 ]
                             View.button [
-                                prop.position.x.at 4
-                                prop.position.y.at 5
+                                prop.position.x.at 2
+                                prop.position.y.at 2
                                 prop.text "Plus"
                                 button.onClick (fun () -> dispatch Msg.Inc)
                                 if state.IsVisible then prop.enabled else prop.disabled
                             ]
 
                             View.button [
-                                prop.position.x.at 14
-                                prop.position.y.at 5
+                                prop.position.x.at 2
+                                prop.position.y.at 4
                                 prop.text "Minus"
                                 button.onClick (fun () -> dispatch Msg.Dec)
                             ]
 
                             View.checkBox [
-                                prop.position.x.at 14
-                                prop.position.y.at 11
+                                prop.position.x.at 2
+                                prop.position.y.at 6
                                 prop.text "Checkbox"
                                 if state.IsVisible then
                                     prop.onMouseEnter (fun e -> System.Diagnostics.Debug.WriteLine($"mouse enter event"))
@@ -299,7 +169,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             ]
 
                             View.colorPicker [
-                                prop.position.x.at 34
+                                prop.position.x.at 15
                                 prop.position.y.at 2
                                 prop.text "Color"
                                 colorPicker.selectedColor Terminal.Gui.Color.BrightCyan
@@ -307,28 +177,27 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             ]
 
                             View.button [
-                                prop.position.x.at 24
-                                prop.position.y.at 5
+                                prop.position.x.at 2
+                                prop.position.y.at 8
                                 prop.text "Visible"
                                 button.onClick (fun () -> dispatch <| Msg.ChangeVisibility (state.IsVisible |> not))
                             ]
 
                             
                             View.comboBox [
-                                prop.position.x.at 34
+                                prop.position.x.at 15
                                 prop.position.y.at 8
                                 prop.width.sized 10
                                 prop.text "Combobox"
-                                prop.color Colors.Base
+                                prop.color (Color.BrightYellow, Color.Green)
                                 comboBox.source state.ListItems
                                 comboBox.selectedItem state.SelectedListItem
                                 comboBox.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"open selected item {t.Value}"))
                                 comboBox.onSelectedItemChanged (fun e -> dispatch <| ListChanged e.Item)
-                                comboBox.readonly state.IsVisible
                             ]
 
                             View.dateField [
-                                prop.position.x.at 49
+                                prop.position.x.at 26
                                 prop.position.y.at 8
                                 prop.width.sized 10
                                 prop.text "DateField"
@@ -337,43 +206,53 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             ]
 
                             View.timeField [
-                                prop.position.x.at 65
+                                prop.position.x.at 38
                                 prop.position.y.at 8
                                 prop.width.sized 10
                                 prop.text "Timefield"
+                                prop.color (Color.BrightYellow, Color.Green)
                                 timeField.time DateTime.Now.TimeOfDay
                             ]
 
                             View.frameView [
-                                prop.position.x.at 5
-                                prop.position.y.at 12
-                                prop.width.sized 20
+                                prop.position.x.at 2
+                                prop.position.y.at 10
+                                prop.width.sized 15
                                 prop.height.sized 7
                                 prop.text "FrameView"
                                 frameView.borderStyle.rounded
                                 frameView.effect3D
                             ]
 
-                            View.hexView [
-                                prop.position.x.at 30
-                                prop.position.y.at 12
-                                prop.width.sized 20
+                            View.scrollView [
+                                prop.position.x.at 19
+                                prop.position.y.at 10
+                                prop.width.sized 15
                                 prop.height.sized 7
-                                prop.text "Hex"
-                                hexView.source (new MemoryStream(System.Text.ASCIIEncoding.UTF8.GetBytes("Hello World")))
+                                scrollView.showHorizontalScrollIndicator true
+                                scrollView.showVerticalScrollIndicator true
+                                scrollView.contentSize (Size(25,20))
+                                prop.children [
+                                    View.hexView [
+                                        prop.width.sized 25
+                                        prop.height.sized 20
+                                        prop.text "Hex"
+                                        hexView.source (new MemoryStream(System.Text.ASCIIEncoding.UTF8.GetBytes("Hello World")))
+                                    ]
+                                ]
                             ]
 
                             View.lineView [
                                 prop.position.y.at 1
-                                lineView.lineRune (Rune('~'))
+                                lineView.lineRune (Rune('-'))
                                 lineView.startingAnchor (Some <| Rune('>'))
                                 lineView.endingAnchor (Some <| Rune('<'))
                             ]
 
 
                             View.panelView [
-                                prop.position.x.at 45
-                                prop.position.y.at 12
+                                prop.position.x.at 37
+                                prop.position.y.at 10
                                 panelView.borderStyle.rounded
                                 panelView.effect3D
                                 panelView.child <|
@@ -391,7 +270,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             ]
 
                             View.progressBar [
-                                prop.position.x.at 65
+                                prop.position.x.at 57
                                 prop.position.y.at 9
                                 prop.width.sized 15
                                 prop.text "Progress"
@@ -402,7 +281,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             ]
 
                             View.progressBar [
-                                prop.position.x.at 65
+                                prop.position.x.at 57
                                 prop.position.y.at 11
                                 prop.width.sized 15
                                 prop.text "Progress"
@@ -412,7 +291,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             ]
 
                             View.progressBar [
-                                prop.position.x.at 65
+                                prop.position.x.at 57
                                 prop.position.y.at 17
                                 prop.width.sized 15
                                 prop.text "Progress"
@@ -423,7 +302,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
 
 
                             View.radioGroup [
-                                prop.position.x.at 82
+                                prop.position.x.at 57
                                 prop.position.y.at 2
                                 prop.text "Progress"
                                 radioGroup.displayMode.vertical
@@ -431,42 +310,30 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 radioGroup.onSelectedItemChanged (fun e -> dispatch <| RadioChanged e.SelectedItem)
                                 radioGroup.selectedItem state.SelectedRadioItem
                             ]
-
-
-                            View.scrollView [
-                                prop.position.x.at 68
-                                prop.position.y.at 2
-                                prop.width.sized 12
-                                prop.height.sized 5
-                                scrollView.showHorizontalScrollIndicator true
-                                scrollView.showVerticalScrollIndicator true
-                                scrollView.contentSize (Size(10,10))
-                                prop.children [
-                                    View.radioGroup [
-                                        prop.text "Scroll"
-                                        radioGroup.displayMode.vertical
-                                        radioGroup.radioLabels (state.RadioItems @ state.ListItems)
-                                        radioGroup.onSelectedItemChanged (fun e -> dispatch <| RadioChanged e.SelectedItem)
-                                        radioGroup.selectedItem state.SelectedRadioItem
-                                    ]
-                                
-                                ]
-                            ]
+                            
 
                             View.tableView [
-                                prop.position.x.at 82
-                                prop.position.y.at 8
-                                prop.width.sized 30
+                                prop.position.x.at 72
+                                prop.position.y.at 2
+                                prop.width.sized 50
                                 prop.height.sized 8
                                 tableView.table Data.table
                             ]
 
                             View.textField [
-                                prop.position.x.at 82
-                                prop.position.y.at 18
+                                prop.position.x.at 2
+                                prop.position.y.at 20
                                 prop.width.sized 20
                                 prop.text state.Text
                                 textField.onTextChanging (fun (newText:string) -> dispatch <| Msg.ChangeText newText)
+                            ]
+
+                            View.textView [
+                                prop.position.x.at 80
+                                prop.position.y.at 9
+                                prop.width.sized 20
+                                prop.height.sized 10
+                                textView.text "This is Text!"
                             ]
                         ]
                     ]

@@ -54,6 +54,8 @@ module internal EventHelpers =
             delegates |> List.iter (fun d -> eventInfo.AddEventHandler(o, d))
 
 
+
+
 [<RequireQualifiedAccess>]
 module Interop =
 
@@ -137,7 +139,7 @@ module Interop =
         |> Option.defaultValue defaultVal
 
 
-    let inline filterProps (oldprops:IProperty list) (newprops:IProperty list) =
+    let filterProps (oldprops:IProperty list) (newprops:IProperty list) =
         let get (KeyValue (a,b)) = (a,b)
         let changedProps = 
             ([],newprops)
@@ -192,9 +194,23 @@ module Interop =
                 Some p
         )
 
+    let cloneColorScheme (scheme:ColorScheme) =
+        let colorDisabled = Attribute.Make(scheme.Disabled.Foreground, scheme.Disabled.Background)
+        let colorFocus = Attribute.Make(scheme.Focus.Foreground, scheme.Focus.Background)
+        let colorHotFocus = Attribute.Make(scheme.HotFocus.Foreground, scheme.HotFocus.Background)
+        let colorHotNormal = Attribute.Make(scheme.HotNormal.Foreground, scheme.HotNormal.Background)
+        let colorNormal = Attribute.Make(scheme.Normal.Foreground, scheme.Normal.Background)
+        ColorScheme(Disabled=colorDisabled,Focus=colorFocus,HotFocus=colorHotFocus,HotNormal=colorHotNormal,Normal=colorNormal)
 
+    
 
     let removeEventHandlerIfNecessary evName element =
         let eventDel = EventHelpers.getEventDelegates evName element
         if (eventDel.Length > 0) then
             EventHelpers.clearEventDelegates evName element
+
+[<RequireQualifiedAccess>]
+module internal Checker =
+
+    let textChanged (element:View) text =
+        element.Text <> (text |> Interop.ustr)
