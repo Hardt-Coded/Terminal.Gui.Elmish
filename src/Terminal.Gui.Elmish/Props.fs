@@ -144,7 +144,7 @@ type button =
 
 
 type checkBox =
-    static member inline onToggled (f:bool->unit) = Interop.mkprop "toggled" f
+    static member inline onToggled (f:{| previous:bool; current:bool |}->unit) = Interop.mkprop "toggled" f
     static member inline isChecked (v:bool) = Interop.mkprop "checked" v
     static member inline text (text:string) = Interop.mkprop "text" text
 

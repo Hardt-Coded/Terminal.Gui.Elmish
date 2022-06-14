@@ -77,6 +77,8 @@ let view (model:Model) (dispatch:Msg -> unit) =
                 View.textView [
                     prop.position.x.at 0
                     prop.position.y.at 0
+                    prop.width.filled
+                    prop.height.filled
                     prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
                     textView.text model.Text
                     textView.onTextChanged (fun e -> dispatch (ChangeText e))

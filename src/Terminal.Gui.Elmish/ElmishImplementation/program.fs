@@ -17,6 +17,7 @@ open Terminal.Gui.Elmish.Elements
 open Terminal.Gui
 open System
 open System.Reflection
+open System.Diagnostics
 
 
 
@@ -165,21 +166,23 @@ module Program =
                             Differ.update currentState nextTreeState
                             currentTreeState <- Some nextTreeState
 
-                        Application.MainLoop.Invoke(fun () ->
-                            match currentTreeState with
-                            | None ->
-                                ()
-                            | Some currentState ->
-                                //let nextTreeState = program.view model' syncDispatch
-                                //Differ.update currentState nextTreeState
-                                //currentTreeState <- Some nextTreeState
-                                ()
-                                //Application.Top.RemoveAll()
-                                //Application.Top.Add(newState.Subviews |> Seq.toArray)
-                                //Application.Top.LayoutSubviews()
-                                //Application.Top |> setViewElementState toSynchViewStates
-                                //Application.Driver.Refresh()
-                        )
+                        Application.MainLoop.Invoke(fun () -> ())
+                        
+                        //Application.MainLoop.Invoke(fun () ->
+                        //    match currentTreeState with
+                        //    | None ->
+                        //        ()
+                        //    | Some currentState ->
+                        //        //let nextTreeState = program.view model' syncDispatch
+                        //        //Differ.update currentState nextTreeState
+                        //        //currentTreeState <- Some nextTreeState
+                        //        ()
+                        //        //Application.Top.RemoveAll()
+                        //        //Application.Top.Add(newState.Subviews |> Seq.toArray)
+                        //        //Application.Top.LayoutSubviews()
+                        //        //Application.Top |> setViewElementState toSynchViewStates
+                        //        //Application.Driver.Refresh()
+                        //)
                                                 
                         cmd' |> Cmd.exec syncDispatch
                         state <- model'

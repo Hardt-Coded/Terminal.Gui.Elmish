@@ -45,7 +45,7 @@ type Msg =
 let timerSubscription dispatch =
     let rec loop () =
         async {
-            do! Async.Sleep 1000
+            do! Async.Sleep 20
             dispatch UpdateTime
             return! loop ()
         }
@@ -133,7 +133,7 @@ let update (msg:Msg) (model:Model) =
             | _ ->
                 {model with Page = page}, Cmd.none
         | MessageBoxes ->
-            match model.ScrollViewModel with
+            match model.MessageBoxesModel with
             | None ->
                 let (m,c) = MessageBoxes.init()
                 let cmd =

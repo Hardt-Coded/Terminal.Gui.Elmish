@@ -29,6 +29,6 @@
     <Compile Include="ElmishImplementation\program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Terminal.Gui" Version="1.6.4" />
+    <ProjectReference Include="..\..\gui.cs\Terminal.Gui\Terminal.Gui.csproj" />
   </ItemGroup>
 </Project>

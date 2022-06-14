@@ -53,21 +53,13 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.text "List View"
         ] 
 
-        View.label [
-            prop.position.x.center
-            prop.position.y.at 5
-            prop.width.filled
-            prop.textAlignment.centered
-            prop.text "Please Vote!"
-        ]
-
 
         View.frameView [
             prop.position.x.at 1
             prop.position.y.at 4
             prop.width.fill 1
             prop.height.fill 5
-            frameView.title "TextView"
+            frameView.title "Please Vote!"
             frameView.children [
                 View.listView [
                     prop.position.x.at 0

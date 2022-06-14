@@ -17,19 +17,10 @@ module Differ =
 
 
     let rec initializeTree (parent:View option) (tree:TerminalElement) =
-        tree.create()
-        match parent  with
-        | None ->
-            ()
-        | Some parent ->
-            parent.Add tree.element
-
-        match tree.children with
-        | [] ->
-            ()
-        | head::rest ->
-            (initializeTree (Some tree.element) head)
-            rest |> List.iter (fun e -> initializeTree (Some tree.element) e)
+        tree.create parent
+        tree.children |> List.iter (fun e -> initializeTree (Some tree.element) e)
+        
+            
 
 
 
@@ -49,6 +40,7 @@ module Differ =
             else
                 let parent = rootTree.element |> Interop.getParent
                 parent |> Option.iter (fun p -> p.Remove rootTree.element)
+                rootTree.element.RemoveAll()
                 rootTree.element.Dispose()
                 #if DEBUG
                 System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")
@@ -87,8 +79,15 @@ module Differ =
                         if (idx+1 <= rootElements.Length) then
                             update rootElements.[idx] ne
                         else
+                            // somehow when the window is empty and you add new elements to it, it complains about that the can focus is not set.
+                            // don't know
+                            if rootTree.element.Subviews.Count = 0 then
+                                rootTree.element.CanFocus <- true
                             let newElem = initializeTree (Some rootTree.element) ne
                             newElem
+                        #if DEBUG
+                            System.Diagnostics.Debug.WriteLine ($"child {ne.name} created ()!")
+                        #endif
                 
                     )
                 else
@@ -99,8 +98,9 @@ module Differ =
                         else
                             // the rest we remove
                             re.element |> rootTree.element.Remove |> ignore
+                            re.element.Dispose()
                         #if DEBUG
-                            System.Diagnostics.Debug.WriteLine ($"{re.element} removed and disposed!")
+                            System.Diagnostics.Debug.WriteLine ($"child {re.name} removed and disposed!")
                         #endif
                             ()
                     
