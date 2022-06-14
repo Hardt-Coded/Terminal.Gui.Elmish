@@ -12,6 +12,24 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Optional: Include PDB in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <PackageId>Terminal.Gui.Elmish</PackageId>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>Daniel Hardt</Authors>
+    <Company>Daniel Hardt</Company>
+    <Product>Terminal.Gui.Elmish</Product>
+    <Description>An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including F# Feliz-like like view DSL.</Description>
+    <Copyright>MIT License</Copyright>
+    <PackageProjectUrl>https://github.com/DieselMeister/Terminal.Gui.Elmish</PackageProjectUrl>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/DieselMeister/Terminal.Gui.Elmish</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>fsharp f# gui console ui elmish feliz</PackageTags>
+    <PackageReleaseNotes>Major Rewrite:
+- Feliz-styled DSL
+- Diffing
+- Update latest Terminal.Gui (1.64)</PackageReleaseNotes>
+    <Version>2.0.164-preview1</Version>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Scripts\**" />
@@ -29,6 +47,16 @@
     <Compile Include="ElmishImplementation\program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\gui.cs\Terminal.Gui\Terminal.Gui.csproj" />
+    <None Include="..\..\docs\img\logo.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Terminal.Gui" Version="1.6.4" />
   </ItemGroup>
 </Project>

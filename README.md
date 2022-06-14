@@ -2,11 +2,37 @@
 
 [![Build Status](https://travis-ci.org/DieselMeister/Terminal.Gui.Elmish.svg?branch=master)](https://travis-ci.org/DieselMeister/Terminal.Gui.Elmish)
 
-An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including a fable like view DSL.
+An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including a Feliz-like like view DSL.
 
 ![anim gif](https://github.com/DieselMeister/Terminal.Gui.Elmish/raw/master/docsrc/files/img/lmish_console_gif4_lower_fps.gif)
 
-Usage:
+
+# Major Changes
+
+I decided to rework the DSL to a Feliz-style. Thank you Zaid Ajaj (https://github.com/Zaid-Ajaj/Feliz) for that awesome idea! You can leverage now more the Intellisense of your IDE.  
+I also introduced a diffing mechanism, so that the elements are not recreated on every cycle. I try actually to update the current elements.
+
+This can be end up sometimes in some weird behavior or exceptions. I try to find all the quirks, but help me out and open an issue if you find something.
+
+
+# Documentation
+
+It's missing again!
+
+Almost all properties from the View-Elements should be available. Some events I extended. For example the Toggled-Event from a checkbox returns the old value in the event.  
+I mapped the event to return both.
+
+
+
+# Example
+
+In the examples you find the old project, which I converted to the new DSL
+
+
+# Usage:
+
+
+
 ```fs
 Program.mkProgram init update view  
 |> Program.run
@@ -16,37 +42,151 @@ Program.mkProgram init update view
 Some fable-elmish DSL:
 ```fs
 
-window [
-    Styles [
-        Pos (PercentPos 20.0,PercentPos 10.0)
-        Dim (PercentDim 30.0,AbsDim 15)
+module Counter
+
+open Terminal.Gui
+open Terminal.Gui.Elmish
+open System
+
+type Model = {
+    Counter:int
+    IsSpinning: bool
+}
+
+type Msg =
+    | Increment
+    | Decrement
+    | Reset
+    | StartSpin
+    | StopSpin
+    | Spinned
+
+let init () : Model * Cmd<Msg> =
+    let model = {
+        Counter = 0
+        IsSpinning = false
+    }
+    model, Cmd.none
+
+
+module Commands =
+    let startSpinning isSpinning =
+        fun dispatch ->
+            async {
+                do! Async.Sleep 20
+                if isSpinning then
+                    dispatch Increment
+                    dispatch Spinned
+            }
+            |> Async.StartImmediate
+        |> Cmd.ofSub
+
+let update (msg:Msg) (model:Model) =
+    match msg with
+    | Increment ->
+        {model with Counter = model.Counter + 1}, Cmd.none
+    | Decrement ->
+        {model with Counter = model.Counter - 1}, Cmd.none
+    | Reset ->
+        {model with Counter = 0}, Cmd.none
+    | StartSpin ->
+        {model with IsSpinning = true}, Commands.startSpinning true
+    | StopSpin ->
+        {model with IsSpinning = false}, Cmd.none
+    | Spinned ->
+        model, Commands.startSpinning model.IsSpinning
+        
+
+
+let view (model:Model) (dispatch:Msg->unit) =
+    View.page [
+        page.menuBar [
+            menubar.menus [
+                menu.menuBarItem [
+                    menu.prop.title "Menu 1"
+                    menu.prop.children [
+                        menu.submenuItem [
+                            menu.prop.title "Sub Menu 1"
+                            menu.prop.children [
+                                menu.menuItem ("Sub Item 1", (fun () -> System.Diagnostics.Debug.WriteLine($"Sub menu 1 triggered")))
+                                menu.menuItem [
+                                    menu.prop.title "Sub Item 2"
+                                    menu.item.action (fun () -> System.Diagnostics.Debug.WriteLine($"Sub menu 2 triggered"))
+                                    menu.item.itemstyle.check
+                                    menu.item.isChecked true
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+        prop.children [
+            View.label [
+                prop.position.x.center
+                prop.position.y.at 1
+                prop.textAlignment.centered
+                prop.color (Color.BrightYellow, Color.Green)
+                prop.text "'F#ncy' Counter!"
+            ] 
+
+            View.button [
+                prop.position.x.center
+                prop.position.y.at 5
+                prop.text "Up"
+                button.onClick (fun () -> dispatch Increment)
+            ] 
+
+            View.label [
+                let c = (model.Counter |> float) / 100.0
+                let x = (16.0 * Math.Cos(c)) |> int 
+                let y = (8.0 * Math.Sin(c)) |> int
+
+                prop.position.x.at (x + 20)
+                prop.position.y.at (y + 10)
+                prop.textAlignment.centered
+                prop.color (Color.Magenta, Color.BrightYellow)
+                prop.text $"The Count of 'Fancyness' is {model.Counter}"
+            ] 
+
+
+            View.button [
+                prop.position.x.center
+                prop.position.y.at 7
+                prop.text "Down"
+                button.onClick (fun () -> dispatch Decrement)
+            ] 
+
+            View.button [
+                prop.position.x.center
+                prop.position.y.at 9
+                prop.text "Start Spinning"
+                button.onClick (fun () -> dispatch StartSpin)
+            ] 
+
+            View.button [
+                prop.position.x.center
+                prop.position.y.at 11
+                prop.text "Stop Spinning"
+                button.onClick (fun () -> dispatch StopSpin)
+            ] 
+
+            View.button [
+                prop.position.x.center
+                prop.position.y.at 13
+                prop.text "Reset"
+                button.onClick (fun () -> dispatch Reset)
+            ]
+        ]
     ]
-    Title "Demo 1"
-] [
-    button [
-        Styles [
-            Pos (AbsPos 1, AbsPos 1)
-        ]
-        Text "Counter Up"
-        OnClicked (fun () -> dispatch Inc)                    
-    ] 
 
-    button [
-        Styles [
-            Pos (AbsPos 1, AbsPos 2)
-        ]
-        Text "Counter Down"
-        OnClicked (fun () -> dispatch Dec)                    
-    ] 
 
-                
-]
 
 ```
 
 Install via Nuget:
 
-https://www.nuget.org/packages/Terminal.Gui.Elmish/0.1.0
+https://www.nuget.org/packages/Terminal.Gui.Elmish
 
 ```
 dotnet add package Terminal.Gui.Elmish
