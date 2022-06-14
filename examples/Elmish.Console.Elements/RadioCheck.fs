@@ -81,7 +81,6 @@ let view (model:Model) (dispatch:Msg -> unit) =
         View.checkBox [
             prop.position.x.center
             prop.position.y.at 16
-            prop.autoSize true
             checkBox.isChecked model.IsHappy
             checkBox.text "Are you happy?"
             checkBox.onToggled (fun b -> dispatch (ChangeHappy b.current))            

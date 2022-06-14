@@ -1020,8 +1020,8 @@ type CheckBoxElement(props:IProperty list) =
         let text = props |> Interop.getValue<string> "text" |> Option.defaultValue ""
         let el = new CheckBox(text)
         parent |> Option.iter (fun p -> p.Add el)
-        ViewElement.setProps el props
         setProps el props
+        ViewElement.setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
 
