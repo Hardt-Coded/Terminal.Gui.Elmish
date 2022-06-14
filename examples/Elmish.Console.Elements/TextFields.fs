@@ -50,14 +50,14 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.width.fill 1
             prop.textAlignment.centered
             prop.color (Color.BrightYellow, Color.Green)
-            prop.text "Some Text Fields..."
+            label.text "Some Text Fields..."
         ] 
 
         View.label [
             prop.position.x.at 1
             prop.position.y.at 5
             prop.width.sized 14
-            prop.text "Text:"
+            label.text "Text:"
         ]
 
         View.textField [
@@ -72,7 +72,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.x.at 1
             prop.position.y.at 7
             prop.width.sized 14
-            prop.text "Secret Text:"
+            label.text "Secret Text:"
         ]
 
         View.textField [
@@ -87,13 +87,13 @@ let view (model:Model) (dispatch:Msg -> unit) =
         View.label [
             prop.position.x.at 1
             prop.position.y.at 9
-            prop.text $"The Text says: {model.Text}"
+            label.text $"The Text says: {model.Text}"
         ]
 
         View.label [
             prop.position.x.at 1
             prop.position.y.at 11
-            prop.text $"The Secret Text says: {model.SecretText}"
+            label.text $"The Secret Text says: {model.SecretText}"
         ]
 
 
@@ -101,7 +101,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.x.at 1
             prop.position.y.at 13
             prop.width.sized 14
-            prop.text "Time Field:"
+            label.text "Time Field:"
         ]
 
         View.timeField [
@@ -123,7 +123,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.x.at 1
             prop.position.y.at 15
             prop.width.sized 14
-            prop.text "Date Field:"
+            label.text "Date Field:"
         ]
 
         View.dateField [
@@ -145,7 +145,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
         View.label [
             prop.position.x.at 1
             prop.position.y.at 17
-            prop.text $"The DateTime (time and date Field) says: {model.CurrentDate.Add(model.CurrentTime):``ddd, yyyy-MM-dd HH:mm:ss``}"
+            label.text $"The DateTime (time and date Field) says: {model.CurrentDate.Add(model.CurrentTime):``ddd, yyyy-MM-dd HH:mm:ss``}"
         ]
 
     ]

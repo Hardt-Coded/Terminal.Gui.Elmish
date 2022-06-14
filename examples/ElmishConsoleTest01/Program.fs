@@ -132,7 +132,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                         prop.children [
                             if state.IsVisible then
                                 View.label [
-                                    prop.text $"Hello Counter: {state.Count}"
+                                    label.text $"Hello Counter: {state.Count}"
 
                                     let c = (state.Count |> float) / 100.0
                                     let x = (16.0 * Math.Cos(c)) |> int 
@@ -146,7 +146,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             View.button [
                                 prop.position.x.at 2
                                 prop.position.y.at 2
-                                prop.text "Plus"
+                                button.text "Plus"
                                 button.onClick (fun () -> dispatch Msg.Inc)
                                 if state.IsVisible then prop.enabled else prop.disabled
                             ]
@@ -154,14 +154,14 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             View.button [
                                 prop.position.x.at 2
                                 prop.position.y.at 4
-                                prop.text "Minus"
+                                button.text "Minus"
                                 button.onClick (fun () -> dispatch Msg.Dec)
                             ]
 
                             View.checkBox [
                                 prop.position.x.at 2
                                 prop.position.y.at 6
-                                prop.text "Checkbox"
+                                checkBox.text "Checkbox"
                                 if state.IsVisible then
                                     prop.onMouseEnter (fun e -> System.Diagnostics.Debug.WriteLine($"mouse enter event"))
                                 checkBox.onToggled (fun t -> System.Diagnostics.Debug.WriteLine($"check toggeld {t}"))
@@ -171,7 +171,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             View.colorPicker [
                                 prop.position.x.at 15
                                 prop.position.y.at 2
-                                prop.text "Color"
+                                colorPicker.title "Color"
                                 colorPicker.selectedColor Terminal.Gui.Color.BrightCyan
                                 colorPicker.onColorChanged (fun color -> System.Diagnostics.Debug.WriteLine($"color changed {color}"))
                             ]
@@ -179,7 +179,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             View.button [
                                 prop.position.x.at 2
                                 prop.position.y.at 8
-                                prop.text "Visible"
+                                button.text "Visible"
                                 button.onClick (fun () -> dispatch <| Msg.ChangeVisibility (state.IsVisible |> not))
                             ]
 
@@ -188,7 +188,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 prop.position.x.at 15
                                 prop.position.y.at 8
                                 prop.width.sized 10
-                                prop.text "Combobox"
+                                comboBox.text "Combobox"
                                 prop.color (Color.BrightYellow, Color.Green)
                                 comboBox.source state.ListItems
                                 comboBox.selectedItem state.SelectedListItem
@@ -200,7 +200,6 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 prop.position.x.at 26
                                 prop.position.y.at 8
                                 prop.width.sized 10
-                                prop.text "DateField"
                                 dateField.date DateTime.Now
 
                             ]
@@ -209,7 +208,6 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 prop.position.x.at 38
                                 prop.position.y.at 8
                                 prop.width.sized 10
-                                prop.text "Timefield"
                                 prop.color (Color.BrightYellow, Color.Green)
                                 timeField.time DateTime.Now.TimeOfDay
                             ]
@@ -219,7 +217,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 prop.position.y.at 10
                                 prop.width.sized 15
                                 prop.height.sized 7
-                                prop.text "FrameView"
+                                frameView.text "FrameView"
                                 frameView.borderStyle.rounded
                                 frameView.effect3D
                             ]
@@ -236,7 +234,6 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                     View.hexView [
                                         prop.width.sized 25
                                         prop.height.sized 20
-                                        prop.text "Hex"
                                         hexView.source (new MemoryStream(System.Text.ASCIIEncoding.UTF8.GetBytes("Hello World")))
                                     ]
                                 ]
@@ -257,15 +254,14 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 panelView.effect3D
                                 panelView.child <|
                                     View.listView [
-                                    prop.width.sized 15
-                                    prop.height.sized 5
-                                    prop.text "List"
-                                    listView.topItem 3
-                                    listView.leftItem 2
-                                    listView.source state.ListItems
-                                    listView.selectedItem state.SelectedListItem
-                                    listView.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: open selected item {t.Value}"))
-                                    listView.onSelectedItemChanged (fun e -> dispatch <| ListChanged e.Item)
+                                        prop.width.sized 15
+                                        prop.height.sized 5
+                                        listView.topItem 3
+                                        listView.leftItem 2
+                                        listView.source state.ListItems
+                                        listView.selectedItem state.SelectedListItem
+                                        listView.onOpenSelectedItem (fun t ->  System.Diagnostics.Debug.WriteLine($"LB: open selected item {t.Value}"))
+                                        listView.onSelectedItemChanged (fun e -> dispatch <| ListChanged e.Item)
                                 ]
                             ]
 
@@ -273,7 +269,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 prop.position.x.at 57
                                 prop.position.y.at 9
                                 prop.width.sized 15
-                                prop.text "Progress"
+                                progressBar.text "Progress"
                                 progressBar.format.simplePlusPercentage
                                 progressBar.style.blocks
                                 progressBar.bidirectionalMarquee true
@@ -284,7 +280,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 prop.position.x.at 57
                                 prop.position.y.at 11
                                 prop.width.sized 15
-                                prop.text "Progress"
+                                progressBar.text "Progress"
                                 progressBar.format.framedProgressPadded
                                 progressBar.style.marqueeBlocks
                                 progressBar.fraction ((DateTime.Now.Second |> float) / 60.0)
@@ -294,7 +290,7 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 prop.position.x.at 57
                                 prop.position.y.at 17
                                 prop.width.sized 15
-                                prop.text "Progress"
+                                progressBar.text "Progress"
                                 progressBar.format.framed
                                 progressBar.style.marqueeContinuous
                                 progressBar.fraction ((DateTime.Now.Second |> float) / 60.0)
@@ -304,7 +300,6 @@ let view (state:Model) (dispatch:Msg -> unit) =
                             View.radioGroup [
                                 prop.position.x.at 57
                                 prop.position.y.at 2
-                                prop.text "Progress"
                                 radioGroup.displayMode.vertical
                                 radioGroup.radioLabels state.RadioItems
                                 radioGroup.onSelectedItemChanged (fun e -> dispatch <| RadioChanged e.SelectedItem)
@@ -324,7 +319,16 @@ let view (state:Model) (dispatch:Msg -> unit) =
                                 prop.position.x.at 2
                                 prop.position.y.at 20
                                 prop.width.sized 20
-                                prop.text state.Text
+                                textField.text state.Text
+                                textField.onTextChanging (fun (newText:string) -> dispatch <| Msg.ChangeText newText)
+                            ]
+
+
+                            View.textField [
+                                prop.position.x.at 20
+                                prop.position.y.at 20
+                                prop.width.sized 20
+                                textField.text state.Text
                                 textField.onTextChanging (fun (newText:string) -> dispatch <| Msg.ChangeText newText)
                             ]
 

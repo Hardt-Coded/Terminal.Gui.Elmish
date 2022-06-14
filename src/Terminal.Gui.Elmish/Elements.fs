@@ -114,7 +114,7 @@ module ViewElement =
         props |> Interop.getValue<Dim> "width"  |> Option.iter (fun v -> view.Width <- v)
         props |> Interop.getValue<Dim> "height" |> Option.iter (fun v -> view.Height <- v)
 
-        props |> Interop.getValue<string> "text"                    |> Option.iter (fun v -> if Checker.textChanged view v then view.Text <- v)
+        //props |> Interop.getValue<string> "text"                    |> Option.iter (fun v -> if Checker.textChanged view v then view.Text <- v)
         props |> Interop.getValue<TextAlignment> "textAlignment"    |> Option.iter (fun v -> view.TextAlignment <- v)
         props |> Interop.getValue<TextDirection> "textDirection"    |> Option.iter (fun v -> view.TextDirection <- v)
             
@@ -818,6 +818,7 @@ type WindowElement(props:IProperty list) =
 
     let setProps (element:Window) props =
         props |> Interop.getValue<string> "title" |> Option.map Interop.ustr |> Option.iter (fun v -> element.Title <- v)
+        props |> Interop.getValue<string> "text" |> Option.map Interop.ustr |> Option.iter (fun v -> element.Text <- v)
         props |> Interop.getValue<BorderStyle> "borderStyle" |> Option.iter (fun v -> element.Border.BorderStyle <- v)
         props |> Interop.getValue<bool> "effect3D" |> Option.iter (fun v -> element.Border.Effect3D <- v)
 
@@ -1047,6 +1048,8 @@ type ColorPickerElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:ColorPicker) props =
+        // yes named title, but into the text property
+        props |> Interop.getValue<string> "title" |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
         props |> Interop.getValue<Terminal.Gui.Color> "selectedColor" |> Option.iter (fun v -> element.SelectedColor <- v)
         //onColorChanged
         props 
@@ -1103,15 +1106,17 @@ type ComboBoxElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:ComboBox) props =
-        props |> Interop.getValue<int> "selectedItem"   |> Option.iter (fun v -> element.SelectedItem <- v)
-        props |> Interop.getValue<bool> "readonly"      |> Option.iter (fun v -> element.ReadOnly <- v)
-        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
-        
         props 
         |> Interop.getValue<string list> "source" 
         |> Option.iter (fun v -> 
             element.SetSource(v |> System.Linq.Enumerable.ToList)
         )
+        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
+        props |> Interop.getValue<int> "selectedItem"   |> Option.iter (fun v -> element.SelectedItem <- v)
+        props |> Interop.getValue<bool> "readonly"      |> Option.iter (fun v -> element.ReadOnly <- v)
+        
+        
+        
         //
         props 
         |> Interop.getValue<Terminal.Gui.ListViewItemEventArgs->unit> "onOpenSelectedItem" 
@@ -2079,10 +2084,10 @@ type TextFieldElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:TextField) props =
+        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> if element.Text<>v then element.Text <- v)
         props |> Interop.getValue<bool> "used"          |> Option.iter (fun v -> element.Used <- v)
         props |> Interop.getValue<bool> "readOnly"      |> Option.iter (fun v -> element.ReadOnly <- v)
         props |> Interop.getValue<Rect> "frame"         |> Option.iter (fun v -> element.Frame <- v)
-        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> if Checker.textChanged element v then element.Text <- v)
         props |> Interop.getValue<bool> "secret"        |> Option.iter (fun v -> element.Secret <- v)
         props |> Interop.getValue<int> "cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v)
         props |> Interop.getValue<bool> "canFocus"      |> Option.iter (fun v -> element.CanFocus <- v)
@@ -2100,7 +2105,7 @@ type TextFieldElement(props:IProperty list) =
         |> Interop.getValue<string->unit> "onTextChangingString" 
         |> Option.iter (fun v -> 
             Interop.removeEventHandlerIfNecessary "TextChanging" element
-            let action (ev:TextChangingEventArgs) = v (ev.NewText |> Interop.str)
+            let action (ev:TextChangingEventArgs) = v (ev.NewText |> Interop.str); ev.Cancel <- false
             element.add_TextChanging action
         )
         // onTextChanged
@@ -2140,7 +2145,8 @@ type TextFieldElement(props:IProperty list) =
         Diagnostics.Debug.WriteLine ($"{this.name} created!")
         #endif
         this.parent <- parent
-        let el = new TextField()
+        let text = props |> Interop.getValue<string> "text" |> Option.defaultValue ""
+        let el = new TextField(text)
         parent |> Option.iter (fun p -> p.Add el)
         ViewElement.setProps el props
         setProps el props

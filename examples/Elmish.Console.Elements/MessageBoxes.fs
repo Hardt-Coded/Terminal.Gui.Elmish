@@ -65,13 +65,13 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.width.fill 1
             prop.textAlignment.centered
             prop.color (Color.BrightYellow, Color.Green)
-            prop.text "Counter with Message Boxes!"
+            label.text "Counter with Message Boxes!"
         ] 
 
         View.button [
             prop.position.x.center
             prop.position.y.at 5
-            prop.text "Up"
+            button.text "Up"
             button.onClick (fun () -> dispatch Increment)
         ] 
 
@@ -80,14 +80,14 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.position.y.at 6
             prop.textAlignment.centered
             prop.color (Color.Magenta, Color.BrightYellow)
-            prop.text $"The Count of 'Fancyness' is {model.Counter}"
+            label.text $"The Count of 'Fancyness' is {model.Counter}"
         ] 
 
 
         View.button [
             prop.position.x.center
             prop.position.y.at 7
-            prop.text "Down"
+            button.text "Down"
             button.onClick (fun () -> dispatch Decrement)
         ] 
     ]

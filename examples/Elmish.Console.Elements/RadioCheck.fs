@@ -53,7 +53,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.width.fill 1
             prop.textAlignment.centered
             prop.color (Color.BrightYellow, Color.Green)
-            prop.text "Radio and Check..."
+            label.text "Radio and Check..."
         ] 
 
         View.label [
@@ -61,7 +61,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.y.at 5
             prop.width.filled
             prop.textAlignment.centered
-            prop.text "Please Vote!"
+            label.text "Please Vote!"
         ]
 
         View.radioGroup [
@@ -92,7 +92,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.y.at 18
             //prop.autoSize true
             prop.color (Color.BrightYellow,Color.Red)
-            prop.text $"The Vote says: {model.VoteResult}"
+            label.text $"The Vote says: {model.VoteResult}"
         ]
 
         View.label [
@@ -101,9 +101,9 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.color (Color.BrightYellow,Color.Red)
             match model.IsHappy with
             | true ->
-                prop.text "You are Happy!"
+                label.text "You are Happy!"
             | false ->
-                prop.text "you are not Happy!"
+                label.text "you are not Happy!"
         ]
     ]
 

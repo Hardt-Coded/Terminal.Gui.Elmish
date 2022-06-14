@@ -11,7 +11,7 @@ type prop =
     static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
     static member inline ref (reference:View->unit) = Interop.mkprop "ref" reference
 
-    static member inline text (text:string) = Interop.mkprop "text" text
+    //static member inline text (text:string) = Interop.mkprop "text" text
 
     static member inline autoSize (value:bool) = Interop.mkprop "autoSize" value
     static member inline tabIndex (i:int) = Interop.mkprop "tabIndex" i
@@ -124,6 +124,7 @@ type page =
 
 type window =
     static member inline title (p:string) = Interop.mkprop "title" p
+    static member inline text (p:string) = Interop.mkprop "text" p
     static member inline effect3D = Interop.mkprop "effect3D" true
     static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
 
@@ -150,6 +151,7 @@ type checkBox =
 
 
 type colorPicker =
+    static member inline title (title:string) = Interop.mkprop "title" title
     static member inline selectedColor (color:Terminal.Gui.Color) = Interop.mkprop "selectedColor" color
     static member inline onColorChanged (f:Terminal.Gui.Color->unit) = Interop.mkprop "onColorChanged" f
 
@@ -289,6 +291,7 @@ module panelView =
         static member inline single = Interop.mkprop    "borderStyle" BorderStyle.Single
 
 type progressBar =
+    static member inline text (value:string)  = Interop.mkprop "text" value
     static member inline bidirectionalMarquee (value:bool)  = Interop.mkprop "bidirectionalMarquee" value
     static member inline fraction (value:double)  = Interop.mkprop "fraction" value
     static member inline segmentCharacter (value:System.Rune)  = Interop.mkprop "segmentCharacter" value

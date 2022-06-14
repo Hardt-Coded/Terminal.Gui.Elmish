@@ -57,7 +57,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.width.fill 1
             prop.textAlignment.centered
             prop.color (Color.BrightYellow, Color.Green)
-            prop.text "TextView with File Dialog..."
+            label.text "TextView with File Dialog..."
         ] 
 
         View.button [

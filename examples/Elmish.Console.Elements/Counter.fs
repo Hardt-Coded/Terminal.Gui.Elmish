@@ -61,13 +61,13 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.position.y.at 1
             prop.textAlignment.centered
             prop.color (Color.BrightYellow, Color.Green)
-            prop.text "'F#ncy' Counter!"
+            label.text "'F#ncy' Counter!"
         ] 
 
         View.button [
             prop.position.x.center
             prop.position.y.at 5
-            prop.text "Up"
+            button.text "Up"
             button.onClick (fun () -> dispatch Increment)
         ] 
 
@@ -80,35 +80,35 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.position.y.at (y + 10)
             prop.textAlignment.centered
             prop.color (Color.Magenta, Color.BrightYellow)
-            prop.text $"The Count of 'Fancyness' is {model.Counter}"
+            label.text $"The Count of 'Fancyness' is {model.Counter}"
         ] 
 
 
         View.button [
             prop.position.x.center
             prop.position.y.at 7
-            prop.text "Down"
+            button.text "Down"
             button.onClick (fun () -> dispatch Decrement)
         ] 
 
         View.button [
             prop.position.x.center
             prop.position.y.at 9
-            prop.text "Start Spinning"
+            button.text "Start Spinning"
             button.onClick (fun () -> dispatch StartSpin)
         ] 
 
         View.button [
             prop.position.x.center
             prop.position.y.at 11
-            prop.text "Stop Spinning"
+            button.text "Stop Spinning"
             button.onClick (fun () -> dispatch StopSpin)
         ] 
 
         View.button [
             prop.position.x.center
             prop.position.y.at 13
-            prop.text "Reset"
+            button.text "Reset"
             button.onClick (fun () -> dispatch Reset)
         ] 
     ]
