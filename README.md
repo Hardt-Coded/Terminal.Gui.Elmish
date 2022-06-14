@@ -4,8 +4,7 @@
 
 An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including a Feliz-like like view DSL.
 
-![anim gif](https://github.com/DieselMeister/Terminal.Gui.Elmish/raw/master/docsrc/files/img/lmish_console_gif4_lower_fps.gif)
-
+![20220614_terminal_gui_2](https://user-images.githubusercontent.com/13096516/173627457-eb4d5e71-9819-4c9f-aa13-a037846745a4.gif)
 
 # Major Changes
 
