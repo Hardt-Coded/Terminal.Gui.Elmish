@@ -191,9 +191,11 @@ https://www.nuget.org/packages/Terminal.Gui.Elmish
 dotnet add package Terminal.Gui.Elmish
 ```
 
-#Referencing the underlying Element
+# Referencing the underlying Element
 
 You can reference the underlying element. Also use this to influcence further setting when the element is created!  
+
+use `prop.ref (fun view -> ...)`
 
 ```fs
 View.button [
