@@ -191,5 +191,19 @@ https://www.nuget.org/packages/Terminal.Gui.Elmish
 dotnet add package Terminal.Gui.Elmish
 ```
 
+#Referencing the underlying Element
+
+You can reference the underlying element. Also use this to influcence further setting when the element is created!  
+
+```
+            View.button [
+                prop.position.x.center
+                prop.position.y.at 13
+                prop.text "Reset"
+                button.onClick (fun () -> dispatch Reset)
+                prop.ref (fun view -> myButtonRef <- (view :?> Terminal.Gui.Button).xxxx // do your stuff here)
+            ]
+
+```
 
 A lot of Thanks to Miguel de Icaza. Nice Project!.
