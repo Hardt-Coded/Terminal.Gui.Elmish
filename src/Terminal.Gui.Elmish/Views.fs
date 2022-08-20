@@ -118,9 +118,18 @@ type View =
 module Dialogs =
     open System
 
+    let showWizard (wizard:Wizard) =
+        Application.Top.Add(wizard)
+        Application.Run(wizard)
+        Application.Top.Remove(wizard)
+        ()
+
+
     let openFileDialog title message =
-        use dia = new OpenDialog(title |> Interop.ustr,message |> Interop.ustr)                
+        use dia = new OpenDialog(title |> Interop.ustr,message |> Interop.ustr)           
+        Application.Top.Add(dia)
         Application.Run(dia)
+        Application.Top.Remove(dia)
         if dia.Canceled then
             None
         else

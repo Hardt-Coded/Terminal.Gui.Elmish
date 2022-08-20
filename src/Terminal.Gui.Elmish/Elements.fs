@@ -2084,7 +2084,7 @@ type TextFieldElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:TextField) props =
-        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> if element.Text<>v then element.Text <- v)
+        props |> Interop.getValue<string> "text"        |> Option.iter (fun v -> if element.Text.ToString()<>v then element.Text <- v)
         props |> Interop.getValue<bool> "used"          |> Option.iter (fun v -> element.Used <- v)
         props |> Interop.getValue<bool> "readOnly"      |> Option.iter (fun v -> element.ReadOnly <- v)
         props |> Interop.getValue<Rect> "frame"         |> Option.iter (fun v -> element.Frame <- v)

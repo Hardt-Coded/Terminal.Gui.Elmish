@@ -14,6 +14,7 @@ type Msg =
     | Decrement
     | Incremented of int
     | Decremented of int
+    | ShowWizard
     | Reset
 
 let init () : Model * Cmd<Msg> =
@@ -42,6 +43,42 @@ let decrementCmd () =
         | _ -> 0
     ) () Decremented
 
+let showWizardCmd =
+    fun dispatch ->
+        let wizard = new Wizard ($"Setup Wizard")
+        
+        // Add 1st step
+        let firstStep = new Wizard.WizardStep ("End User License Agreement")
+        wizard.AddStep(firstStep);
+        firstStep.NextButtonText <- "Accept!"
+        firstStep.HelpText <- "This is the End User License Agreement."
+        
+        // Add 2nd step
+        let secondStep = new Wizard.WizardStep ("Second Step")
+        wizard.AddStep(secondStep)
+        secondStep.HelpText <- "This is the help text for the Second Step."
+        let lbl = new Label ("Enter Number to Increase the Counter:", AutoSize=true)
+        secondStep.Add(lbl);
+        
+        let number = new TextField (X = (Pos.Right(lbl)) + Pos.At(1), Width = (Dim.Fill()) - Dim.Sized(1))
+        secondStep.Add(number);
+        
+        wizard.add_Finished(
+            fun ev ->
+                match System.Int32.TryParse(number.Text.ToString()) with
+                | false, _ -> 
+                    MessageBox.Query("Wizard", $"Error. '{number.Text}' is not a number", "Ok") |> ignore
+                    ev.Cancel <- true
+                | true, num ->
+                    MessageBox.Query("Wizard", $"Finished. The Number you entered is '{num}' and will be added to the counter!", "Ok") |> ignore
+                    dispatch (Incremented num)
+                
+        )
+ 
+        Dialogs.showWizard wizard
+        
+    |> Cmd.ofSub
+
 
 let update (msg:Msg) (model:Model) =
     match msg with
@@ -55,6 +92,8 @@ let update (msg:Msg) (model:Model) =
         {model with Counter = model.Counter - i}, Cmd.none
     | Reset ->
         {model with Counter = 0}, Cmd.none
+    | ShowWizard ->
+        model, showWizardCmd
 
 
 let view (model:Model) (dispatch:Msg->unit) =
@@ -89,6 +128,13 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.position.y.at 7
             button.text "Down"
             button.onClick (fun () -> dispatch Decrement)
+        ] 
+
+        View.button [
+            prop.position.x.center
+            prop.position.y.at 11
+            button.text "Show Wizard"
+            button.onClick (fun () -> dispatch ShowWizard)
         ] 
     ]
 
