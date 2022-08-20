@@ -12,6 +12,7 @@ type Pages =
     | ListView
     | ScrollView
     | MessageBoxes
+    | Wizard
 
 type Model = {
     Page: Pages
@@ -23,6 +24,7 @@ type Model = {
     ListViewModel:ListView.Model option
     ScrollViewModel:ScrollView.Model option
     MessageBoxesModel:MessageBoxes.Model option
+    WizardModel:Wizard.Model option
     CurrentLocalTime:DateTime
 }
 
@@ -38,6 +40,7 @@ type Msg =
     | ListViewMsg of ListView.Msg
     | ScrollViewMsg of ScrollView.Msg
     | MessageBoxesMsg of MessageBoxes.Msg
+    | WizardMsg of Wizard.Msg
 
     | UpdateTime
 
@@ -63,6 +66,7 @@ let init () =
         ListViewModel = None
         ScrollViewModel = None
         MessageBoxesModel = None
+        WizardModel = None
         CurrentLocalTime = DateTime.Now
     }
     model, Cmd.none
@@ -141,6 +145,15 @@ let update (msg:Msg) (model:Model) =
                 {model with MessageBoxesModel = Some m; Page = MessageBoxes}, cmd
             | _ ->
                 {model with Page = page}, Cmd.none
+        | Wizard ->
+            match model.WizardModel with
+            | None ->
+                let (m,c) = Wizard.init()
+                let cmd =
+                    c |> Cmd.map (WizardMsg)
+                {model with WizardModel = Some m; Page = Wizard}, cmd
+            | _ ->
+                {model with Page = page}, Cmd.none
 
 
     | ExitApp ->
@@ -213,6 +226,16 @@ let update (msg:Msg) (model:Model) =
                let cmd =
                    c |> Cmd.map (MessageBoxesMsg)
                {model with MessageBoxesModel = Some m}, cmd
+
+    | WizardMsg tfmsg ->
+        match model.WizardModel with
+        | None ->
+            model, Cmd.none
+        | Some tfmodel ->
+            let (m,c) = Wizard.update tfmsg tfmodel
+            let cmd =
+                c |> Cmd.map (WizardMsg)
+            {model with WizardModel = Some m}, cmd
 
     | UpdateTime ->
         {model with CurrentLocalTime = DateTime.Now}, Cmd.none
@@ -335,6 +358,12 @@ let view (model:Model) (dispatch:Msg->unit) =
                             button.text "Message Boxes"
                             button.onClick (fun () -> dispatch (ChangePage MessageBoxes))
                         ] 
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 9
+                            button.text "Wizard"
+                            button.onClick (fun () -> dispatch (ChangePage Wizard))
+                        ]
                     ]
                 ]
 
@@ -383,6 +412,12 @@ let view (model:Model) (dispatch:Msg->unit) =
                             | None -> ()
                             | Some svmodel ->
                                 yield! MessageBoxes.view svmodel (MessageBoxesMsg >> dispatch)
+                        | Wizard ->
+                            match model.WizardModel with
+                            | None -> ()
+                            | Some svmodel ->
+                                yield! Wizard.view svmodel (WizardMsg >> dispatch)
+
                     ]
                 ]
             ]

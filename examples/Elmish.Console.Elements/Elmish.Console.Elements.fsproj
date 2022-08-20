@@ -13,6 +13,7 @@
     <Compile Include="ListView.fs" />
     <Compile Include="ScrollView.fs" />
     <Compile Include="MessageBoxes.fs" />
+    <Compile Include="Wizard.fs" />
     <Compile Include="App.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
