@@ -136,6 +136,7 @@ module Dialogs =
         let result = MessageBox.Query(width,height,title |>Interop.ustr,text |> Interop.ustr,buttons |> List.map Interop.ustr |> List.toArray)
         match buttons with
         | [] -> ""
+        | _ when result < 0 || result > buttons.Length - 1  -> ""
         | _ -> buttons.[result]
 
 
@@ -143,6 +144,7 @@ module Dialogs =
         let result = MessageBox.ErrorQuery(width,height,title |>Interop.ustr,text |> Interop.ustr,buttons |> List.map Interop.ustr |> List.toArray)
         match buttons with
         | [] -> ""
+        | _ when result < 0 || result > buttons.Length - 1  -> ""
         | _ -> buttons.[result]
    
 
