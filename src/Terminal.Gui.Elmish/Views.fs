@@ -121,15 +121,18 @@ module Dialogs =
     let openFileDialog title message =
         use dia = new OpenDialog(title |> Interop.ustr,message |> Interop.ustr)                
         Application.Run(dia)
-        let file = 
-            dia.FilePath
-            |> Option.ofObj 
-            |> Option.map string
-            |> Option.bind (fun s ->
-                if String.IsNullOrEmpty(s) then None 
-                else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
-            )
-        file
+        if dia.Canceled then
+            None
+        else
+            let file = 
+                dia.FilePath
+                |> Option.ofObj 
+                |> Option.map string
+                |> Option.bind (fun s ->
+                    if String.IsNullOrEmpty(s) then None 
+                    else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+                )
+            file
 
 
     let messageBox width height title text (buttons:string list) =
