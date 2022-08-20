@@ -35,4 +35,13 @@
 * move to dotnet tools (Thanks Chet)
 * cleanup dependencies (Thanks Chet)
 
-#### 0.1.8-preview1 - Sunday, 02. August 2020
+
+#### 2.0.164-preview1 - June, 14th
+* Major Rewrite:
+* Feliz-styled DSL
+* Diffing
+
+#### 2.0.172 - August, 20th
+* Update latest Terminal.Gui (1.72)
+* Bugfix Messagebox-Helper Exception on Cancel Dialog
+* Added the Wizard (Example under Dialogs)

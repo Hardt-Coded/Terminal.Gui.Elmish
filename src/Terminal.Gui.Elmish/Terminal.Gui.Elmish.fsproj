@@ -28,8 +28,10 @@
     <PackageReleaseNotes>Major Rewrite:
 - Feliz-styled DSL
 - Diffing
-- Update latest Terminal.Gui (1.64)</PackageReleaseNotes>
-    <Version>2.0.164-preview1</Version>
+- Update latest Terminal.Gui (1.72)
+- Wizard added
+- Bugfixes</PackageReleaseNotes>
+    <Version>2.0.172</Version>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Scripts\**" />
