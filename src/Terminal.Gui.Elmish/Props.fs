@@ -96,24 +96,24 @@ module prop =
 
 type page =
     
-    static member inline running (value:bool)  = Interop.mkprop "running" value
-    static member inline onLoaded (value:unit->unit)  = Interop.mkprop "onLoaded" value
-    static member inline onReady (value:unit->unit)  = Interop.mkprop "onReady" value
-    static member inline onUnloaded (value:unit->unit)  = Interop.mkprop "onUnloaded" value
-    static member inline onActivate (value:unit->unit)  = Interop.mkprop "onActivate" value
-    static member inline onDeactivate (value:unit->unit)  = Interop.mkprop "onDeactivate" value
-    static member inline onChildClosed (value:unit->unit)  = Interop.mkprop "onChildClosed" value
-    static member inline onAllChildClosed (value:unit->unit)  = Interop.mkprop "onAllChildClosed" value
-    static member inline onClosing (value:unit->unit)  = Interop.mkprop "onClosing" value
-    static member inline onClosed (value:unit->unit)  = Interop.mkprop "onClosed" value
-    static member inline onChildLoaded (value:unit->unit)  = Interop.mkprop "onChildLoaded" value
-    static member inline onChildUnloaded (value:unit->unit)  = Interop.mkprop "onChildUnloaded" value
-    static member inline onResized (value:unit->unit)  = Interop.mkprop "onResized" value
-    static member inline onAlternateForwardKeyChanged (value:unit->unit)  = Interop.mkprop "onAlternateForwardKeyChanged" value
-    static member inline onAlternateBackwardKeyChanged (value:unit->unit)  = Interop.mkprop "onAlternateBackwardKeyChanged" value
-    static member inline onQuitKeyChanged (value:unit->unit)  = Interop.mkprop "onQuitKeyChanged" value
-    static member inline modal (value:bool)  = Interop.mkprop "modal" value
-    static member inline isMdiContainer (value:bool)  = Interop.mkprop "isMdiContainer" value
+    static member inline running                        (value:bool)  = Interop.mkprop "running" value
+    static member inline onLoaded                       (value:unit->unit)  = Interop.mkprop "onLoaded" value
+    static member inline onReady                        (value:unit->unit)  = Interop.mkprop "onReady" value
+    static member inline onUnloaded                     (value:unit->unit)  = Interop.mkprop "onUnloaded" value
+    static member inline onActivate                     (value:Toplevel->unit)  = Interop.mkprop "onActivate" value
+    static member inline onDeactivate                   (value:Toplevel->unit)  = Interop.mkprop "onDeactivate" value
+    static member inline onChildClosed                  (value:Toplevel->unit)  = Interop.mkprop "onChildClosed" value
+    static member inline onAllChildClosed               (value:unit->unit)  = Interop.mkprop "onAllChildClosed" value
+    static member inline onClosing                      (value:ToplevelClosingEventArgs->unit)  = Interop.mkprop "onClosing" value
+    static member inline onClosed                       (value:Toplevel->unit)  = Interop.mkprop "onClosed" value
+    static member inline onChildLoaded                  (value:Toplevel->unit)  = Interop.mkprop "onChildLoaded" value
+    static member inline onChildUnloaded                (value:Toplevel->unit)  = Interop.mkprop "onChildUnloaded" value
+    static member inline onResized                      (value:Size->unit)  = Interop.mkprop "onResized" value
+    static member inline onAlternateForwardKeyChanged   (value:Key->unit)  = Interop.mkprop "onAlternateForwardKeyChanged" value
+    static member inline onAlternateBackwardKeyChanged  (value:Key->unit)  = Interop.mkprop "onAlternateBackwardKeyChanged" value
+    static member inline onQuitKeyChanged               (value:Key->unit)  = Interop.mkprop "onQuitKeyChanged" value
+    static member inline modal                          (value:bool)  = Interop.mkprop "modal" value
+    static member inline isMdiContainer                 (value:bool)  = Interop.mkprop "isMdiContainer" value
 
     static member inline menuBar (props:IMenuBarProperty list) = Interop.mkprop "menuBar" props
     static member inline statusBar (value:StatusBar)  = Interop.mkprop "statusBar" value
@@ -219,7 +219,7 @@ type hexView =
 
 type label =
     static member inline text (value:string)  = Interop.mkprop "text" value
-    static member inline onClicked (value:unit->unit)  = Interop.mkprop "onClicked" value
+    static member inline onClick (value:unit->unit)  = Interop.mkprop "onClick" value
 
 type lineView =
     static member inline startingAnchor (value:System.Rune option)  = Interop.mkprop "startingAnchor" value
@@ -355,8 +355,8 @@ type tableView =
     static member inline maxCellWidth (value:int)  = Interop.mkprop "maxCellWidth" value
     static member inline nullSymbol (value:String)  = Interop.mkprop "nullSymbol" value
     static member inline separatorSymbol (value:Char)  = Interop.mkprop "separatorSymbol" value
-    static member inline onSelectedCellChanged (value:unit->unit)  = Interop.mkprop "onSelectedCellChanged" value
-    static member inline onCellActivated (value:unit->unit)  = Interop.mkprop "onCellActivated" value
+    static member inline onSelectedCellChanged (value:TableView.CellActivatedEventArgs->unit)  = Interop.mkprop "onSelectedCellChanged" value
+    static member inline onCellActivated (value:TableView.CellActivatedEventArgs->unit)  = Interop.mkprop "onCellActivated" value
     static member inline cellActivationKey (value:Key)  = Interop.mkprop "cellActivationKey" value
 
 
