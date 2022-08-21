@@ -25,13 +25,8 @@
     <RepositoryUrl>https://github.com/DieselMeister/Terminal.Gui.Elmish</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>fsharp f# gui console ui elmish feliz</PackageTags>
-    <PackageReleaseNotes>Major Rewrite:
-- Feliz-styled DSL
-- Diffing
-- Update latest Terminal.Gui (1.72)
-- Wizard added
-- Bugfixes</PackageReleaseNotes>
-    <Version>2.0.172</Version>
+    <PackageReleaseNotes>- Bugfixes for event sigantures</PackageReleaseNotes>
+    <Version>2.1.172</Version>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Scripts\**" />

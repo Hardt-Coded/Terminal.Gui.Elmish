@@ -45,3 +45,6 @@
 * Update latest Terminal.Gui (1.72)
 * Bugfix Messagebox-Helper Exception on Cancel Dialog
 * Added the Wizard (Example under Wizard)
+
+#### 2.1.172 - August, 21th
+* Bugfixes for event sigantures #19
