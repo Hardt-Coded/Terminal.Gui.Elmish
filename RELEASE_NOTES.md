@@ -48,3 +48,6 @@
 
 #### 2.1.172 - August, 21th
 * Bugfixes for event sigantures #19
+
+#### 2.0.190 - January 22th 2023
+* Update latest Terminal.Gui (1.9.0)
