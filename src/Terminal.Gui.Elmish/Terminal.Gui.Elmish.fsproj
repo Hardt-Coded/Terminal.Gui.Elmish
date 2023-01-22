@@ -54,6 +54,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Terminal.Gui" Version="1.7.2" />
+    <PackageReference Include="Terminal.Gui" Version="1.9.0" />
   </ItemGroup>
 </Project>
