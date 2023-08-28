@@ -2381,6 +2381,8 @@ type TreeViewElement(props:IProperty list) =
         props |> Interop.getValue<int> "scrollOffsetHorizontal"                     |> Option.iter (fun v -> element.ScrollOffsetHorizontal <- v)
         props |> Interop.getValue<AspectGetterDelegate<ITreeNode>> "aspectGetter"   |> Option.iter (fun v -> element.AspectGetter <- v)
         props |> Interop.getValue<CursorVisibility> "desiredCursorVisibility"       |> Option.iter (fun v -> element.DesiredCursorVisibility <- v)
+        props |> Interop.getValue<string list> "items"                              |> Option.iter (fun v -> v |> List.iter (fun text -> element.AddObject(TreeNode(text))))
+        props |> Interop.getValue<ITreeNode list> "nodes"                           |> Option.iter (fun v -> v |> List.iter element.AddObject)
         // onObjectActivated
         props 
         |> Interop.getValue<ObjectActivatedEventArgs<ITreeNode>->unit> "onObjectActivated" 

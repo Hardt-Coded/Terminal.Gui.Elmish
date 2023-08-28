@@ -426,6 +426,7 @@ type treeView =
     static member inline scrollOffsetHorizontal (value:int)  = Interop.mkprop "scrollOffsetHorizontal" value
     static member inline aspectGetter (value:AspectGetterDelegate<ITreeNode>)  = Interop.mkprop "aspectGetter" value
     static member inline desiredCursorVisibility (value:CursorVisibility)  = Interop.mkprop "desiredCursorVisibility" value
-
+    static member inline items (value: string list) = Interop.mkprop "items" value
+    static member inline nodes (value: ITreeNode list) = Interop.mkprop "nodes" value
 
 
