@@ -2027,6 +2027,23 @@ type TabViewElement(props:IProperty list) =
         props |> Interop.getValue<UInt32> "maxTabTextWidth" |> Option.iter (fun v -> element.MaxTabTextWidth <- v)
         props |> Interop.getValue<TabView.Tab> "selectedTab"|> Option.iter (fun v -> element.SelectedTab <- v)
         props |> Interop.getValue<TabView.TabStyle> "style" |> Option.iter (fun v -> element.Style <- v)
+
+        props |> Interop.getValue<ITabProperty list> "tabs" |> Option.iter (fun v ->
+            v
+            |> List.iter (fun tabProp ->
+                Interop.getTabValue<ITabItemProperty list> "tabItems" [tabProp]
+                |> Option.iter (fun v ->
+                    let title = Interop.getTabItemValue<string> "title" v
+                    let view = Interop.getTabItemValue<TerminalElement> "view" v
+                    let result =
+                        (title, view)
+                        ||> Option.map2 (fun title view ->
+                            view.create None
+                            TabView.Tab(title, view.element))
+
+                    match result with
+                    | None -> ()
+                    | Some tab -> element.AddTab(tab, false))))
         
         // onSelectedTabChanged
         props 
