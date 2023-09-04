@@ -7,6 +7,7 @@
   <ItemGroup>
     <Compile Include="Start.fs" />
     <Compile Include="Counter.fs" />
+    <Compile Include="TabView.fs" />
     <Compile Include="TextFields.fs" />
     <Compile Include="RadioCheck.fs" />
     <Compile Include="TextView.fs" />
