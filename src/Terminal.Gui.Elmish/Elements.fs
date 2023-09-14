@@ -1,4 +1,4 @@
-namespace Terminal.Gui.Elmish.Elements
+﻿namespace Terminal.Gui.Elmish.Elements
 
 open System.Reflection
 open System.Collections
@@ -7,9 +7,6 @@ open Terminal.Gui
 open Terminal.Gui.Elmish
 open System.Data
 open Terminal.Gui.Trees
-
-
-
 
 [<AbstractClass>]
 type TerminalElement (props:IProperty list) =
@@ -2034,15 +2031,11 @@ type TabViewElement(props:IProperty list) =
             |> List.iter (fun tabItems ->
                 let title = Interop.getTabItemValue<string> "title" tabItems
                 let view = Interop.getTabItemValue<TerminalElement> "view" tabItems
-                let result =
-                    (title, view)
-                    ||> Option.map2 (fun title view ->
-                        view.create None
-                        TabView.Tab(title, view.element))
-
-                match result with
-                | None -> ()
-                | Some tab -> element.AddTab(tab, false)))
+                (title, view)
+                ||> Option.map2 (fun title view ->
+                    view.create None
+                    TabView.Tab(title, view.element))
+                |> Option.iter (fun tab -> element.AddTab(tab, false))))
         
         // onSelectedTabChanged
         props 
