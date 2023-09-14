@@ -1,4 +1,4 @@
-﻿namespace Terminal.Gui.Elmish.Elements
+namespace Terminal.Gui.Elmish.Elements
 
 open System.Reflection
 open System.Collections
@@ -2030,20 +2030,19 @@ type TabViewElement(props:IProperty list) =
 
         props |> Interop.getValue<ITabProperty list> "tabs" |> Option.iter (fun v ->
             v
-            |> List.iter (fun tabProp ->
-                Interop.getTabValue<ITabItemProperty list> "tabItems" [tabProp]
-                |> Option.iter (fun v ->
-                    let title = Interop.getTabItemValue<string> "title" v
-                    let view = Interop.getTabItemValue<TerminalElement> "view" v
-                    let result =
-                        (title, view)
-                        ||> Option.map2 (fun title view ->
-                            view.create None
-                            TabView.Tab(title, view.element))
+            |> List.choose (fun tabProp -> Interop.getTabValue<ITabItemProperty list> "tabItems" [tabProp])
+            |> List.iter (fun tabItems ->
+                let title = Interop.getTabItemValue<string> "title" tabItems
+                let view = Interop.getTabItemValue<TerminalElement> "view" tabItems
+                let result =
+                    (title, view)
+                    ||> Option.map2 (fun title view ->
+                        view.create None
+                        TabView.Tab(title, view.element))
 
-                    match result with
-                    | None -> ()
-                    | Some tab -> element.AddTab(tab, false))))
+                match result with
+                | None -> ()
+                | Some tab -> element.AddTab(tab, false)))
         
         // onSelectedTabChanged
         props 

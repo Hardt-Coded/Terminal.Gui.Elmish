@@ -79,9 +79,6 @@ type View =
     static member inline tableView (props:IProperty list) = TableViewElement(props) :> TerminalElement
    
     static member inline tabView (props:IProperty list) = TabViewElement(props) :> TerminalElement
-    static member inline tabView (children:TerminalElement list) = 
-        let props = [ prop.children children ]
-        TabViewElement(props) :> TerminalElement
 
     static member inline textField (props:IProperty list) = TextFieldElement(props) :> TerminalElement
     
