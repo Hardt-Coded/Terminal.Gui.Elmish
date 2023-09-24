@@ -26,7 +26,7 @@
     <PackageTags>fsharp f# gui console ui elmish feliz</PackageTags>
     <PackageReleaseNotes>Add Tabs and MenuBar support. Fix Focus on Button Click</PackageReleaseNotes>
     <Version>2.2.1140</Version>
-    <TargetFrameworks>net7.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net7.0;netstandard2.1;net6.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Scripts\**" />
