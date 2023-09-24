@@ -36,15 +36,21 @@
 * cleanup dependencies (Thanks Chet)
 
 
-#### 2.0.164-preview1 - June, 14th
+#### 2.0.164-preview1 - June, 14th 2022
 * Major Rewrite:
 * Feliz-styled DSL
 * Diffing
 
-#### 2.0.172 - August, 20th
+#### 2.0.172 - August, 20th 2022
 * Update latest Terminal.Gui (1.72)
 * Bugfix Messagebox-Helper Exception on Cancel Dialog
 * Added the Wizard (Example under Wizard)
 
-#### 2.1.172 - August, 21th
+#### 2.1.172 - August, 21th 2022
 * Bugfixes for event sigantures #19
+
+#### 2.1.1140 - September, 24th 2023
+* Bump to Terminal.Gui Version 1.14
+* Add Tab-View Support! Thanks to  Christian Sheridan (@sheridanchris)
+* Add Menu Bar support
+* Fix Missing Focus on clicking on button

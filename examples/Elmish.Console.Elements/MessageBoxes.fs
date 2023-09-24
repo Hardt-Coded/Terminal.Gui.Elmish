@@ -60,7 +60,7 @@ let showWizardCmd =
         let lbl = new Label ("Enter Number to Increase the Counter:", AutoSize=true)
         secondStep.Add(lbl);
         
-        let number = new TextField (X = (Pos.Right(lbl)) + Pos.At(1), Width = (Dim.Fill()) - Dim.Sized(1))
+        let number = new TextField (X = Pos.Right(lbl) + Pos.At(1), Width = Dim.Fill() - Dim.Sized(1))
         secondStep.Add(number);
         
         wizard.add_Finished(

@@ -515,10 +515,25 @@ type MenuBarElement(props:IMenuBarProperty list) =
 
 
     override this.canUpdate prevElement oldProps =
-        true
+        let props = props |> Seq.cast<IProperty> |> Seq.toList
+        let (changedProps,removedProps) = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
 
     override this.update prevElement oldProps = 
-        ()
+        let props = props |> Seq.cast<IProperty> |> Seq.toList
+        let element = prevElement :?> MenuBar
+        let (changedProps,removedProps) = Interop.filterProps oldProps props
+        // let removedProps = removedProps |> Seq.cast<IMenuBarProperty> |> Seq.toList
+        // let changedProps = changedProps |> Seq.cast<IMenuBarProperty> |> Seq.toList
+        ViewElement.removeProps prevElement removedProps
+        removeProps element (removedProps |> Seq.cast<IMenuBarProperty> |> Seq.toList)
+        ViewElement.setProps prevElement changedProps
+        setProps element (changedProps |> Seq.cast<IMenuBarProperty> |> Seq.toList)
+        this.element <- prevElement
 
     
 
@@ -526,14 +541,7 @@ type PageElement(props:IProperty list) =
     inherit TerminalElement(props) 
 
     let setProps (element:Toplevel) props =
-        props 
-        |> Interop.getValue<IMenuBarProperty list> "menuBar" 
-        |> Option.iter (fun menubarProperties -> 
-            let menubar = MenuBarElement(menubarProperties)
-            menubar.create (Some element)
-            //element.MenuBar <- (menubar.element :?> MenuBar)
-            //element.Add (menubar.element :?> MenuBar)
-        )
+        
         
         props |> Interop.getValue<bool> "running"         |> Option.iter (fun v -> element.Running <- v)
         props |> Interop.getValue<bool> "modal"         |> Option.iter (fun v -> element.Modal <- v)
@@ -786,6 +794,17 @@ type PageElement(props:IProperty list) =
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+        
+        // add menu
+        props 
+        |> Interop.getValue<IMenuBarProperty list> "menuBar" 
+        |> Option.iter (fun menubarProperties -> 
+            let menubar = MenuBarElement(menubarProperties)
+            menubar.create (Some el)
+            //element.MenuBar <- (menubar.element :?> MenuBar)
+            //element.Add (menubar.element :?> MenuBar)
+        )
+        
         this.element <- el
 
     override this.canUpdate prevElement oldProps =
