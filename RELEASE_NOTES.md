@@ -51,6 +51,7 @@
 
 #### 2.2.1140 - September, 24th 2023
 * Bump to Terminal.Gui Version 1.14
-* Add Tab-View Support! Thanks to  Christian Sheridan (@sheridanchris)
+* Add Tab-View Support! Thanks to Christian Sheridan (@sheridanchris)
 * Add Menu Bar support
 * Fix Missing Focus on clicking on button
+* Adding Items to a Tree View. Thanks again to Christian Sheridan (@sheridanchris)
