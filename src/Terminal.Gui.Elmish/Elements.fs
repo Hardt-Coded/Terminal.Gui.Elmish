@@ -8,9 +8,6 @@ open Terminal.Gui.Elmish
 open System.Data
 open Terminal.Gui.Trees
 
-
-
-
 [<AbstractClass>]
 type TerminalElement (props:IProperty list) =
     let mutable view: View = null
@@ -2027,6 +2024,18 @@ type TabViewElement(props:IProperty list) =
         props |> Interop.getValue<UInt32> "maxTabTextWidth" |> Option.iter (fun v -> element.MaxTabTextWidth <- v)
         props |> Interop.getValue<TabView.Tab> "selectedTab"|> Option.iter (fun v -> element.SelectedTab <- v)
         props |> Interop.getValue<TabView.TabStyle> "style" |> Option.iter (fun v -> element.Style <- v)
+
+        props |> Interop.getValue<ITabProperty list> "tabs" |> Option.iter (fun v ->
+            v
+            |> List.choose (fun tabProp -> Interop.getTabValue<ITabItemProperty list> "tabItems" [tabProp])
+            |> List.iter (fun tabItems ->
+                let title = Interop.getTabItemValue<string> "title" tabItems
+                let view = Interop.getTabItemValue<TerminalElement> "view" tabItems
+                (title, view)
+                ||> Option.map2 (fun title view ->
+                    view.create None
+                    TabView.Tab(title, view.element))
+                |> Option.iter (fun tab -> element.AddTab(tab, false))))
         
         // onSelectedTabChanged
         props 

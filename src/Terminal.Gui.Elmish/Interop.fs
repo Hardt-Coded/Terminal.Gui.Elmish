@@ -58,64 +58,39 @@ module internal EventHelpers =
 
 [<RequireQualifiedAccess>]
 module Interop =
-
-    let inline mkprop (name:string) (data:obj) : IProperty = KeyValue (name, data)
-
-    let inline valueExists name (props:IProperty list) =
+    let inline valueExists name (props: IProperty list) =
         props
         |> Seq.cast<KeyValue>
         |> Seq.exists (function | KeyValue (pname,_) -> name = pname)
 
-
-    let inline getValue<'a> name (props:IProperty list) =
+    let inline getValueGeneric<'a, 'b when 'b :> IProperty> (name: string) (props: 'b list) =
         props
         |> Seq.cast<KeyValue>
         |> Seq.tryFind (function | KeyValue (pname,_) -> name = pname)
         |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
 
-
-    let inline getValueDefault<'a> name defaultVal (props:IProperty list) =
+    let inline getValueDefaultGeneric<'a, 'b when 'b :> IProperty> (name: string) (defaultValue: 'a) (props: 'b list) =
         props
-        |> Seq.cast<KeyValue>
-        |> Seq.tryFind (function | KeyValue (pname, _) -> name = pname)
-        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
-        |> Option.defaultValue defaultVal
+        |> getValueGeneric<'a, 'b> name
+        |> Option.defaultValue defaultValue
 
+    let inline mkprop (name:string) (data:obj) : IProperty = KeyValue (name, data)
+    let inline getValue<'a> name props = getValueGeneric<'a, IProperty> name props
+    let inline getValueDefault<'a> name defaultVal (props:IProperty list) = getValueDefaultGeneric<'a, IProperty> name defaultVal props
 
     let inline mkMenuProp (name:string) (data:obj) : IMenuProperty = KeyValue (name, data)
-
-    let inline getMenuValue<'a> name (props:IMenuProperty list) =
-        props
-        |> Seq.cast<KeyValue>
-        |> Seq.tryFind (function | KeyValue (pname,_) -> name = pname)
-        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
-
-
-    let inline getMenuValueDefault<'a> name defaultVal (props:IMenuProperty list) =
-        props
-        |> Seq.cast<KeyValue>
-        |> Seq.tryFind (function | KeyValue (pname, _) -> name = pname)
-        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
-        |> Option.defaultValue defaultVal
-
+    let inline getMenuValue<'a> name (props: IMenuProperty list) = getValueGeneric<'a, IMenuProperty> name props
+    let inline getMenuValueDefault<'a> name defaultVal (props:IMenuProperty list) = getValueDefaultGeneric<'a, IMenuProperty> name defaultVal props
 
     let inline mkMenuBarProp (name:string) (data:obj) : IMenuBarProperty = KeyValue (name, data)
+    let inline getMenuBarValue<'a> name (props:IMenuBarProperty list) = getValueGeneric<'a, IMenuBarProperty> name props
+    let inline getMenuBarValueDefault<'a> name defaultVal (props:IMenuBarProperty list) = getValueDefaultGeneric<'a, IMenuBarProperty> name defaultVal props
 
-    let inline getMenuBarValue<'a> name (props:IMenuBarProperty list) =
-        props
-        |> Seq.cast<KeyValue>
-        |> Seq.tryFind (function | KeyValue (pname,_) -> name = pname)
-        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
+    let mkTabProp (name: string) (data: obj) : ITabProperty = KeyValue (name, data)
+    let getTabValue<'a> name (props: ITabProperty list) = getValueGeneric<'a, ITabProperty> name props
 
-
-    let inline getMenuBarValueDefault<'a> name defaultVal (props:IMenuBarProperty list) =
-        props
-        |> Seq.cast<KeyValue>
-        |> Seq.tryFind (function | KeyValue (pname, _) -> name = pname)
-        |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
-        |> Option.defaultValue defaultVal
-
-
+    let mkTabItemProp (name: string) (data: obj) : ITabItemProperty = KeyValue (name, data)
+    let getTabItemValue<'a> name (props: ITabItemProperty list) = getValueGeneric<'a, ITabItemProperty> name props
 
     let inline mkstyle (name:string) (data:obj) : IStyle= KeyValue (name, data)
     

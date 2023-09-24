@@ -366,7 +366,14 @@ type tabView =
     static member inline onSelectedTabChanged (value:EventHandler<TabView.TabChangedEventArgs>)  = Interop.mkprop "onSelectedTabChanged" value
     static member inline selectedTab (value:TabView.Tab)  = Interop.mkprop "selectedTab" value
     static member inline style (value:TabView.TabStyle)  = Interop.mkprop "style" value
+    static member inline tabs (value: ITabProperty list) = Interop.mkprop "tabs" value
 
+type tab =
+    static member create (value: ITabItemProperty list) = Interop.mkTabProp "tabItems" value
+
+type tabItem =
+    static member inline title (value: string) = Interop.mkTabItemProp "title" value
+    static member inline view (value: TerminalElement) = Interop.mkTabItemProp "view" value
 
 type textField =
     static member inline used (value:bool)  = Interop.mkprop "used" value

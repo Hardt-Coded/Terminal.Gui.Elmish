@@ -13,6 +13,7 @@ type Pages =
     | ScrollView
     | MessageBoxes
     | Wizard
+    | TabView
 
 type Model = {
     Page: Pages
@@ -87,9 +88,6 @@ let update (msg:Msg) (model:Model) =
                 {model with CounterModel = Some m; Page = Counter}, cmd
             | _ ->
                 {model with Page = page}, Cmd.none
-
-
-
         | TextFields ->
             match model.TextFieldsModel with
             | None ->
@@ -154,7 +152,8 @@ let update (msg:Msg) (model:Model) =
                 {model with WizardModel = Some m; Page = Wizard}, cmd
             | _ ->
                 {model with Page = page}, Cmd.none
-
+        | TabView ->
+            { model with Page = TabView }, Cmd.none
 
     | ExitApp ->
         Program.quit()
@@ -364,6 +363,12 @@ let view (model:Model) (dispatch:Msg->unit) =
                             button.text "Wizard"
                             button.onClick (fun () -> dispatch (ChangePage Wizard))
                         ]
+                        View.button [
+                            prop.position.x.at 1
+                            prop.position.y.at 10
+                            button.text "Tab View"
+                            button.onClick (fun () -> dispatch(ChangePage TabView))
+                        ]
                     ]
                 ]
 
@@ -417,7 +422,8 @@ let view (model:Model) (dispatch:Msg->unit) =
                             | None -> ()
                             | Some svmodel ->
                                 yield! Wizard.view svmodel (WizardMsg >> dispatch)
-
+                        | TabView ->
+                            yield! TabView.view 
                     ]
                 ]
             ]
