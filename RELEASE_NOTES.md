@@ -49,7 +49,7 @@
 #### 2.1.172 - August, 21th 2022
 * Bugfixes for event sigantures #19
 
-#### 2.1.1140 - September, 24th 2023
+#### 2.2.1140 - September, 24th 2023
 * Bump to Terminal.Gui Version 1.14
 * Add Tab-View Support! Thanks to  Christian Sheridan (@sheridanchris)
 * Add Menu Bar support

@@ -25,7 +25,7 @@
     <RepositoryUrl>https://github.com/DieselMeister/Terminal.Gui.Elmish</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>fsharp f# gui console ui elmish feliz</PackageTags>
-    <PackageReleaseNotes>- Bugfixes for event sigantures</PackageReleaseNotes>
+    <PackageReleaseNotes>Add Tabs and MenuBar support. Fix Focus on Button Click</PackageReleaseNotes>
     <Version>2.2.1140</Version>
   </PropertyGroup>
   <ItemGroup>
