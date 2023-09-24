@@ -933,7 +933,11 @@ type ButtonElement(props:IProperty list) =
         |> Interop.getValue<unit->unit> "onClick" 
         |> Option.iter (fun v -> 
             Interop.removeEventHandlerIfNecessary "Clicked" element
-            element.add_Clicked v
+            let action = fun () ->
+                v()
+                element.SetFocus()
+            
+            element.add_Clicked action
         )
         
             

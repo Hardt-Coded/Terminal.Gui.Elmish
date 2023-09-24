@@ -429,6 +429,3 @@ let view (model:Model) (dispatch:Msg->unit) =
             ]
         ]
     ]
-
-
-

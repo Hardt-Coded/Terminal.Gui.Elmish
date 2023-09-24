@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>Terminal.Gui.Elmish</RootNamespace>
     <AssemblyName>Terminal.Gui.Elmish</AssemblyName>
     <Name>Terminal.Gui.Elmish</Name>
@@ -26,7 +26,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>fsharp f# gui console ui elmish feliz</PackageTags>
     <PackageReleaseNotes>- Bugfixes for event sigantures</PackageReleaseNotes>
-    <Version>2.1.172</Version>
+    <Version>2.2.1140</Version>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Scripts\**" />
@@ -54,6 +54,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Terminal.Gui" Version="1.7.2" />
+    <PackageReference Include="Terminal.Gui" Version="1.14.0" />
   </ItemGroup>
 </Project>
