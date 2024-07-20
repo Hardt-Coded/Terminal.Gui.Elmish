@@ -24,7 +24,7 @@ let openFileDialogCmd () =
     Cmd.OfAsync.perform (
         fun () ->
             async {
-                let file = Dialogs.openFileDialog "Open TextFile" "Select Textfile to Open"            
+                let file = Dialogs.openFileDialog "Open TextFile"             
                 match file with
                 | None ->
                     return ""
@@ -53,30 +53,30 @@ let view (model:Model) (dispatch:Msg -> unit) =
     [
         View.label [
             prop.position.x.center
-            prop.position.y.at 1
+            prop.position.y.absolute 1
             prop.width.fill 1
-            prop.textAlignment.centered
+            prop.alignment.center
             prop.color (Color.BrightYellow, Color.Green)
             label.text "TextView with File Dialog..."
         ] 
 
         View.button [
             prop.position.x.center
-            prop.position.y.at 3
+            prop.position.y.absolute 3
             button.text "Open Textfile"
-            button.onClick (fun () -> dispatch OpenFileDialog)
+            button.onAccept (fun () -> dispatch OpenFileDialog)
         ]
 
         View.frameView [
-            prop.position.x.at 1
-            prop.position.y.at 5
+            prop.position.x.absolute 1
+            prop.position.y.absolute 5
             prop.width.fill 1
             prop.height.fill 1
             frameView.title "TextView"
             frameView.children [
                 View.textView [
-                    prop.position.x.at 0
-                    prop.position.y.at 0
+                    prop.position.x.absolute 0
+                    prop.position.y.absolute 0
                     prop.width.filled
                     prop.height.filled
                     prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)

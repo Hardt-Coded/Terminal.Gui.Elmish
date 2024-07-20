@@ -20,8 +20,8 @@ type View =
     static member inline label (props:IProperty list) = LabelElement(props) :> TerminalElement
     static member inline label (x:int, y:int, text: string) = 
         let props = [ 
-            prop.position.x.at x
-            prop.position.y.at y
+            prop.position.x.absolute x
+            prop.position.y.absolute y
             label.text text
         ]
         LabelElement(props) :> TerminalElement
@@ -49,11 +49,11 @@ type View =
 
     static member inline listView (props:IProperty list) = ListViewElement(props) :> TerminalElement
 
-    static member inline panelView (props:IProperty list) = 
+    (*static member inline panelView (props:IProperty list) = 
         PanelViewElement(props) :> TerminalElement
     static member inline panelView (child:TerminalElement) = 
         let props = [ panelView.child child ]
-        PanelViewElement(props) :> TerminalElement
+        PanelViewElement(props) :> TerminalElement*)
 
     static member inline progressBar (props:IProperty list) = ProgressBarElement(props) :> TerminalElement
     
@@ -116,41 +116,40 @@ module Dialogs =
     open System
 
     let showWizard (wizard:Wizard) =
-        Application.Top.Add(wizard)
+        Application.Top.Add(wizard) |> ignore
         Application.Run(wizard)
-        Application.Top.Remove(wizard)
+        Application.Top.Remove(wizard) |> ignore
         ()
 
 
-    let openFileDialog title message =
-        use dia = new OpenDialog(title |> Interop.ustr,message |> Interop.ustr)           
-        Application.Top.Add(dia)
+    let openFileDialog title =
+        use dia = new OpenDialog(Title=title)           
+        Application.Top.Add(dia) |> ignore
         Application.Run(dia)
-        Application.Top.Remove(dia)
+        Application.Top.Remove(dia) |> ignore
         if dia.Canceled then
             None
         else
             let file = 
-                dia.FilePath
-                |> Option.ofObj 
-                |> Option.map string
+                dia.FilePaths
+                |> Seq.tryHead
                 |> Option.bind (fun s ->
                     if String.IsNullOrEmpty(s) then None 
-                    else Some (System.IO.Path.Combine((dia.DirectoryPath |> string),s))
+                    else Some s
                 )
             file
 
 
-    let messageBox width height title text (buttons:string list) =
-        let result = MessageBox.Query(width,height,title |>Interop.ustr,text |> Interop.ustr,buttons |> List.map Interop.ustr |> List.toArray)
+    let messageBox (width:int) height title text (buttons:string list) =
+        let result = MessageBox.Query(width,height,title,text,buttons |> List.toArray)
         match buttons with
         | [] -> ""
         | _ when result < 0 || result > buttons.Length - 1  -> ""
         | _ -> buttons.[result]
 
 
-    let errorBox width height title text (buttons:string list) =
-        let result = MessageBox.ErrorQuery(width,height,title |>Interop.ustr,text |> Interop.ustr,buttons |> List.map Interop.ustr |> List.toArray)
+    let errorBox (width:int) height title text (buttons:string list) =
+        let result = MessageBox.ErrorQuery(width,height,title,text,buttons |> List.toArray)
         match buttons with
         | [] -> ""
         | _ when result < 0 || result > buttons.Length - 1  -> ""

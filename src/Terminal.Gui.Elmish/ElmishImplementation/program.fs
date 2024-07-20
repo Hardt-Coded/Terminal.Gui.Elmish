@@ -166,7 +166,7 @@ module Program =
                             Differ.update currentState nextTreeState
                             currentTreeState <- Some nextTreeState
 
-                        Application.MainLoop.Invoke(fun () -> ())
+                        Application.Invoke(fun () -> ())
                         
                         //Application.MainLoop.Invoke(fun () ->
                         //    match currentTreeState with
@@ -207,7 +207,7 @@ module Program =
             failwith ("error state not initialized")
         | topElement ->
             match topElement with
-            | :? Toplevel ->
+            | :? Toplevel as te ->
                 let sub = 
                     try 
                         program.subscribe model 
@@ -217,12 +217,13 @@ module Program =
                 sub @ cmd |> Cmd.exec syncDispatch
         
                 // some reflection to set the actual top
-                let topProp = typeof<Application>.GetProperty("Top")
-                let currentProp = typeof<Application>.GetProperty("Current")
-                currentProp.SetValue(null,topElement)
-                topProp.SetValue(null,topElement)
-        
-                Application.Run()
+                // let topProp = typeof<Application>.GetProperty("Top")
+                //let currentProp = typeof<Application>.GetProperty("Current")
+                //currentProp.SetValue(null,te)
+                // topProp.SetValue(null,te)
+                //Application.Begin(te) |> ignore
+                
+                Application.Run(te) |> ignore
             | _ ->
                 failwith("first element must be a page!")
 

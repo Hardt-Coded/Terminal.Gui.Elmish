@@ -25,25 +25,26 @@ let init () : Model * Cmd<Msg> =
 
 let showWizardCmd case =
     fun dispatch ->
-        let wizard = new Wizard ($"Setup Wizard")
+        let wizard = new Wizard (Title="Setup Wizard")
         
         // Add 1st step
-        let firstStep = new Wizard.WizardStep ("End User License Agreement")
+        let firstStep = new WizardStep (Title="End User License Agreement")
         wizard.AddStep(firstStep);
         firstStep.NextButtonText <- "Accept!"
         firstStep.HelpText <- "This is the End User License Agreement."
         
         // Add 2nd step
-        let secondStep = new Wizard.WizardStep ("Second Step")
+        let secondStep = new WizardStep (Title="Second Step")
         wizard.AddStep(secondStep)
         secondStep.HelpText <- "This is the help text for the Second Step."
-        let lbl = new Label ("Enter Number to Change the Counter:", AutoSize=true)
-        secondStep.Add(lbl);
+        let lbl = new Label (Text="Enter Number to Change the Counter:", Width=Dim.Auto())
+        secondStep.Add(lbl) |> ignore
         
-        let number = new TextField (X = Pos.Right(lbl) + Pos.At(1), Width = Dim.Fill() - Dim.Sized(1))
-        secondStep.Add(number);
+        let number = new TextField (X = Pos.Right(lbl) + Pos.Absolute(1), Width = Dim.Fill(1))
+        number.ColorScheme <- Application.Top.ColorScheme
+        secondStep.Add(number) |> ignore
         
-        wizard.add_Finished(
+        wizard.Finished.Add(
             fun ev ->
                 match System.Int32.TryParse(number.Text.ToString()) with
                 | false, _ -> 
@@ -79,24 +80,24 @@ let view (model:Model) (dispatch:Msg->unit) =
     [
         View.label [
             prop.position.x.center
-            prop.position.y.at 1
+            prop.position.y.absolute 1
             prop.width.fill 1
-            prop.textAlignment.centered
+            prop.alignment.center
             prop.color (Color.BrightYellow, Color.Green)
             label.text "Counter with Message Boxes!"
         ] 
 
         View.button [
             prop.position.x.center
-            prop.position.y.at 5
+            prop.position.y.absolute 5
             button.text "Wizard Up"
-            button.onClick (fun () -> dispatch Increment)
+            button.onAccept (fun () -> dispatch Increment)
         ] 
 
         View.label [
             prop.position.x.center
-            prop.position.y.at 6
-            prop.textAlignment.centered
+            prop.position.y.absolute 6
+            prop.alignment.center
             prop.color (Color.Magenta, Color.BrightYellow)
             label.text $"The Count of 'Fancyness' is {model.Counter}"
         ] 
@@ -104,9 +105,9 @@ let view (model:Model) (dispatch:Msg->unit) =
 
         View.button [
             prop.position.x.center
-            prop.position.y.at 7
+            prop.position.y.absolute 7
             button.text "Wizard Down"
-            button.onClick (fun () -> dispatch Decrement)
+            button.onAccept (fun () -> dispatch Decrement)
         ] 
 
         

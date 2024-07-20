@@ -275,89 +275,89 @@ let view (model:Model) (dispatch:Msg->unit) =
         
         prop.children [
             View.window [
-                prop.position.x.at 0
-                prop.position.y.at 0
+                prop.position.x.absolute 0
+                prop.position.y.absolute 0
                 prop.width.filled
                 prop.height.filled
                 window.title $"Elmish Console Demo - {model.CurrentLocalTime:``yyyy-MM-dd HH:mm:ss.ms``}"
                 window.children [
 
                     View.window [
-                        prop.position.x.at 0
-                        prop.position.y.at 0
-                        prop.width.percent 20.0
+                        prop.position.x.absolute 0
+                        prop.position.y.absolute 0
+                        prop.width.percent 20
                         prop.height.fill 2
                         window.title "Choose"
                         window.children [
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 1
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 1
                                 button.text "Start"
-                                button.onClick (fun () -> dispatch (ChangePage Start))
+                                button.onAccept (fun () -> dispatch (ChangePage Start))
                             ]
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 2
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 2
                                 button.text "Counter"
-                                button.onClick (fun () -> dispatch (ChangePage Counter))
+                                button.onAccept (fun () -> dispatch (ChangePage Counter))
                             ] 
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 3
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 3
                                 button.text "TextFields"
-                                button.onClick (fun () -> dispatch (ChangePage TextFields))
+                                button.onAccept (fun () -> dispatch (ChangePage TextFields))
                             ] 
 
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 4
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 4
                                 button.text "Radio and Check"
-                                button.onClick (fun () -> dispatch (ChangePage RadioCheck))
+                                button.onAccept (fun () -> dispatch (ChangePage RadioCheck))
                             ] 
 
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 5
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 5
                                 button.text "Text File View"
-                                button.onClick (fun () -> dispatch (ChangePage TextView))
+                                button.onAccept (fun () -> dispatch (ChangePage TextView))
                             ] 
 
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 6
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 6
                                 button.text "List View"
-                                button.onClick (fun () -> dispatch (ChangePage ListView))
+                                button.onAccept (fun () -> dispatch (ChangePage ListView))
                             ]                
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 7
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 7
                                 button.text "Scroll View"
-                                button.onClick (fun () -> dispatch (ChangePage ScrollView))
+                                button.onAccept (fun () -> dispatch (ChangePage ScrollView))
                             ] 
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 8
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 8
                                 button.text "Message Boxes"
-                                button.onClick (fun () -> dispatch (ChangePage MessageBoxes))
+                                button.onAccept (fun () -> dispatch (ChangePage MessageBoxes))
                             ] 
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 9
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 9
                                 button.text "Wizard"
-                                button.onClick (fun () -> dispatch (ChangePage Wizard))
+                                button.onAccept (fun () -> dispatch (ChangePage Wizard))
                             ]
                             View.button [
-                                prop.position.x.at 1
-                                prop.position.y.at 10
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 10
                                 button.text "Tab View"
-                                button.onClick (fun () -> dispatch(ChangePage TabView))
+                                button.onAccept (fun () -> dispatch(ChangePage TabView))
                             ]
                         ]
                     ]
 
                     View.window [
-                        prop.position.x.percent 25.0
-                        prop.position.y.at 2
+                        prop.position.x.percent 25
+                        prop.position.y.absolute 2
                         prop.width.fill 2
                         prop.height.fill 2
                         window.title "Demo"

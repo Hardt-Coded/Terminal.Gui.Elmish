@@ -58,17 +58,17 @@ let view (model:Model) (dispatch:Msg->unit) =
     [
         View.label [
             prop.position.x.center
-            prop.position.y.at 1
-            prop.textAlignment.centered
+            prop.position.y.absolute 1
+            prop.alignment.center
             prop.color (Color.BrightYellow, Color.Green)
             label.text "'F#ncy' Counter!"
         ] 
 
         View.button [
             prop.position.x.center
-            prop.position.y.at 5
+            prop.position.y.absolute 5
             button.text "Up"
-            button.onClick (fun () -> dispatch Increment)
+            button.onAccept (fun () -> dispatch Increment)
         ] 
 
         View.label [
@@ -76,9 +76,9 @@ let view (model:Model) (dispatch:Msg->unit) =
             let x = (16.0 * Math.Cos(c)) |> int 
             let y = (8.0 * Math.Sin(c)) |> int
 
-            prop.position.x.at (x + 20)
-            prop.position.y.at (y + 10)
-            prop.textAlignment.centered
+            prop.position.x.absolute (x + 20)
+            prop.position.y.absolute (y + 10)
+            prop.alignment.center
             prop.color (Color.Magenta, Color.BrightYellow)
             label.text $"The Count of 'Fancyness' is {model.Counter}"
         ] 
@@ -86,30 +86,30 @@ let view (model:Model) (dispatch:Msg->unit) =
 
         View.button [
             prop.position.x.center
-            prop.position.y.at 7
+            prop.position.y.absolute 7
             button.text "Down"
-            button.onClick (fun () -> dispatch Decrement)
+            button.onAccept (fun () -> dispatch Decrement)
         ] 
 
         View.button [
             prop.position.x.center
-            prop.position.y.at 9
+            prop.position.y.absolute 9
             button.text "Start Spinning"
-            button.onClick (fun () -> dispatch StartSpin)
+            button.onAccept (fun () -> dispatch StartSpin)
         ] 
 
         View.button [
             prop.position.x.center
-            prop.position.y.at 11
+            prop.position.y.absolute 11
             button.text "Stop Spinning"
-            button.onClick (fun () -> dispatch StopSpin)
+            button.onAccept (fun () -> dispatch StopSpin)
         ] 
 
         View.button [
             prop.position.x.center
-            prop.position.y.at 13
+            prop.position.y.absolute 13
             button.text "Reset"
-            button.onClick (fun () -> dispatch Reset)
+            button.onAccept (fun () -> dispatch Reset)
         ] 
     ]
 

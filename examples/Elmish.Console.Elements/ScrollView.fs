@@ -1,6 +1,7 @@
 ﻿module ScrollView
 
 
+open System.Drawing
 open Terminal.Gui
 open Terminal.Gui.Elmish
 open Terminal.Gui.Elmish
@@ -61,9 +62,9 @@ let view (model:Model) (dispatch:Msg -> unit) =
     [
         View.label [
             prop.position.x.center
-            prop.position.y.at 1
+            prop.position.y.absolute 1
             prop.width.fill 1
-            prop.textAlignment.centered
+            prop.alignment.center
             prop.color (Color.BrightYellow, Color.Green)
             label.text "Scrollbars"
         ] 
@@ -71,16 +72,16 @@ let view (model:Model) (dispatch:Msg -> unit) =
         
 
         View.frameView [
-            prop.position.x.at 1
-            prop.position.y.at 4
+            prop.position.x.absolute 1
+            prop.position.y.absolute 4
             prop.width.fill 1
             prop.height.fill 5
             frameView.title "ScrollView"
             frameView.children [
         
                 View.scrollView [
-                    prop.position.x.at 0
-                    prop.position.y.at 0
+                    prop.position.x.absolute 0
+                    prop.position.y.absolute 0
                     prop.width.filled
                     prop.height.filled
                     scrollView.contentSize (Size(120,120))
@@ -88,11 +89,11 @@ let view (model:Model) (dispatch:Msg -> unit) =
                     scrollView.showVerticalScrollIndicator true
                     scrollView.children [
                         View.label [
-                            prop.position.x.at 0
-                            prop.position.y.at 0
-                            prop.width.sized 120
-                            prop.height.sized 120
-                            prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
+                            prop.position.x.absolute 0
+                            prop.position.y.absolute 0
+                            prop.width.absolute 120
+                            prop.height.absolute 120
+                            //prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
                             label.text model.Text
                         ]
                     ]

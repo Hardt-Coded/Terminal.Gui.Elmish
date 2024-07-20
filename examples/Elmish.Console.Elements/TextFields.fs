@@ -46,38 +46,38 @@ let view (model:Model) (dispatch:Msg -> unit) =
     [
         View.label [
             prop.position.x.center
-            prop.position.y.at 1
+            prop.position.y.absolute 1
             prop.width.fill 1
-            prop.textAlignment.centered
+            prop.alignment.center
             prop.color (Color.BrightYellow, Color.Green)
             label.text "Some Text Fields..."
         ] 
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 5
-            prop.width.sized 14
+            prop.position.x.absolute 1
+            prop.position.y.absolute 5
+            prop.width.fill 14
             label.text "Text:"
         ]
 
         View.textField [
-            prop.position.x.at 14
-            prop.position.y.at 5
+            prop.position.x.absolute 14
+            prop.position.y.absolute 5
             prop.width.filled
             textField.text model.Text
             textField.onTextChanging (fun t -> dispatch (ChangeText t))
         ]
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 7
-            prop.width.sized 14
+            prop.position.x.absolute 1
+            prop.position.y.absolute 7
+            prop.width.fill 14
             label.text "Secret Text:"
         ]
 
         View.textField [
-            prop.position.x.at 14
-            prop.position.y.at 7
+            prop.position.x.absolute 14
+            prop.position.y.absolute 7
             prop.width.filled
             textField.text  model.SecretText
             textField.onTextChanging (fun text -> dispatch (ChangeSecretText text))
@@ -85,66 +85,65 @@ let view (model:Model) (dispatch:Msg -> unit) =
         ]
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 9
+            prop.position.x.absolute 1
+            prop.position.y.absolute 9
             label.text $"The Text says: {model.Text}"
         ]
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 11
+            prop.position.x.absolute 1
+            prop.position.y.absolute 11
             label.text $"The Secret Text says: {model.SecretText}"
         ]
 
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 13
-            prop.width.sized 14
+            prop.position.x.absolute 1
+            prop.position.y.absolute 13
+            prop.width.fill 14
             label.text "Time Field:"
         ]
 
         View.timeField [
-            prop.position.x.at 16
-            prop.position.y.at 13
+            prop.position.x.absolute 16
+            prop.position.y.absolute 13
             timeField.time  model.CurrentTime
             timeField.onTimeChanged (fun ev -> dispatch <| ChangeTime ev.NewValue)
         ]
 
         View.timeField [
-            prop.position.x.at 30
-            prop.position.y.at 13
+            prop.position.x.absolute 30
+            prop.position.y.absolute 13
             timeField.isShortFormat true
             timeField.time model.CurrentTime
             timeField.onTimeChanged (fun ev -> dispatch <| ChangeTime ev.NewValue)
         ]
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 15
-            prop.width.sized 14
+            prop.position.x.absolute 1
+            prop.position.y.absolute 15
+            prop.width.fill 14
             label.text "Date Field:"
         ]
 
         View.dateField [
-            prop.position.x.at 16
-            prop.position.y.at 15
+            prop.position.x.absolute 16
+            prop.position.y.absolute 15
             dateField.date model.CurrentDate
             dateField.onDateChanged (fun ev -> dispatch <| ChangeDate ev.NewValue)
         ]
 
         View.dateField [
-            prop.position.x.at 30
-            prop.position.y.at 15
-            dateField.isShortFormat true
+            prop.position.x.absolute 30
+            prop.position.y.absolute 15
             dateField.date model.CurrentDate
             dateField.onDateChanged (fun ev -> dispatch <| ChangeDate ev.NewValue)
         ]
  
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 17
+            prop.position.x.absolute 1
+            prop.position.y.absolute 17
             label.text $"The DateTime (time and date Field) says: {model.CurrentDate.Add(model.CurrentTime):``ddd, yyyy-MM-dd HH:mm:ss``}"
         ]
 

@@ -49,24 +49,24 @@ let view (model:Model) (dispatch:Msg -> unit) =
     [
         View.label [
             prop.position.x.center
-            prop.position.y.at 1
+            prop.position.y.absolute 1
             prop.width.fill 1
-            prop.textAlignment.centered
+            prop.alignment.center
             prop.color (Color.BrightYellow, Color.Green)
             label.text "Radio and Check..."
         ] 
 
         View.label [
             prop.position.x.center
-            prop.position.y.at 5
+            prop.position.y.absolute 5
             prop.width.filled
-            prop.textAlignment.centered
+            prop.alignment.center
             label.text "Please Vote!"
         ]
 
         View.radioGroup [
             prop.position.x.center
-            prop.position.y.at 7
+            prop.position.y.absolute 7
             radioGroup.selectedItem (model.VoteResultItems |> List.findIndex (fun (i,_) -> i = model.VoteResult))
             radioGroup.radioLabels (model.VoteResultItems |> List.map snd)
             radioGroup.onSelectedItemChanged 
@@ -80,23 +80,23 @@ let view (model:Model) (dispatch:Msg -> unit) =
 
         View.checkBox [
             prop.position.x.center
-            prop.position.y.at 16
+            prop.position.y.absolute 16
             checkBox.isChecked model.IsHappy
             checkBox.text "Are you happy?"
-            checkBox.onToggled (fun b -> dispatch (ChangeHappy b.current))            
+            checkBox.onToggled (fun b -> dispatch <| ChangeHappy b)            
         ]
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 18
+            prop.position.x.absolute 1
+            prop.position.y.absolute 18
             //prop.autoSize true
             prop.color (Color.BrightYellow,Color.Red)
             label.text $"The Vote says: {model.VoteResult}"
         ]
 
         View.label [
-            prop.position.x.at 1
-            prop.position.y.at 19
+            prop.position.x.absolute 1
+            prop.position.y.absolute 19
             prop.color (Color.BrightYellow,Color.Red)
             match model.IsHappy with
             | true ->

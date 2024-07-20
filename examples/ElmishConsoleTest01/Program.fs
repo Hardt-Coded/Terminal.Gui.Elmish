@@ -2,17 +2,11 @@
 
 open System
 
-open NStack
+open System.Drawing
+open System.Text
 open Terminal.Gui.Elmish
 open System.IO
 open Terminal.Gui
-open Terminal.Gui
-open Terminal.Gui
-
-
-
-
-
 
 
 
@@ -79,7 +73,9 @@ let update (msg: Msg) (model: Model) =
 
 
 let myColorScheme () =
-    let color = Attribute.Make(Color.BrightYellow, Color.Green)
+    let yellow = Color.BrightYellow
+    let green = Color.Green
+    let color = new Attribute(&yellow, &green)
     ColorScheme(Focus = color, Normal = color)
 
 let view (state: Model) (dispatch: Msg -> unit) =
@@ -112,18 +108,18 @@ let view (state: Model) (dispatch: Msg -> unit) =
         ]
         prop.children [
             View.window [
-                prop.position.x.at 0
-                prop.position.y.at 1
+                prop.position.x.absolute 0
+                prop.position.y.absolute 1
                 prop.width.filled
                 prop.height.filled
                 window.title "Toller Titel!"
                 window.borderStyle.rounded
                 prop.children [
                     View.window [
-                        prop.position.x.at 1
-                        prop.position.y.at 1
+                        prop.position.x.absolute 1
+                        prop.position.y.absolute 1
                         prop.width.fill 4
-                        prop.height.sized 23
+                        prop.height.fill 23
                         window.title "Anderer toller Titel"
                         window.borderStyle.double
                         window.effect3D
@@ -136,16 +132,16 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                     let x = (16.0 * Math.Cos(c)) |> int
                                     let y = (8.0 * Math.Sin(c)) |> int
 
-                                    prop.position.x.at (x + 20)
-                                    prop.position.y.at (y + 10)
-                                    prop.textAlignment.centered
+                                    prop.position.x.absolute (x + 20)
+                                    prop.position.y.absolute (y + 10)
+                                    prop.alignment.center
 
                                     ]
                             View.button [
-                                prop.position.x.at 2
-                                prop.position.y.at 2
+                                prop.position.x.absolute 2
+                                prop.position.y.absolute 2
                                 button.text "Plus"
-                                button.onClick (fun () -> dispatch Msg.Inc)
+                                button.onAccept (fun () -> dispatch Msg.Inc)
                                 if state.IsVisible then
                                     prop.enabled
                                 else
@@ -153,15 +149,15 @@ let view (state: Model) (dispatch: Msg -> unit) =
                             ]
 
                             View.button [
-                                prop.position.x.at 2
-                                prop.position.y.at 4
+                                prop.position.x.absolute 2
+                                prop.position.y.absolute 4
                                 button.text "Minus"
-                                button.onClick (fun () -> dispatch Msg.Dec)
+                                button.onAccept (fun () -> dispatch Msg.Dec)
                             ]
 
                             View.checkBox [
-                                prop.position.x.at 2
-                                prop.position.y.at 6
+                                prop.position.x.absolute 2
+                                prop.position.y.absolute 6
                                 checkBox.text "Checkbox"
                                 if state.IsVisible then
                                     prop.onMouseEnter (fun e -> System.Diagnostics.Debug.WriteLine($"mouse enter event")
@@ -171,8 +167,8 @@ let view (state: Model) (dispatch: Msg -> unit) =
                             ]
 
                             View.colorPicker [
-                                prop.position.x.at 15
-                                prop.position.y.at 2
+                                prop.position.x.absolute 15
+                                prop.position.y.absolute 2
                                 colorPicker.title "Color"
                                 colorPicker.selectedColor Terminal.Gui.Color.BrightCyan
                                 colorPicker.onColorChanged (fun color ->
@@ -181,10 +177,10 @@ let view (state: Model) (dispatch: Msg -> unit) =
                             ]
 
                             View.button [
-                                prop.position.x.at 2
-                                prop.position.y.at 8
+                                prop.position.x.absolute 2
+                                prop.position.y.absolute 8
                                 button.text "Visible"
-                                button.onClick (fun () ->
+                                button.onAccept (fun () ->
                                     dispatch
                                     <| Msg.ChangeVisibility(state.IsVisible |> not)
                                 )
@@ -192,9 +188,9 @@ let view (state: Model) (dispatch: Msg -> unit) =
 
 
                             View.comboBox [
-                                prop.position.x.at 15
-                                prop.position.y.at 8
-                                prop.width.sized 10
+                                prop.position.x.absolute 15
+                                prop.position.y.absolute 8
+                                prop.width.fill 10
                                 comboBox.text "Combobox"
                                 prop.color (Color.BrightYellow, Color.Green)
                                 comboBox.source state.ListItems
@@ -206,43 +202,42 @@ let view (state: Model) (dispatch: Msg -> unit) =
                             ]
 
                             View.dateField [
-                                prop.position.x.at 26
-                                prop.position.y.at 8
-                                prop.width.sized 10
+                                prop.position.x.absolute 26
+                                prop.position.y.absolute 8
+                                prop.width.fill 10
                                 dateField.date DateTime.Now
 
                                 ]
 
                             View.timeField [
-                                prop.position.x.at 38
-                                prop.position.y.at 8
-                                prop.width.sized 10
+                                prop.position.x.absolute 38
+                                prop.position.y.absolute 8
+                                prop.width.fill 10
                                 prop.color (Color.BrightYellow, Color.Green)
                                 timeField.time DateTime.Now.TimeOfDay
                             ]
 
                             View.frameView [
-                                prop.position.x.at 2
-                                prop.position.y.at 10
-                                prop.width.sized 15
-                                prop.height.sized 7
+                                prop.position.x.absolute 2
+                                prop.position.y.absolute 10
+                                prop.width.fill 15
+                                prop.height.fill 7
                                 frameView.text "FrameView"
                                 frameView.borderStyle.rounded
-                                frameView.effect3D
                             ]
 
                             View.scrollView [
-                                prop.position.x.at 19
-                                prop.position.y.at 10
-                                prop.width.sized 15
-                                prop.height.sized 7
+                                prop.position.x.absolute 19
+                                prop.position.y.absolute 10
+                                prop.width.fill 15
+                                prop.height.fill 7
                                 scrollView.showHorizontalScrollIndicator true
                                 scrollView.showVerticalScrollIndicator true
                                 scrollView.contentSize (Size(25, 20))
                                 prop.children [
                                     View.hexView [
-                                        prop.width.sized 25
-                                        prop.height.sized 20
+                                        prop.width.fill 25
+                                        prop.height.fill 20
                                         hexView.source (
                                             new MemoryStream(System.Text.ASCIIEncoding.UTF8.GetBytes("Hello World"))
                                         )
@@ -251,37 +246,19 @@ let view (state: Model) (dispatch: Msg -> unit) =
                             ]
 
                             View.lineView [
-                                prop.position.y.at 1
+                                prop.position.y.absolute 1
                                 lineView.lineRune (Rune('-'))
                                 lineView.startingAnchor (Some <| Rune('>'))
                                 lineView.endingAnchor (Some <| Rune('<'))
                             ]
 
 
-                            View.panelView [
-                                prop.position.x.at 37
-                                prop.position.y.at 10
-                                panelView.borderStyle.rounded
-                                panelView.effect3D
-                                panelView.child
-                                <| View.listView [
-                                    prop.width.sized 15
-                                    prop.height.sized 5
-                                    listView.topItem 3
-                                    listView.leftItem 2
-                                    listView.source state.ListItems
-                                    listView.selectedItem state.SelectedListItem
-                                    listView.onOpenSelectedItem (fun t ->
-                                        System.Diagnostics.Debug.WriteLine($"LB: open selected item {t.Value}")
-                                    )
-                                    listView.onSelectedItemChanged (fun e -> dispatch <| ListChanged e.Item)
-                                   ]
-                            ]
+                            
 
                             View.progressBar [
-                                prop.position.x.at 57
-                                prop.position.y.at 9
-                                prop.width.sized 15
+                                prop.position.x.absolute 57
+                                prop.position.y.absolute 9
+                                prop.width.fill 15
                                 progressBar.text "Progress"
                                 progressBar.format.simplePlusPercentage
                                 progressBar.style.blocks
@@ -290,29 +267,29 @@ let view (state: Model) (dispatch: Msg -> unit) =
                             ]
 
                             View.progressBar [
-                                prop.position.x.at 57
-                                prop.position.y.at 11
-                                prop.width.sized 15
+                                prop.position.x.absolute 57
+                                prop.position.y.absolute 11
+                                prop.width.fill 15
                                 progressBar.text "Progress"
-                                progressBar.format.framedProgressPadded
+                                progressBar.format.simple
                                 progressBar.style.marqueeBlocks
                                 progressBar.fraction ((DateTime.Now.Second |> float) / 60.0)
                             ]
 
                             View.progressBar [
-                                prop.position.x.at 57
-                                prop.position.y.at 17
-                                prop.width.sized 15
+                                prop.position.x.absolute 57
+                                prop.position.y.absolute 17
+                                prop.width.fill 15
                                 progressBar.text "Progress"
-                                progressBar.format.framed
+                                progressBar.format.simple
                                 progressBar.style.marqueeContinuous
                                 progressBar.fraction ((DateTime.Now.Second |> float) / 60.0)
                             ]
 
 
                             View.radioGroup [
-                                prop.position.x.at 57
-                                prop.position.y.at 2
+                                prop.position.x.absolute 57
+                                prop.position.y.absolute 2
                                 radioGroup.displayMode.vertical
                                 radioGroup.radioLabels state.RadioItems
                                 radioGroup.onSelectedItemChanged (fun e -> dispatch <| RadioChanged e.SelectedItem)
@@ -321,35 +298,35 @@ let view (state: Model) (dispatch: Msg -> unit) =
 
 
                             View.tableView [
-                                prop.position.x.at 72
-                                prop.position.y.at 2
-                                prop.width.sized 50
-                                prop.height.sized 8
+                                prop.position.x.absolute 72
+                                prop.position.y.absolute 2
+                                prop.width.fill 50
+                                prop.height.fill 8
                                 tableView.table Data.table
                             ]
 
                             View.textField [
-                                prop.position.x.at 2
-                                prop.position.y.at 20
-                                prop.width.sized 20
+                                prop.position.x.absolute 2
+                                prop.position.y.absolute 20
+                                prop.width.fill 20
                                 textField.text state.Text
                                 textField.onTextChanging (fun (newText: string) -> dispatch <| Msg.ChangeText newText)
                             ]
 
 
                             View.textField [
-                                prop.position.x.at 20
-                                prop.position.y.at 20
-                                prop.width.sized 20
+                                prop.position.x.absolute 20
+                                prop.position.y.absolute 20
+                                prop.width.fill 20
                                 textField.text state.Text
                                 textField.onTextChanging (fun (newText: string) -> dispatch <| Msg.ChangeText newText)
                             ]
 
                             View.textView [
-                                prop.position.x.at 80
-                                prop.position.y.at 9
-                                prop.width.sized 20
-                                prop.height.sized 10
+                                prop.position.x.absolute 80
+                                prop.position.y.absolute 9
+                                prop.width.fill 20
+                                prop.height.fill 10
                                 textView.text "This is Text!"
                             ]
                         ]

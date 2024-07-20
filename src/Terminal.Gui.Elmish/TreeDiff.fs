@@ -28,7 +28,7 @@ module Differ =
         match rootTree, newTree with
         | rt, nt when rt.name <> nt.name ->
             let parent = rootTree.element |> Interop.getParent
-            parent |> Option.iter (fun p -> p.Remove rootTree.element)
+            parent |> Option.iter (fun p -> p.Remove rootTree.element |> ignore)
             rootTree.element.Dispose()
         #if DEBUG
             System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")
@@ -39,7 +39,7 @@ module Differ =
                 newTree.update rootTree.element rootTree.properties
             else
                 let parent = rootTree.element |> Interop.getParent
-                parent |> Option.iter (fun p -> p.Remove rootTree.element)
+                parent |> Option.iter (fun p -> p.Remove rootTree.element |> ignore)
                 rootTree.element.RemoveAll()
                 rootTree.element.Dispose()
                 #if DEBUG
@@ -55,7 +55,7 @@ module Differ =
                 newTree.update rootTree.element rootTree.properties
             else
                 let parent = rootTree.element |> Interop.getParent
-                parent |> Option.iter (fun p -> p.Remove rootTree.element)
+                parent |> Option.iter (fun p -> p.Remove rootTree.element |> ignore)
                 rootTree.element.Dispose()
             #if DEBUG
                 System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")

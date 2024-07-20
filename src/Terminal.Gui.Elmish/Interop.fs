@@ -1,6 +1,6 @@
 ﻿namespace Terminal.Gui.Elmish
 
-open NStack
+open System.Text
 open System
 open Terminal.Gui
 
@@ -151,9 +151,9 @@ module Interop =
         (changedProps, removedProps)
 
 
-    let ustr (s:string) = ustring.Make s
+    (*let ustr (s:string) = ustring.Make s
 
-    let str (s:ustring) = s.ToString()
+    let str (s:ustring) = s.ToString()*)
 
 
     let inline csharpList (list:'a list) = System.Linq.Enumerable.ToList list
@@ -170,11 +170,16 @@ module Interop =
         )
 
     let cloneColorScheme (scheme:ColorScheme) =
-        let colorDisabled = Attribute.Make(scheme.Disabled.Foreground, scheme.Disabled.Background)
-        let colorFocus = Attribute.Make(scheme.Focus.Foreground, scheme.Focus.Background)
-        let colorHotFocus = Attribute.Make(scheme.HotFocus.Foreground, scheme.HotFocus.Background)
-        let colorHotNormal = Attribute.Make(scheme.HotNormal.Foreground, scheme.HotNormal.Background)
-        let colorNormal = Attribute.Make(scheme.Normal.Foreground, scheme.Normal.Background)
+        let disabled = scheme.Disabled
+        let focus = scheme.Focus
+        let hotFocus = scheme.HotFocus
+        let hotNormal = scheme.HotNormal
+        let normal = scheme.Normal
+        let colorDisabled = Attribute(&disabled)
+        let colorFocus = Attribute(&focus)
+        let colorHotFocus = Attribute(&hotFocus)
+        let colorHotNormal = Attribute(&hotNormal)
+        let colorNormal = Attribute(&normal)
         ColorScheme(Disabled=colorDisabled,Focus=colorFocus,HotFocus=colorHotFocus,HotNormal=colorHotNormal,Normal=colorNormal)
 
     
@@ -188,4 +193,4 @@ module Interop =
 module internal Checker =
 
     let textChanged (element:View) text =
-        element.Text <> (text |> Interop.ustr)
+        element.Text <> text
