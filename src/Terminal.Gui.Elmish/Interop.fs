@@ -8,6 +8,10 @@ open Terminal.Gui
 module internal EventHelpers =
 
     open System.Reflection
+    
+    type Expr = 
+        static member Quote(e:Expression<System.Func<_, _>>) = e
+        static member Quote(e:Expression<System.Action<_>>) = e
 
     let getEventDelegates (eventName:string) (o:obj) =
         //let eventInfo  = o.GetType().GetEvent(eventName, BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Instance ||| BindingFlags.FlattenHierarchy)
@@ -196,38 +200,59 @@ module Interop =
     open FSharp.Linq.RuntimeHelpers
     
     
+    /// Get the property name from an event expression
+    /// i don'T like it, it's unnecessary complicated to get the name as sting from this particualr expression 
+    let private getPropNameFromEvent (eventExpr: Expr<IEvent<'a,'b>>) =
+        match eventExpr with
+        | Call (a, mi, expr) ->
+            if mi.Name = "CreateEvent" then
+                if expr.Length < 1 then
+                    None
+                else
+                    match expr[0] with
+                    | Lambda (a, expr) ->
+                        match expr with
+                        | Call (a, mi, call) ->
+                            Some (mi.Name.Replace("add_", "").Replace("remove_", ""))
+                        | _ -> None
+                    | _ -> None
+            else
+                None
+        | _ -> None
+    
     /// Set an event handler for an event on an element and remove the previous handler
-    let setEventHandler (eventExpr: Expr<IEvent<'a,'b>>) eventHandler element =
-        let evName =
-            match eventExpr with
-            | PropertyGet(_, propertyInfo, _) -> propertyInfo.Name
-            | _ -> raise (ArgumentException("Invalid event expression"))
-        let eventDel = EventHelpers.getEventDelegates evName element
-        if (eventDel.Length > 0) then
-            EventHelpers.clearEventDelegates evName element
-            
-        let event = LeafExpressionConverter.EvaluateQuotation eventExpr :?> IEvent<'a,'b>
-        event.Add(eventHandler)
+    let setEventHandler (eventExpr: Expr<IEvent<'a,'b>>) (eventHandler:'b->unit) element  =
+        let evName = getPropNameFromEvent eventExpr
+        match evName with
+        | None -> raise (ArgumentException "can not get property name from event expression")
+        | Some evName ->
+            let eventDel = EventHelpers.getEventDelegates evName element
+            if (eventDel.Length > 0) then
+                EventHelpers.clearEventDelegates evName element
+            let event = unbox<IEvent<'a,'b>>(LeafExpressionConverter.EvaluateQuotation eventExpr)
+            event.Add(eventHandler)
         
         
     let removeEventHandler (eventExpr: Expr<IEvent<'a,'b>>) element =
-        let evName =
-            match eventExpr with
-            | PropertyGet(_, propertyInfo, _) -> propertyInfo.Name
-            | _ -> raise (ArgumentException("Invalid event expression"))
-        let eventDel = EventHelpers.getEventDelegates evName element
-        if (eventDel.Length > 0) then
-            EventHelpers.clearEventDelegates evName element
+        let evName = getPropNameFromEvent eventExpr
+        match evName with
+        | None -> raise (ArgumentException "can not get property name from event expression")
+        | Some evName ->
+            let eventDel = EventHelpers.getEventDelegates evName element
+            if (eventDel.Length > 0) then
+                EventHelpers.clearEventDelegates evName element
             
         
         
         
         
     /// Set an event handler for an event on an element and remove the previous handler
-    let inline setEvent2 (eventExpr: Expression<IEvent<_,_>>) eventHandler element =
+    let setEventHandlerExpr (eventExpr: Expression<Func<_,IEvent<'a,'b>>>) eventHandler element =
         let evName =
             match eventExpr.Body with
-            | :? MemberExpression as me -> me.Member.Name
+            | :? MethodCallExpression as me ->
+                let property = (me.Object :?> MemberExpression)
+                property.Member.Name
             | _ -> raise (ArgumentException("Invalid event expression"))
             
         let eventDel = EventHelpers.getEventDelegates evName element
@@ -235,7 +260,8 @@ module Interop =
             EventHelpers.clearEventDelegates evName element
             
         let event = eventExpr.Compile()
-        event.Add(eventHandler)
+        let e = event.Invoke() // :?> IEvent<'a,'b>
+        e.Add(eventHandler)
             
         
         

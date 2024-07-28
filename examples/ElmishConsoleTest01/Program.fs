@@ -2,12 +2,12 @@
 
 open System
 
+open System.Diagnostics
 open System.Drawing
 open System.Text
 open Terminal.Gui.Elmish
 open System.IO
 open Terminal.Gui
-
 
 
 type Model =
@@ -110,19 +110,16 @@ let view (state: Model) (dispatch: Msg -> unit) =
             View.window [
                 prop.position.x.absolute 0
                 prop.position.y.absolute 1
-                prop.width.filled
-                prop.height.filled
-                window.title "Toller Titel!"
-                window.borderStyle.rounded
+                prop.width.fill 0
+                prop.height.fill 0
+                prop.title "Toller Titel!"
                 prop.children [
                     View.window [
                         prop.position.x.absolute 1
                         prop.position.y.absolute 1
                         prop.width.fill 4
-                        prop.height.fill 23
-                        window.title "Anderer toller Titel"
-                        window.borderStyle.double
-                        window.effect3D
+                        prop.height.fill 5
+                        prop.title "Anderer toller Titel"
                         prop.children [
                             if state.IsVisible then
                                 View.label [
@@ -142,12 +139,17 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                 prop.position.y.absolute 2
                                 button.text "Plus"
                                 button.onAccept (fun () -> dispatch Msg.Inc)
-                                if state.IsVisible then
-                                    prop.enabled
-                                else
-                                    prop.disabled
+                                button.titleChanged (fun e -> dispatch <| ChangeText $"title changed {e}")
+                                //button.mouseClick (fun e -> dispatch <| ChangeText $"mouse click {e}";dispatch Msg.Inc)
+                            ]
+                            
+                            View.label [
+                                prop.position.x.absolute 2
+                                prop.position.y.absolute 3
+                                label.text $"{state.Text} - {state.Count}"
                             ]
 
+                            (*
                             View.button [
                                 prop.position.x.absolute 2
                                 prop.position.y.absolute 4
@@ -328,7 +330,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                 prop.width.fill 20
                                 prop.height.fill 10
                                 textView.text "This is Text!"
-                            ]
+                            ]*)
                         ]
                     ]
                 ]
@@ -347,9 +349,10 @@ let main argv =
     |> Program.withSubscription (fun state ->
         fun dispatch ->
             async {
-                while state.Count < 1_000_000 do
+                ()
+                (*while state.Count < 1_000_000 do
                     do! Async.Sleep 10
-                    dispatch Inc
+                    dispatch Inc*)
             }
             |> Async.StartImmediate
         |> Cmd.ofSub

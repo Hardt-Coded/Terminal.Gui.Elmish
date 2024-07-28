@@ -11,7 +11,9 @@ open System.Data
 
 
 type prop =
-    
+    static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
+    static member inline ref (reference:View->unit) = Interop.mkprop "ref" reference
+
     
     // View
     static member inline accept (handler: EventHandler<HandledEventArgs>) = Interop.mkprop "accept" handler
@@ -71,10 +73,10 @@ type prop =
     static member inline wantMousePositionReports (value: bool) = Interop.mkprop "wantMousePositionReports" value
     // View Layouts
     static member inline frame (frame: Rectangle) = Interop.mkprop "frame" frame
-    static member inline x (x: Pos) = Interop.mkprop "x" x
-    static member inline y (y: Pos) = Interop.mkprop "y" y
-    static member inline height (height: Dim) = Interop.mkprop "height" height
-    static member inline width (width: Dim) = Interop.mkprop "width" width
+    //static member inline x (x: Pos) = Interop.mkprop "x" x
+    //static member inline y (y: Pos) = Interop.mkprop "y" y
+    //static member inline height (height: Dim) = Interop.mkprop "height" height
+    //static member inline width (width: Dim) = Interop.mkprop "width" width
     static member inline validatePosDim (validatePosDim: bool) = Interop.mkprop "validatePosDim" validatePosDim
 
     static member inline layoutComplete (handler: EventHandler<LayoutEventArgs>) = Interop.mkprop "layoutComplete" handler
@@ -120,31 +122,30 @@ module prop =
             static member inline func (f:unit -> int)                                           = Interop.mkprop "y" (Pos.Func(f))
             static member inline percent (percent:int)                                          = Interop.mkprop "y" (Pos.Percent(percent))
 
-    module Dim =
-        type width =
-            static member inline absolute (size:int)                                                                    = Interop.mkprop "width" (Dim.Absolute(size))
-            static member inline auto (?style:DimAutoStyle, ?minimumContentDim:Dim, ?maximumContentDim:Dim)
-                =
-                    let style = defaultArg style DimAutoStyle.Auto
-                    let minimumContentDim = defaultArg minimumContentDim null
-                    let maximumContentDim = defaultArg maximumContentDim null
-                    Interop.mkprop "width" (Dim.Auto(style, minimumContentDim, maximumContentDim))
-            static member inline fill (margin:int)                                                                      = Interop.mkprop "width" (Dim.Fill(margin))
-            static member inline func (f:unit->int)                                                                     = Interop.mkprop "width" (Dim.Func(f))
-            static member inline percent (percent:int, mode:DimPercentMode)                                             = Interop.mkprop "width" (Dim.Percent(percent, mode))
+    type width =
+        static member inline absolute (size:int)                                                                    = Interop.mkprop "width" (Dim.Absolute(size))
+        static member inline auto (?style:DimAutoStyle, ?minimumContentDim:Dim, ?maximumContentDim:Dim)
+            =
+                let style = defaultArg style DimAutoStyle.Auto
+                let minimumContentDim = defaultArg minimumContentDim null
+                let maximumContentDim = defaultArg maximumContentDim null
+                Interop.mkprop "width" (Dim.Auto(style, minimumContentDim, maximumContentDim))
+        static member inline fill (margin:int)                                                                      = Interop.mkprop "width" (Dim.Fill(margin))
+        static member inline func (f:unit->int)                                                                     = Interop.mkprop "width" (Dim.Func(f))
+        static member inline percent (percent:int, mode:DimPercentMode)                                             = Interop.mkprop "width" (Dim.Percent(percent, mode))
 
 
-        type height =
-            static member inline absolute (size:int)                                                                    = Interop.mkprop "height" (Dim.Absolute(size))
-            static member inline auto (?style:DimAutoStyle, ?minimumContentDim:Dim, ?maximumContentDim:Dim)
-                =
-                    let style = defaultArg style DimAutoStyle.Auto
-                    let minimumContentDim = defaultArg minimumContentDim null
-                    let maximumContentDim = defaultArg maximumContentDim null
-                    Interop.mkprop "height" (Dim.Auto(style, minimumContentDim, maximumContentDim))
-            static member inline fill (margin:int)                                                                      = Interop.mkprop "height" (Dim.Fill(margin))
-            static member inline func (f:unit->int)                                                                     = Interop.mkprop "height" (Dim.Func(f))
-            static member inline percent (percent:int, mode:DimPercentMode)                                             = Interop.mkprop "height" (Dim.Percent(percent, mode))
+    type height =
+        static member inline absolute (size:int)                                                                    = Interop.mkprop "height" (Dim.Absolute(size))
+        static member inline auto (?style:DimAutoStyle, ?minimumContentDim:Dim, ?maximumContentDim:Dim)
+            =
+                let style = defaultArg style DimAutoStyle.Auto
+                let minimumContentDim = defaultArg minimumContentDim null
+                let maximumContentDim = defaultArg maximumContentDim null
+                Interop.mkprop "height" (Dim.Auto(style, minimumContentDim, maximumContentDim))
+        static member inline fill (margin:int)                                                                      = Interop.mkprop "height" (Dim.Fill(margin))
+        static member inline func (f:unit->int)                                                                     = Interop.mkprop "height" (Dim.Func(f))
+        static member inline percent (percent:int, mode:DimPercentMode)                                             = Interop.mkprop "height" (Dim.Percent(percent, mode))
 
     
     

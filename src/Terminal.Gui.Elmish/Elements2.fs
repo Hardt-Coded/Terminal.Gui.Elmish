@@ -1,8 +1,10 @@
 ﻿module Terminal.Gui.Elmish.Elements2
 
+open System.Linq.Expressions
 open System.Text
 open Terminal.Gui
 open Terminal.Gui.Elmish.Elements
+open Terminal.Gui.Elmish.EventHelpers
 
 
 
@@ -23,8 +25,9 @@ type ButtonElement2(props:IProperty list) =
         props |> Interop.getValue<Rune> "hotKeySpecifier"                   |> Option.iter (fun v -> element.HotKeySpecifier <- v)
         props |> Interop.getValue<bool> "noDecorations"                     |> Option.iter (fun v -> element.NoDecorations <- v)
         props |> Interop.getValue<bool> "noPadding"                         |> Option.iter (fun v -> element.NoPadding <- v)
-        props |> Interop.getValue<EventArgs<string> -> unit> "titleChanged" |> Option.iter (fun v -> element.TitleChanged.Add v)
-        props |> Interop.getValue<MouseEventEventArgs -> unit> "mouseClick" |> Option.iter (fun v -> element.MouseClick.Add v)
+        props |> Interop.getValue<EventArgs<string> -> unit> "titleChanged" |> Option.iter (fun v -> Interop.setEventHandler (<@ element.TitleChanged @>) v element)
+        props |> Interop.getValue<MouseEventEventArgs -> unit> "mouseClick" |> Option.iter (fun v -> Interop.setEventHandler (<@ element.MouseClick @>) v element)
+        //props |> Interop.getValue<unit -> unit> "onAccept"                  |> Option.iter (fun v -> Interop.setEventHandler <@ fun () -> element.Accept @> (fun _ -> v()) element)
         props |> Interop.getValue<unit -> unit> "onAccept"                  |> Option.iter (fun v -> Interop.setEventHandler (<@ element.Accept @>) (fun _ -> v()) element)
         
             
