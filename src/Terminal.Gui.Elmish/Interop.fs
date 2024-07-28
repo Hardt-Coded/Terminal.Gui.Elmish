@@ -1,5 +1,6 @@
 ﻿namespace Terminal.Gui.Elmish
 
+open System.Linq.Expressions
 open System.Text
 open System
 open Terminal.Gui
@@ -188,7 +189,57 @@ module Interop =
         let eventDel = EventHelpers.getEventDelegates evName element
         if (eventDel.Length > 0) then
             EventHelpers.clearEventDelegates evName element
-
+            
+    open Microsoft.FSharp.Quotations
+    open Microsoft.FSharp.Quotations.Patterns
+    open Microsoft.FSharp.Quotations.DerivedPatterns
+    open FSharp.Linq.RuntimeHelpers
+    
+    
+    /// Set an event handler for an event on an element and remove the previous handler
+    let setEventHandler (eventExpr: Expr<IEvent<'a,'b>>) eventHandler element =
+        let evName =
+            match eventExpr with
+            | PropertyGet(_, propertyInfo, _) -> propertyInfo.Name
+            | _ -> raise (ArgumentException("Invalid event expression"))
+        let eventDel = EventHelpers.getEventDelegates evName element
+        if (eventDel.Length > 0) then
+            EventHelpers.clearEventDelegates evName element
+            
+        let event = LeafExpressionConverter.EvaluateQuotation eventExpr :?> IEvent<'a,'b>
+        event.Add(eventHandler)
+        
+        
+    let removeEventHandler (eventExpr: Expr<IEvent<'a,'b>>) element =
+        let evName =
+            match eventExpr with
+            | PropertyGet(_, propertyInfo, _) -> propertyInfo.Name
+            | _ -> raise (ArgumentException("Invalid event expression"))
+        let eventDel = EventHelpers.getEventDelegates evName element
+        if (eventDel.Length > 0) then
+            EventHelpers.clearEventDelegates evName element
+            
+        
+        
+        
+        
+    /// Set an event handler for an event on an element and remove the previous handler
+    let inline setEvent2 (eventExpr: Expression<IEvent<_,_>>) eventHandler element =
+        let evName =
+            match eventExpr.Body with
+            | :? MemberExpression as me -> me.Member.Name
+            | _ -> raise (ArgumentException("Invalid event expression"))
+            
+        let eventDel = EventHelpers.getEventDelegates evName element
+        if (eventDel.Length > 0) then
+            EventHelpers.clearEventDelegates evName element
+            
+        let event = eventExpr.Compile()
+        event.Add(eventHandler)
+            
+        
+        
+    
 [<RequireQualifiedAccess>]
 module internal Checker =
 

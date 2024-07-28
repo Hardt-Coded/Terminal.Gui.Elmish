@@ -2,6 +2,7 @@
 
 open Terminal.Gui
 open Terminal.Gui.Elmish.Elements
+open Terminal.Gui.Elmish.Elements2
 
 
 
@@ -26,7 +27,7 @@ type View =
         ]
         LabelElement(props) :> TerminalElement
     
-    static member inline button (props:IProperty list) = ButtonElement(props) :> TerminalElement
+    static member inline button (props:IProperty list) = ButtonElement2(props) :> TerminalElement
     
     static member inline checkBox (props:IProperty list) = CheckBoxElement(props) :> TerminalElement
     

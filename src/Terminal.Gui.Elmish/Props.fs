@@ -1,6 +1,8 @@
 ﻿namespace Terminal.Gui.Elmish
 
+open System.ComponentModel
 open System.Drawing
+open System.Text
 open Terminal.Gui
 open Terminal.Gui.Elmish.Elements
 open System
@@ -9,68 +11,140 @@ open System.Data
 
 
 type prop =
-    static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
-    static member inline ref (reference:View->unit) = Interop.mkprop "ref" reference
+    
+    
+    // View
+    static member inline accept (handler: EventHandler<HandledEventArgs>) = Interop.mkprop "accept" handler
+    static member inline data (value: obj) = Interop.mkprop "data" value
+    static member inline id (value: string) = Interop.mkprop "id" value
+    static member inline initialized (handler: EventHandler) = Interop.mkprop "initialized" handler
+    static member inline enabled (value: bool) = Interop.mkprop "enabled" value
+    static member inline enabledChanged (handler: EventHandler) = Interop.mkprop "enabledChanged" handler
+    static member inline visible (value: bool) = Interop.mkprop "visible" value
+    static member inline visibleChanged (handler: EventHandler) = Interop.mkprop "visibleChanged" handler
+    static member inline clearOnVisibleFalse (value: bool) = Interop.mkprop "clearOnVisibleFalse" value
+    static member inline title (value: string) = Interop.mkprop "title" value
+    static member inline titleChanged (handler: EventHandler<EventArgs<string>>) = Interop.mkprop "titleChanged" handler
+    static member inline titleChanging (handler: EventHandler<CancelEventArgs<string>>) = Interop.mkprop "titleChanging" handler
+    // View Keyboard
+    static member inline hotKeyChanged (handler: EventHandler<KeyChangedEventArgs>) = Interop.mkprop "hotKeyChanged" handler
+    static member inline hotKey (hotKey: Key) = Interop.mkprop "hotKey" hotKey
+    static member inline hotKeySpecifier (hotKeySpecifier: Rune) = Interop.mkprop "hotKeySpecifier" hotKeySpecifier
+    //static member inline tabIndexes (tabIndexes: IList<View>) = Interop.mkprop "tabIndexes" tabIndexes
+    static member inline tabIndex (tabIndex: int) = Interop.mkprop "tabIndex" tabIndex
+    static member inline tabStop (tabStop: bool) = Interop.mkprop "tabStop" tabStop
+    static member inline keyDown (handler: EventHandler<Key>) = Interop.mkprop "keyDown" handler
+    static member inline processKeyDown (handler: EventHandler<Key>) = Interop.mkprop "processKeyDown" handler
+    static member inline keyUp (handler: EventHandler<Key>) = Interop.mkprop "keyUp" handler
+    static member inline invokingKeyBindings (handler: EventHandler<Key>) = Interop.mkprop "invokingKeyBindings" handler
+    static member inline keyBindings (keyBindings: KeyBindings) = Interop.mkprop "keyBindings" keyBindings
+    // View Adornments
+    static member inline margin (value: Margin) = Interop.mkprop "margin" value
+    static member inline shadowStyle (value: ShadowStyle) = Interop.mkprop "shadowStyle" value
+    static member inline border (value: Border) = Interop.mkprop "border" value
+    static member inline borderStyle (value: LineStyle) = Interop.mkprop "borderStyle" value
+    static member inline padding (value: Padding) = Interop.mkprop "padding" value
+    static member inline borderStyleChanging (handler: EventHandler<CancelEventArgs<LineStyle>>) = Interop.mkprop "borderStyleChanging" handler
+    // View Arrangement
+    static member inline arrangement (value: ViewArrangement) = Interop.mkprop "arrangement" value
+    // View Content
+    static member inline contentSizeTracksViewport (value: bool) = Interop.mkprop "contentSizeTracksViewport" value
+    static member inline viewportSettings (value: ViewportSettings) = Interop.mkprop "viewportSettings" value
+    static member inline viewport (value: Rectangle) = Interop.mkprop "viewport" value
+    static member inline contentSizeChanged (handler: EventHandler<SizeChangedEventArgs>) = Interop.mkprop "contentSizeChanged" handler
+    static member inline viewportChanged (handler: EventHandler<DrawEventArgs>) = Interop.mkprop "viewportChanged" handler
+    // View Drawing
+    static member inline colorScheme (value: ColorScheme) = Interop.mkprop "colorScheme" value
+    static member inline lineCanvas (value: LineCanvas) = Interop.mkprop "lineCanvas" value
+    static member inline needsDisplay (value: bool) = Interop.mkprop "needsDisplay" value
+    static member inline subViewNeedsDisplay (value: bool) = Interop.mkprop "subViewNeedsDisplay" value
+    static member inline superViewRendersLineCanvas (value: bool) = Interop.mkprop "superViewRendersLineCanvas" value
+    static member inline drawContent (handler: EventHandler<DrawEventArgs>) = Interop.mkprop "drawContent" handler
+    static member inline drawContentComplete (handler: EventHandler<DrawEventArgs>) = Interop.mkprop "drawContentComplete" handler
+    // View Mouse
+    static member inline mouseClick (handler: EventHandler<MouseEventEventArgs>) = Interop.mkprop "mouseClick" handler
+    static member inline mouseEnter (handler: EventHandler<MouseEventEventArgs>) = Interop.mkprop "mouseEnter" handler
+    static member inline mouseEvent (handler: EventHandler<MouseEventEventArgs>) = Interop.mkprop "mouseEvent" handler
+    static member inline mouseLeave (handler: EventHandler<MouseEventEventArgs>) = Interop.mkprop "mouseLeave" handler
+    static member inline highlightStyle (style: HighlightStyle) = Interop.mkprop "highlightStyle" style
+    static member inline wantContinuousButtonPressed (value: bool) = Interop.mkprop "wantContinuousButtonPressed" value
+    static member inline wantMousePositionReports (value: bool) = Interop.mkprop "wantMousePositionReports" value
+    // View Layouts
+    static member inline frame (frame: Rectangle) = Interop.mkprop "frame" frame
+    static member inline x (x: Pos) = Interop.mkprop "x" x
+    static member inline y (y: Pos) = Interop.mkprop "y" y
+    static member inline height (height: Dim) = Interop.mkprop "height" height
+    static member inline width (width: Dim) = Interop.mkprop "width" width
+    static member inline validatePosDim (validatePosDim: bool) = Interop.mkprop "validatePosDim" validatePosDim
 
-    static member inline title (title:string) = Interop.mkprop "title" title
+    static member inline layoutComplete (handler: EventHandler<LayoutEventArgs>) = Interop.mkprop "layoutComplete" handler
+    static member inline layoutStarted (handler: EventHandler<LayoutEventArgs>) = Interop.mkprop "layoutStarted" handler
+    // View Text
+    static member inline preserveTrailingSpaces (value: bool) = Interop.mkprop "preserveTrailingSpaces" value
+    static member inline text (value: string) = Interop.mkprop "text" value
+    static member inline textAlignment (value: Alignment) = Interop.mkprop "textAlignment" value
+    static member inline textDirection (value: TextDirection) = Interop.mkprop "textDirection" value
+    static member inline textFormatter (value: TextFormatter) = Interop.mkprop "textFormatter" value
+    static member inline verticalTextAlignment (value: Alignment) = Interop.mkprop "verticalTextAlignment" value
 
-    static member inline tabIndex (i:int) = Interop.mkprop "tabIndex" i
-    static member inline tabStop (value:bool) = Interop.mkprop "tabStop" value
-
-    static member inline enabled = Interop.mkprop "enabled" true
-    static member inline disabled = Interop.mkprop "enabled" false
-
-    static member inline colorScheme    (colorscheme:ColorScheme)           = Interop.mkprop "colorScheme" colorscheme
-    static member inline colorDisabled  (forground:Color,background:Color)  = Interop.mkprop "colorDisabled"    <| Terminal.Gui.Attribute(&forground,&background)
-    static member inline colorFocus     (forground:Color,background:Color)  = Interop.mkprop "colorFocus"       <| Terminal.Gui.Attribute(&forground,&background)
-    static member inline colorHotFocus  (forground:Color,background:Color)  = Interop.mkprop "colorHotFocus"    <| Terminal.Gui.Attribute(&forground,&background)
-    static member inline colorHotNormal (forground:Color,background:Color)  = Interop.mkprop "colorHotNormal"   <| Terminal.Gui.Attribute(&forground,&background)
-    static member inline colorNormal    (forground:Color,background:Color)  = Interop.mkprop "colorNormal"      <| Terminal.Gui.Attribute(&forground,&background)
-    static member inline color          (forground:Color,background:Color)  = Interop.mkprop "color"            <| Terminal.Gui.Attribute(&forground,&background)
-
-    // events
-    static member inline onEnabledChanged   (f:unit->unit)                      = Interop.mkprop "onEnabledChanged" f
-    static member inline onEnter            (f:FocusEventArgs->unit)            = Interop.mkprop "onEnter" f
-    static member inline onKeyDown          (f:Key->unit)                       = Interop.mkprop "onKeyDown" f
-    static member inline onKeyPress         (f:Key->unit)                       = Interop.mkprop "onKeyPress" f
-    static member inline onKeyUp            (f:Key->unit)                       = Interop.mkprop "onKeyUp" f
-    static member inline onLeave            (f:FocusEventArgs->unit)            = Interop.mkprop "onLeave" f
-    static member inline onMouseClick       (f:MouseEventEventArgs->unit)       = Interop.mkprop "onMouseClick" f
-    static member inline onMouseEnter       (f:MouseEventEventArgs->unit)       = Interop.mkprop "onMouseEnter" f
-    static member inline onMouseLeave       (f:MouseEventEventArgs->unit)       = Interop.mkprop "onMouseLeave" f
-    static member inline onVisibleChanged   (f:unit->unit)                      = Interop.mkprop "onVisibleChanged" f
-
+    static member inline textChanged (handler: EventHandler) = Interop.mkprop "textChanged" handler
+    
+    
 module prop =
 
     module position =
 
         type x =
-            static member inline absolute (i:int) = Interop.mkprop "x" (Pos.Absolute i)
-            //static member inline bottom = Interop.mkprop "x" (Pos.Bottom())
-            static member inline center = Interop.mkprop "x" (Pos.Center())
-            static member inline percent (i:int) = Interop.mkprop "x" (Pos.Percent i)
+            static member inline absolute (position:int)                                        = Interop.mkprop "x" (Pos.Absolute(position))
+            static member inline align (alignment:Alignment, ?modes:AlignmentModes, ?groupId:int)
+                =
+                    let modes = defaultArg modes AlignmentModes.StartToEnd ||| AlignmentModes.AddSpaceBetweenItems
+                    let groupId = defaultArg groupId 0
+                    Interop.mkprop "x" (Pos.Align(alignment, modes, groupId))
+            static member inline anchorEnd ()                                                   = Interop.mkprop "x" (Pos.AnchorEnd())
+            static member inline anchorEndWithOffset (offset:int)                               = Interop.mkprop "x" (Pos.AnchorEnd(offset))
+            static member inline center ()                                                      = Interop.mkprop "x" (Pos.Center())
+            static member inline func (f:unit -> int)                                           = Interop.mkprop "x" (Pos.Func(f))
+            static member inline percent (percent:int)                                          = Interop.mkprop "x" (Pos.Percent(percent))
 
         type y =
-            static member inline absolute (i:int) = Interop.mkprop "y" (Pos.Absolute i)
-            //static member inline bottom = Interop.mkprop "y" (Pos.Bottom())
-            static member inline center = Interop.mkprop "y" (Pos.Center())
-            static member inline percent (i:int) = Interop.mkprop "y" (Pos.Percent i)
+            static member inline absolute (position:int)                                        = Interop.mkprop "y" (Pos.Absolute(position))
+            static member inline align (alignment:Alignment, ?modes:AlignmentModes, ?groupId:int)
+                =
+                    let modes = defaultArg modes AlignmentModes.StartToEnd ||| AlignmentModes.AddSpaceBetweenItems
+                    let groupId = defaultArg groupId 0
+                    Interop.mkprop "y" (Pos.Align(alignment, modes, groupId))
+            static member inline anchorEnd ()                                                   = Interop.mkprop "y" (Pos.AnchorEnd())
+            static member inline anchorEndWithOffset (offset:int)                               = Interop.mkprop "y" (Pos.AnchorEnd(offset))
+            static member inline center ()                                                      = Interop.mkprop "y" (Pos.Center())
+            static member inline func (f:unit -> int)                                           = Interop.mkprop "y" (Pos.Func(f))
+            static member inline percent (percent:int)                                          = Interop.mkprop "y" (Pos.Percent(percent))
 
-    
-    type width =
-        static member inline absolute (i:int) = Interop.mkprop "width" (Dim.Absolute i)
-        static member inline filled = Interop.mkprop "width" (Dim.Fill 0)
-        static member inline fill (margin:int) = Interop.mkprop "width" (Dim.Fill margin)
-        static member inline percent (percent:int) = Interop.mkprop "width" (Dim.Percent percent)
-        static member inline auto = Interop.mkprop "auto" (Dim.Auto())
+    module Dim =
+        type width =
+            static member inline absolute (size:int)                                                                    = Interop.mkprop "width" (Dim.Absolute(size))
+            static member inline auto (?style:DimAutoStyle, ?minimumContentDim:Dim, ?maximumContentDim:Dim)
+                =
+                    let style = defaultArg style DimAutoStyle.Auto
+                    let minimumContentDim = defaultArg minimumContentDim null
+                    let maximumContentDim = defaultArg maximumContentDim null
+                    Interop.mkprop "width" (Dim.Auto(style, minimumContentDim, maximumContentDim))
+            static member inline fill (margin:int)                                                                      = Interop.mkprop "width" (Dim.Fill(margin))
+            static member inline func (f:unit->int)                                                                     = Interop.mkprop "width" (Dim.Func(f))
+            static member inline percent (percent:int, mode:DimPercentMode)                                             = Interop.mkprop "width" (Dim.Percent(percent, mode))
 
 
-    type height =
-        static member inline absolute (i:int) = Interop.mkprop "height" (Dim.Absolute i)
-        static member inline filled = Interop.mkprop "height" (Dim.Fill 0)
-        static member inline fill (margin:int) = Interop.mkprop "height" (Dim.Fill margin)
-        static member inline percent (percent:int) = Interop.mkprop "height" (Dim.Percent percent)
-        static member inline auto = Interop.mkprop "auto" (Dim.Auto()) // Todo: more options
+        type height =
+            static member inline absolute (size:int)                                                                    = Interop.mkprop "height" (Dim.Absolute(size))
+            static member inline auto (?style:DimAutoStyle, ?minimumContentDim:Dim, ?maximumContentDim:Dim)
+                =
+                    let style = defaultArg style DimAutoStyle.Auto
+                    let minimumContentDim = defaultArg minimumContentDim null
+                    let maximumContentDim = defaultArg maximumContentDim null
+                    Interop.mkprop "height" (Dim.Auto(style, minimumContentDim, maximumContentDim))
+            static member inline fill (margin:int)                                                                      = Interop.mkprop "height" (Dim.Fill(margin))
+            static member inline func (f:unit->int)                                                                     = Interop.mkprop "height" (Dim.Func(f))
+            static member inline percent (percent:int, mode:DimPercentMode)                                             = Interop.mkprop "height" (Dim.Percent(percent, mode))
 
     
     
@@ -88,6 +162,17 @@ module prop =
         static member inline rightLeft_bottomTop = Interop.mkprop "textDirection" TextDirection.RightLeft_BottomTop
         static member inline rightLeft_topBottom = Interop.mkprop "textDirection" TextDirection.RightLeft_TopBottom
         static member inline topBottom_leftRight = Interop.mkprop "textDirection" TextDirection.TopBottom_LeftRight
+
+    type borderStyle =
+        static member inline double = Interop.mkprop    "borderStyle" LineStyle.Double
+        static member inline none = Interop.mkprop      "borderStyle" LineStyle.None
+        static member inline rounded = Interop.mkprop   "borderStyle" LineStyle.Rounded
+        static member inline single = Interop.mkprop    "borderStyle" LineStyle.Single
+
+    type shadowStyle =
+        static member inline none = Interop.mkprop          "shadowStyle" ShadowStyle.None
+        static member inline opaque = Interop.mkprop        "shadowStyle" ShadowStyle.Opaque
+        static member inline transparent = Interop.mkprop   "shadowStyle" ShadowStyle.Transparent
 
     
         
@@ -119,39 +204,38 @@ type page =
     
 
 type window =
-    static member inline title (p:string) = Interop.mkprop "title" p
-    static member inline text (p:string) = Interop.mkprop "text" p
-    static member inline effect3D = Interop.mkprop "effect3D" true
-    static member inline children (children:TerminalElement list) = Interop.mkprop "children" children
+    static member inline defaultShadow (value: ShadowStyle)         = Interop.mkprop "defaultShadow" value
+    static member inline defaultBorderStyle (value: LineStyle)      = Interop.mkprop "defaultBorderStyle" value
 
-module window =
-    type borderStyle =
-        static member inline double = Interop.mkprop    "borderStyle" LineStyle.Double
-        static member inline none = Interop.mkprop      "borderStyle" LineStyle.None
-        static member inline rounded = Interop.mkprop   "borderStyle" LineStyle.Rounded
-        static member inline single = Interop.mkprop    "borderStyle" LineStyle.Single
 
-    type shadowStyle =
-        static member inline none = Interop.mkprop          "shadowStyle" ShadowStyle.None
-        static member inline opaque = Interop.mkprop        "shadowStyle" ShadowStyle.Opaque
-        static member inline transparent = Interop.mkprop   "shadowStyle" ShadowStyle.Transparent
+type bar =
+    static member inline orientation (value: Orientation) = Interop.mkprop "orientation" value
+    static member inline alignmentModes (value: AlignmentModes) = Interop.mkprop "alignmentModes" value
+    static member inline initialized (handler: EventHandler) = Interop.mkprop "initialized" handler
 
+    
 type button =
     /// raises when button is clicked or space, enter, hotkey is used
     static member inline onAccept (f:unit->unit) = Interop.mkprop "onAccept" f
-    static member inline text (value:string)  = Interop.mkprop "text" value
-    static member inline isDefault (value:bool)  = Interop.mkprop "isDefault" value
-    static member inline hotKey (value:Key)  = Interop.mkprop "hotKey" value
-    static member inline hotKeySpecifier (value:Text.Rune)  = Interop.mkprop "hotKeySpecifier" value
-    static member inline autoSize (value:bool)  = Interop.mkprop "autoSize" value
+    // direct
+    static member inline wantContinuousButtonPressed (value: bool) = Interop.mkprop "wantContinuousButtonPressed" value
+    static member inline text (value: string) = Interop.mkprop "text" value
+    static member inline hotKeySpecifier (value: Rune) = Interop.mkprop "hotKeySpecifier" value
+    static member inline isDefault (value: bool) = Interop.mkprop "isDefault" value
+    static member inline noDecorations (value: bool) = Interop.mkprop "noDecorations" value
+    static member inline noPadding (value: bool) = Interop.mkprop "noPadding" value
+    static member inline titleChanged (handler: EventArgs<string>->unit) = Interop.mkprop "titleChanged" handler
+    static member inline mouseClick (handler: MouseEventEventArgs->unit) = Interop.mkprop "mouseClick" handler
 
 
 type checkBox =
     static member inline onToggle (f:CancelEventArgs<CheckState>->unit) = Interop.mkprop "onToggle" f
     static member inline onToggled (f:bool->unit) = Interop.mkprop "onToggledBool" f
-    static member inline state (v:CheckState) = Interop.mkprop "checkState" v
-    static member inline isChecked (v:bool) = Interop.mkprop "isChecked" v
-    static member inline text (text:string) = Interop.mkprop "text" text
+    static member inline allowCheckStateNone (value: bool) = Interop.mkprop "allowCheckStateNone" value
+    static member inline state (value: CheckState) = Interop.mkprop "state" value
+    static member inline toggle (handler: EventHandler<CancelEventArgs<CheckState>>) = Interop.mkprop "toggle" handler
+    static member inline text (value: string) = Interop.mkprop "text" value
+    static member inline hotKeySpecifier (value: Rune) = Interop.mkprop "hotKeySpecifier" value
 
 
 type colorPicker =

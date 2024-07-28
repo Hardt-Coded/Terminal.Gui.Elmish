@@ -35,6 +35,7 @@
     <Compile Include="Types.fs" />
     <Compile Include="Interop.fs" />
     <Compile Include="Elements.fs" />
+    <Compile Include="Elements2.fs" />
     <Compile Include="Props.fs" />
     <Compile Include="Views.fs" />
     <Compile Include="TreeDiff.fs" />
