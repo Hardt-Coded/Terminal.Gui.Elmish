@@ -1,6 +1,7 @@
 ﻿#r "nuget: Terminal.Gui, 2.0.0-v2-develop.2329"
 
 open System
+open System.IO
 open System.Reflection
 open Terminal.Gui
 
@@ -145,20 +146,20 @@ let getEventProps (events: (string * string * Type array) array) =
         |}
     )
 
-let printPropertiesProps (properties: {| Name:string; CamelName:string; Type:string |} array) = 
+let printPropertiesProps (printfn:string->unit) (properties: {| Name:string; CamelName:string; Type:string |} array) = 
     properties
     |> Array.iter (fun e ->
         printfn $"    static member inline {e.CamelName} (value:{e.Type}) = Interop.mkprop \"{e.CamelName}\" value"
     )
     
-let printEventsProps (events: {| Name:string; CamelName:string; Type:string |} array) =
+let printEventsProps(printfn:string->unit)  (events: {| Name:string; CamelName:string; Type:string |} array) =
     events
     |> Array.iter (fun e ->
         printfn $"    static member inline {e.CamelName} (handler:{e.Type}) = Interop.mkprop \"{e.CamelName}\" handler"
     )
     
     
-let printViewProps (view: Type) =
+let printViewProps (printfn:string->unit) (view: Type) =
     let propsProps =
         if view.Name = "View" then
             getProperties view
@@ -196,26 +197,26 @@ type {typeName} =
         if typeName = "prop" then        
             printfn "    // Properties"
             propsProps
-            |> printPropertiesProps
+            |> printPropertiesProps printfn
             printfn "    // Events"
             eventProps
-            |> printEventsProps
+            |> printEventsProps printfn
         else
             if propsProps.Length > 0 then
                 printfn "    // Properties"
                 propsProps
-                |> printPropertiesProps
+                |> printPropertiesProps printfn
                 
             if eventProps.Length > 0 then                
                 printfn "    // Events"
                 eventProps
-                |> printEventsProps
+                |> printEventsProps printfn
     else
         printfn $"// No properties or events {view.Name}"
         
     printfn ""
         
-let printNamepaces () =
+let printNamepaces (printfn:string->unit) =
     let namespaces = getAllNamespaces inheritedTypes
     // opens
     printfn "open System"
@@ -232,8 +233,9 @@ let printNamepaces () =
     namespaces |> Array.filter (fun ns -> String.IsNullOrWhiteSpace ns |> not)|> Array.iter (fun ns -> printfn $"open {ns}")
 
 
-if true then
 
+
+let generatePropsFs (printfn:string->unit) =
     printfn ""
     printfn "(*"
     printfn "#######################################"
@@ -241,19 +243,23 @@ if true then
     printfn "#######################################"
     printfn "*)"
     printfn ""
-
-    printNamepaces ()
+    printfn "namespace Terminal.Gui.Elmish.Props"
+    printNamepaces printfn
     // print props
-    printViewProps typeof<View>
+    printViewProps printfn typeof<View>
     inheritedTypes
     |> Array.filter (fun t -> t.Name <> "View")
-    |> Array.iter printViewProps
+    |> Array.iter (printViewProps printfn)
 
+
+if true then
+    let path = Path.Combine(__SOURCE_DIRECTORY__, "Props.fs")
+    generatePropsFs (fun p -> printfn $"{p}")
 
 // #################################### Element.fs ###################
 
 
-let printElementSetProps (t:Type) =
+let printElementSetProps (printfn:string->unit) (t:Type) =
     let props =
         if t.Name = "View" then getProperties t else getPropertiesNotInherited t
         
@@ -289,16 +295,16 @@ let printElementSetProps (t:Type) =
         
         
 // print elements (Elements2.fs)
-let printViewElementSetProps () =
+let printViewElementSetProps (printfn:string->unit) =
     printfn "    let setProps (element: View) props ="
     printfn "        // Properties"
     printfn "        props |> Interop.getValue<View->unit> \"ref\" |> Option.iter (fun v -> v element)"
     
-    printElementSetProps typeof<View>
+    printElementSetProps printfn typeof<View>
     
     
     
-let printElementRemoveProps (t:Type) =
+let printElementRemoveProps (printfn:string->unit) (t:Type) =
     let props =
         if t.Name = "View" then getProperties t else getPropertiesNotInherited t
         
@@ -329,19 +335,19 @@ let printElementRemoveProps (t:Type) =
                 printfn $"        props |> Interop.getValue<{e.CamelName}> \"{e.CamelName}\" |> Option.iter (fun v -> Interop.removeEventHandler (<@ element.{e.Name} @>) element)"
             )
     
-let printViewElementRemoveProps () =
+let printViewElementRemoveProps (printfn:string->unit) =
     printfn "    let setProps (element: View) props ="
     printfn "        // Properties"
     printfn "        props |> Interop.getValue<View->unit> \"ref\" |> Option.iter (fun _ -> ())"
     
-    printElementRemoveProps typeof<View>    
+    printElementRemoveProps printfn typeof<View>    
 
-let printViewElement () =
+let printViewElement (printfn:string->unit) =
     printfn "type ViewElement ="
     printfn ""
-    printViewElementSetProps ()
+    printViewElementSetProps printfn
     printfn ""
-    printViewElementRemoveProps ()
+    printViewElementRemoveProps printfn
     // print can update
     printfn """
 let canUpdate (view:View) props removedProps =
@@ -381,16 +387,16 @@ let canUpdate (view:View) props removedProps =
     """
 
 
-let printElement (t:Type) =
+let printElement (printfn:string->unit) (t:Type) =
     printfn $"// {t.Name}"
     printfn $"type {t.Name}Element(props:IProperty list) ="
     printfn $"    inherit TerminalElement(props)"
     printfn ""
     printfn "    let setProps (element: View) props ="
-    printElementSetProps t
+    printElementSetProps printfn t
     printfn ""
     printfn "    let removeProps (element:Button) props ="
-    printElementRemoveProps t
+    printElementRemoveProps printfn t
     printfn ""
     printfn $"    override _.name = $\"{t.Name}\""
     printfn ""
@@ -434,7 +440,9 @@ let printElement (t:Type) =
 
 
 
-if false then 
+
+    
+let generateElementsFs (printfn:string->unit) =    
     printfn ""
     printfn "(*"
     printfn "#######################################"
@@ -471,10 +479,14 @@ if false then
 
     """
     printfn ""
-    printNamepaces ()
-    printViewElement ()
+    printNamepaces printfn
+    printViewElement printfn
     inheritedTypes
     |> Array.filter (fun t -> t.Name <> "View")
-    |> Array.iter printElement
+    |> Array.iter (printElement printfn)
+    
+    
+if false then
+    generateElementsFs (fun p -> printfn $"{p}")
 
 

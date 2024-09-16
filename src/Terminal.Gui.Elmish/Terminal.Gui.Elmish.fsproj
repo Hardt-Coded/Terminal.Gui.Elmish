@@ -36,7 +36,9 @@
     <Compile Include="Interop.fs" />
     <Compile Include="Elements.fs" />
     <Compile Include="Elements2.fs" />
+    <Compile Include="ElementsNew.fs" />
     <Compile Include="Props.fs" />
+    <Compile Include="PropsNew.fs" />
     <Compile Include="Views.fs" />
     <Compile Include="TreeDiff.fs" />
     <Compile Include="ElmishImplementation\cmd.fs" />
@@ -55,7 +57,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Terminal.Gui" Version="2.0.0-prealpha.1829" />
+    <PackageReference Include="Terminal.Gui" Version="2.0.0-v2-develop.2329" />
     <PackageReference Update="FSharp.Core" Version="8.0.301" />
     <PackageReference Include="ColorHelper" Version="[1.8.1,2)" />
     
