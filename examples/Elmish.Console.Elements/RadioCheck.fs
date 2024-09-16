@@ -59,7 +59,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
         View.label [
             prop.position.x.center
             prop.position.y.absolute 5
-            prop.width.filled
+            prop.width.fill 0
             prop.alignment.center
             label.text "Please Vote!"
         ]
@@ -69,7 +69,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.y.absolute 7
             radioGroup.selectedItem (model.VoteResultItems |> List.findIndex (fun (i,_) -> i = model.VoteResult))
             radioGroup.radioLabels (model.VoteResultItems |> List.map snd)
-            radioGroup.onSelectedItemChanged 
+            radioGroup.selectedItemChanged 
                 (fun r -> 
                     let v = fst model.VoteResultItems.[r.SelectedItem]
                     dispatch (ChangeVoteResult v)
@@ -81,9 +81,9 @@ let view (model:Model) (dispatch:Msg -> unit) =
         View.checkBox [
             prop.position.x.center
             prop.position.y.absolute 16
-            checkBox.isChecked model.IsHappy
+            checkBox.ischecked model.IsHappy
             checkBox.text "Are you happy?"
-            checkBox.onToggled (fun b -> dispatch <| ChangeHappy b)            
+            checkBox.checkedStateChanging (fun b -> dispatch <| ChangeHappy (b.NewValue = CheckState.Checked))            
         ]
 
         View.label [

@@ -76,24 +76,24 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.y.absolute 4
             prop.width.fill 1
             prop.height.fill 5
-            frameView.title "ScrollView"
-            frameView.children [
+            prop.title "ScrollView"
+            prop.children [
         
                 View.scrollView [
                     prop.position.x.absolute 0
                     prop.position.y.absolute 0
-                    prop.width.filled
-                    prop.height.filled
-                    scrollView.contentSize (Size(120,120))
+                    prop.width.fill 0
+                    prop.height.fill 0
+                    scrollView.contentOffset(Point(0,0))
                     scrollView.showHorizontalScrollIndicator true
                     scrollView.showVerticalScrollIndicator true
-                    scrollView.children [
+                    prop.children [
                         View.label [
                             prop.position.x.absolute 0
                             prop.position.y.absolute 0
                             prop.width.absolute 120
                             prop.height.absolute 120
-                            //prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
+                            prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
                             label.text model.Text
                         ]
                     ]

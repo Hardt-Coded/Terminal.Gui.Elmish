@@ -1,5 +1,6 @@
-﻿namespace Terminal.Gui.Elmish.Elements
-
+﻿
+namespace Terminal.Gui.Elmish.Elements
+(*
 open System.Collections.ObjectModel
 open System.Drawing
 open System.Reflection
@@ -946,7 +947,7 @@ type ButtonElement(props:IProperty list) =
         Diagnostics.Debug.WriteLine ($"{this.name} created!")
         #endif
         this.parent <- parent
-        System.Diagnostics.Debug.WriteLine($"button created!")
+        System.Diagnostics.Trace.WriteLine($"button created!")
         let el = new Button(Text=text)
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
@@ -2627,6 +2628,7 @@ type OpenDialogElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement
+        *)
 
 
 

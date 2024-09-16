@@ -1,5 +1,8 @@
 ﻿namespace Terminal.Gui.Elmish
 
+(*
+namespace Terminal.Gui.Elmish
+
 open System.ComponentModel
 open System.Drawing
 open System.Text
@@ -7,6 +10,7 @@ open Terminal.Gui
 open Terminal.Gui.Elmish.Elements
 open System
 open System.Data
+open Terminal.Gui.Elmish.Elements2
 
 
 
@@ -16,29 +20,29 @@ type prop =
 
     
     // View
-    static member inline accept (handler: EventHandler<HandledEventArgs>) = Interop.mkprop "accept" handler
+    static member inline accept (handler: HandledEventArgs->unit) = Interop.mkprop "accept" handler
     static member inline data (value: obj) = Interop.mkprop "data" value
     static member inline id (value: string) = Interop.mkprop "id" value
-    static member inline initialized (handler: EventHandler) = Interop.mkprop "initialized" handler
+    static member inline initialized (handler: unit->unit) = Interop.mkprop "initialized" handler
     static member inline enabled (value: bool) = Interop.mkprop "enabled" value
-    static member inline enabledChanged (handler: EventHandler) = Interop.mkprop "enabledChanged" handler
+    static member inline enabledChanged (handler: unit->unit) = Interop.mkprop "enabledChanged" handler
     static member inline visible (value: bool) = Interop.mkprop "visible" value
-    static member inline visibleChanged (handler: EventHandler) = Interop.mkprop "visibleChanged" handler
+    static member inline visibleChanged (handler: unit->unit) = Interop.mkprop "visibleChanged" handler
     static member inline clearOnVisibleFalse (value: bool) = Interop.mkprop "clearOnVisibleFalse" value
     static member inline title (value: string) = Interop.mkprop "title" value
-    static member inline titleChanged (handler: EventHandler<EventArgs<string>>) = Interop.mkprop "titleChanged" handler
-    static member inline titleChanging (handler: EventHandler<CancelEventArgs<string>>) = Interop.mkprop "titleChanging" handler
+    static member inline titleChanged (handler: EventArgs<string>->unit) = Interop.mkprop "titleChanged" handler
+    static member inline titleChanging (handler: CancelEventArgs<string>->unit) = Interop.mkprop "titleChanging" handler
     // View Keyboard
-    static member inline hotKeyChanged (handler: EventHandler<KeyChangedEventArgs>) = Interop.mkprop "hotKeyChanged" handler
+    static member inline hotKeyChanged (handler: KeyChangedEventArgs->unit) = Interop.mkprop "hotKeyChanged" handler
     static member inline hotKey (hotKey: Key) = Interop.mkprop "hotKey" hotKey
     static member inline hotKeySpecifier (hotKeySpecifier: Rune) = Interop.mkprop "hotKeySpecifier" hotKeySpecifier
     //static member inline tabIndexes (tabIndexes: IList<View>) = Interop.mkprop "tabIndexes" tabIndexes
     static member inline tabIndex (tabIndex: int) = Interop.mkprop "tabIndex" tabIndex
     static member inline tabStop (tabStop: bool) = Interop.mkprop "tabStop" tabStop
-    static member inline keyDown (handler: EventHandler<Key>) = Interop.mkprop "keyDown" handler
-    static member inline processKeyDown (handler: EventHandler<Key>) = Interop.mkprop "processKeyDown" handler
-    static member inline keyUp (handler: EventHandler<Key>) = Interop.mkprop "keyUp" handler
-    static member inline invokingKeyBindings (handler: EventHandler<Key>) = Interop.mkprop "invokingKeyBindings" handler
+    static member inline keyDown (handler: Key->unit) = Interop.mkprop "keyDown" handler
+    static member inline processKeyDown (handler: Key->unit) = Interop.mkprop "processKeyDown" handler
+    static member inline keyUp (handler: Key->unit) = Interop.mkprop "keyUp" handler
+    static member inline invokingKeyBindings (handler: Key->unit) = Interop.mkprop "invokingKeyBindings" handler
     static member inline keyBindings (keyBindings: KeyBindings) = Interop.mkprop "keyBindings" keyBindings
     // View Adornments
     static member inline margin (value: Margin) = Interop.mkprop "margin" value
@@ -46,28 +50,28 @@ type prop =
     static member inline border (value: Border) = Interop.mkprop "border" value
     static member inline borderStyle (value: LineStyle) = Interop.mkprop "borderStyle" value
     static member inline padding (value: Padding) = Interop.mkprop "padding" value
-    static member inline borderStyleChanging (handler: EventHandler<CancelEventArgs<LineStyle>>) = Interop.mkprop "borderStyleChanging" handler
+    static member inline borderStyleChanging (handler: CancelEventArgs<LineStyle>->unit) = Interop.mkprop "borderStyleChanging" handler
     // View Arrangement
     static member inline arrangement (value: ViewArrangement) = Interop.mkprop "arrangement" value
     // View Content
     static member inline contentSizeTracksViewport (value: bool) = Interop.mkprop "contentSizeTracksViewport" value
     static member inline viewportSettings (value: ViewportSettings) = Interop.mkprop "viewportSettings" value
     static member inline viewport (value: Rectangle) = Interop.mkprop "viewport" value
-    static member inline contentSizeChanged (handler: EventHandler<SizeChangedEventArgs>) = Interop.mkprop "contentSizeChanged" handler
-    static member inline viewportChanged (handler: EventHandler<DrawEventArgs>) = Interop.mkprop "viewportChanged" handler
+    static member inline contentSizeChanged (handler: SizeChangedEventArgs->unit) = Interop.mkprop "contentSizeChanged" handler
+    static member inline viewportChanged (handler: DrawEventArgs->unit) = Interop.mkprop "viewportChanged" handler
     // View Drawing
     static member inline colorScheme (value: ColorScheme) = Interop.mkprop "colorScheme" value
     static member inline lineCanvas (value: LineCanvas) = Interop.mkprop "lineCanvas" value
     static member inline needsDisplay (value: bool) = Interop.mkprop "needsDisplay" value
     static member inline subViewNeedsDisplay (value: bool) = Interop.mkprop "subViewNeedsDisplay" value
     static member inline superViewRendersLineCanvas (value: bool) = Interop.mkprop "superViewRendersLineCanvas" value
-    static member inline drawContent (handler: EventHandler<DrawEventArgs>) = Interop.mkprop "drawContent" handler
-    static member inline drawContentComplete (handler: EventHandler<DrawEventArgs>) = Interop.mkprop "drawContentComplete" handler
+    static member inline drawContent (handler: DrawEventArgs->unit) = Interop.mkprop "drawContent" handler
+    static member inline drawContentComplete (handler: DrawEventArgs->unit) = Interop.mkprop "drawContentComplete" handler
     // View Mouse
-    static member inline mouseClick (handler: EventHandler<MouseEventEventArgs>) = Interop.mkprop "mouseClick" handler
-    static member inline mouseEnter (handler: EventHandler<MouseEventEventArgs>) = Interop.mkprop "mouseEnter" handler
-    static member inline mouseEvent (handler: EventHandler<MouseEventEventArgs>) = Interop.mkprop "mouseEvent" handler
-    static member inline mouseLeave (handler: EventHandler<MouseEventEventArgs>) = Interop.mkprop "mouseLeave" handler
+    static member inline mouseClick (handler: MouseEventEventArgs->unit) = Interop.mkprop "mouseClick" handler
+    static member inline mouseEnter (handler: MouseEventEventArgs->unit) = Interop.mkprop "mouseEnter" handler
+    static member inline mouseEvent (handler: MouseEventEventArgs->unit) = Interop.mkprop "mouseEvent" handler
+    static member inline mouseLeave (handler: MouseEventEventArgs->unit) = Interop.mkprop "mouseLeave" handler
     static member inline highlightStyle (style: HighlightStyle) = Interop.mkprop "highlightStyle" style
     static member inline wantContinuousButtonPressed (value: bool) = Interop.mkprop "wantContinuousButtonPressed" value
     static member inline wantMousePositionReports (value: bool) = Interop.mkprop "wantMousePositionReports" value
@@ -79,8 +83,8 @@ type prop =
     //static member inline width (width: Dim) = Interop.mkprop "width" width
     static member inline validatePosDim (validatePosDim: bool) = Interop.mkprop "validatePosDim" validatePosDim
 
-    static member inline layoutComplete (handler: EventHandler<LayoutEventArgs>) = Interop.mkprop "layoutComplete" handler
-    static member inline layoutStarted (handler: EventHandler<LayoutEventArgs>) = Interop.mkprop "layoutStarted" handler
+    static member inline layoutComplete (handler: LayoutEventArgs->unit) = Interop.mkprop "layoutComplete" handler
+    static member inline layoutStarted (handler: LayoutEventArgs->unit) = Interop.mkprop "layoutStarted" handler
     // View Text
     static member inline preserveTrailingSpaces (value: bool) = Interop.mkprop "preserveTrailingSpaces" value
     static member inline text (value: string) = Interop.mkprop "text" value
@@ -89,7 +93,7 @@ type prop =
     static member inline textFormatter (value: TextFormatter) = Interop.mkprop "textFormatter" value
     static member inline verticalTextAlignment (value: Alignment) = Interop.mkprop "verticalTextAlignment" value
 
-    static member inline textChanged (handler: EventHandler) = Interop.mkprop "textChanged" handler
+    static member inline textChanged (handler: unit->unit) = Interop.mkprop "textChanged" handler
     
     
 module prop =
@@ -212,7 +216,7 @@ type window =
 type bar =
     static member inline orientation (value: Orientation) = Interop.mkprop "orientation" value
     static member inline alignmentModes (value: AlignmentModes) = Interop.mkprop "alignmentModes" value
-    static member inline initialized (handler: EventHandler) = Interop.mkprop "initialized" handler
+    static member inline initialized (handler: unit->unit) = Interop.mkprop "initialized" handler
 
     
 type button =
@@ -234,7 +238,7 @@ type checkBox =
     static member inline onToggled (f:bool->unit) = Interop.mkprop "onToggledBool" f
     static member inline allowCheckStateNone (value: bool) = Interop.mkprop "allowCheckStateNone" value
     static member inline state (value: CheckState) = Interop.mkprop "state" value
-    static member inline toggle (handler: EventHandler<CancelEventArgs<CheckState>>) = Interop.mkprop "toggle" handler
+    static member inline toggle (handler: CancelEventArgs<CheckState>->unit) = Interop.mkprop "toggle" handler
     static member inline text (value: string) = Interop.mkprop "text" value
     static member inline hotKeySpecifier (value: Rune) = Interop.mkprop "hotKeySpecifier" value
 
@@ -521,5 +525,6 @@ type treeView =
     static member inline cursorVisibility (value:CursorVisibility)                  = Interop.mkprop "cursorVisibility" value
     static member inline items (value: string list)                                 = Interop.mkprop "items" value
     static member inline nodes (value: ITreeNode list)                              = Interop.mkprop "nodes" value
+    *)
 
 

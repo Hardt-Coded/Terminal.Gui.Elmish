@@ -91,7 +91,7 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.position.x.center
             prop.position.y.absolute 5
             button.text "Wizard Up"
-            button.onAccept (fun () -> dispatch Increment)
+            prop.accept (fun ev -> dispatch Increment)
         ] 
 
         View.label [
@@ -107,7 +107,7 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.position.x.center
             prop.position.y.absolute 7
             button.text "Wizard Down"
-            button.onAccept (fun () -> dispatch Decrement)
+            prop.accept (fun ev -> dispatch Decrement)
         ] 
 
         

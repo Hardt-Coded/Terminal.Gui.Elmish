@@ -189,6 +189,7 @@ module Program =
                         
                     with ex ->
                         program.onError (sprintf "Unable to process the message: %A" msg, ex)
+                        reraise() 
                     nextMsg <- rb.Pop()
                 reentered <- false
 

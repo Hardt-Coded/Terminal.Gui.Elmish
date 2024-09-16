@@ -64,7 +64,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.x.center
             prop.position.y.absolute 3
             button.text "Open Textfile"
-            button.onAccept (fun () -> dispatch OpenFileDialog)
+            prop.accept (fun ev -> dispatch OpenFileDialog)
         ]
 
         View.frameView [
@@ -72,16 +72,16 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.y.absolute 5
             prop.width.fill 1
             prop.height.fill 1
-            frameView.title "TextView"
-            frameView.children [
+            prop.title "TextView"
+            prop.children [
                 View.textView [
                     prop.position.x.absolute 0
                     prop.position.y.absolute 0
-                    prop.width.filled
-                    prop.height.filled
+                    prop.width.fill 0
+                    prop.height.fill 0
                     prop.color (Terminal.Gui.Color.BrightMagenta,Terminal.Gui.Color.Blue)
                     textView.text model.Text
-                    textView.onTextChanged (fun e -> dispatch (ChangeText e))
+                    textView.textChanged (fun e -> dispatch (ChangeText e))
                 ]
                 
             ]

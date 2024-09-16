@@ -24,9 +24,11 @@
     <RepositoryUrl>https://github.com/DieselMeister/Terminal.Gui.Elmish</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>fsharp f# gui console ui elmish feliz</PackageTags>
-    <PackageReleaseNotes>Add Tabs and MenuBar support. Fix Focus on Button Click</PackageReleaseNotes>
-    <Version>2.2.1140</Version>
+    <PackageReleaseNotes>Alpha of Terminal.Gui v2 (develop.2329)</PackageReleaseNotes>
+    <Version>3.0.0-v2-develop.2329-v1</Version>
     <TargetFramework>net8.0</TargetFramework>
+
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Scripts\**" />
@@ -72,4 +74,6 @@
     <PackageReference Include="System.Text.Json" Version="[8.0.4,9)" />
     <PackageReference Include="Wcwidth" Version="[2,3)" />
   </ItemGroup>
+
+  
 </Project>

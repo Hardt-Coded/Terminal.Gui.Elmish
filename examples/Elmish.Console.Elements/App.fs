@@ -1,6 +1,7 @@
 ﻿module App
 
 open System
+open Terminal.Gui
 open Terminal.Gui.Elmish
 
 type Pages = 
@@ -246,7 +247,8 @@ let update (msg:Msg) (model:Model) =
         
 
 let view (model:Model) (dispatch:Msg->unit) =
-    View.page [
+    (*View.window [
+        
         page.menuBar [
             menubar.menus [
                 menu.menuBarItem [
@@ -271,86 +273,87 @@ let view (model:Model) (dispatch:Msg->unit) =
                     ]
                 ]
             ]
-        ]
-        
+        ]*)
+    View.topLevel [
         prop.children [
+        
             View.window [
                 prop.position.x.absolute 0
                 prop.position.y.absolute 0
-                prop.width.filled
-                prop.height.filled
-                window.title $"Elmish Console Demo - {model.CurrentLocalTime:``yyyy-MM-dd HH:mm:ss.ms``}"
-                window.children [
+                prop.width.fill 0
+                prop.height.fill 0
+                prop.title $"Elmish Console Demo - {model.CurrentLocalTime:``yyyy-MM-dd HH:mm:ss.ms``}"
+                prop.children [
 
                     View.window [
                         prop.position.x.absolute 0
                         prop.position.y.absolute 0
                         prop.width.percent 20
                         prop.height.fill 2
-                        window.title "Choose"
-                        window.children [
+                        prop.title "Choose"
+                        prop.children [
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 1
                                 button.text "Start"
-                                button.onAccept (fun () -> dispatch (ChangePage Start))
+                                prop.accept (fun ev -> dispatch (ChangePage Start))
                             ]
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 2
                                 button.text "Counter"
-                                button.onAccept (fun () -> dispatch (ChangePage Counter))
+                                prop.accept (fun ev -> dispatch (ChangePage Counter))
                             ] 
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 3
                                 button.text "TextFields"
-                                button.onAccept (fun () -> dispatch (ChangePage TextFields))
+                                prop.accept (fun ev -> dispatch (ChangePage TextFields))
                             ] 
 
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 4
                                 button.text "Radio and Check"
-                                button.onAccept (fun () -> dispatch (ChangePage RadioCheck))
+                                prop.accept (fun ev -> dispatch (ChangePage RadioCheck))
                             ] 
 
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 5
                                 button.text "Text File View"
-                                button.onAccept (fun () -> dispatch (ChangePage TextView))
+                                prop.accept (fun ev -> dispatch (ChangePage TextView))
                             ] 
 
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 6
                                 button.text "List View"
-                                button.onAccept (fun () -> dispatch (ChangePage ListView))
+                                prop.accept (fun ev -> dispatch (ChangePage ListView))
                             ]                
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 7
                                 button.text "Scroll View"
-                                button.onAccept (fun () -> dispatch (ChangePage ScrollView))
+                                prop.accept (fun ev -> dispatch (ChangePage ScrollView))
                             ] 
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 8
                                 button.text "Message Boxes"
-                                button.onAccept (fun () -> dispatch (ChangePage MessageBoxes))
+                                prop.accept (fun ev -> dispatch (ChangePage MessageBoxes))
                             ] 
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 9
                                 button.text "Wizard"
-                                button.onAccept (fun () -> dispatch (ChangePage Wizard))
+                                prop.accept (fun ev -> dispatch (ChangePage Wizard))
                             ]
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 10
                                 button.text "Tab View"
-                                button.onAccept (fun () -> dispatch(ChangePage TabView))
+                                prop.accept (fun ev -> dispatch(ChangePage TabView))
                             ]
                         ]
                     ]
@@ -360,8 +363,8 @@ let view (model:Model) (dispatch:Msg->unit) =
                         prop.position.y.absolute 2
                         prop.width.fill 2
                         prop.height.fill 2
-                        window.title "Demo"
-                        window.children [
+                        prop.title "Demo"
+                        prop.children [
                             match model.Page with
                             | Start ->
                                 yield! Start.view

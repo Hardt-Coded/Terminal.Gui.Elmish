@@ -107,10 +107,10 @@ let view (model:Model) (dispatch:Msg->unit) =
                         menu.submenuItem [
                             menu.prop.title "Sub Menu 1"
                             menu.prop.children [
-                                menu.menuItem ("Sub Item 1", (fun () -> System.Diagnostics.Debug.WriteLine($"Sub menu 1 triggered")))
+                                menu.menuItem ("Sub Item 1", (fun () -> System.Diagnostics.Trace.WriteLine($"Sub menu 1 triggered")))
                                 menu.menuItem [
                                     menu.prop.title "Sub Item 2"
-                                    menu.item.action (fun () -> System.Diagnostics.Debug.WriteLine($"Sub menu 2 triggered"))
+                                    menu.item.action (fun () -> System.Diagnostics.Trace.WriteLine($"Sub menu 2 triggered"))
                                     menu.item.itemstyle.check
                                     menu.item.isChecked true
                                 ]

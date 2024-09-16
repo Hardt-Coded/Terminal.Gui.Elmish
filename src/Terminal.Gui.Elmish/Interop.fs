@@ -73,6 +73,12 @@ module Interop =
         |> Seq.cast<KeyValue>
         |> Seq.tryFind (function | KeyValue (pname,_) -> name = pname)
         |> Option.map (function | KeyValue (_,value) -> value :?> 'a)
+        
+    let inline checkValueGeneric<'a, 'b when 'b :> IProperty> (name: string) (props: 'b list) =
+        props
+        |> Seq.cast<KeyValue>
+        |> Seq.tryFind (function | KeyValue (pname,_) -> name = pname)
+        |> Option.map (function | KeyValue (_,value) -> value.GetType() = typeof<'a>)
 
     let inline getValueDefaultGeneric<'a, 'b when 'b :> IProperty> (name: string) (defaultValue: 'a) (props: 'b list) =
         props
@@ -80,6 +86,8 @@ module Interop =
         |> Option.defaultValue defaultValue
 
     let inline mkprop (name:string) (data:obj) : IProperty = KeyValue (name, data)
+    
+    let inline checkValue<'a> name props = checkValueGeneric<'a, IProperty> name props |> Option.defaultValue false
     let inline getValue<'a> name props = getValueGeneric<'a, IProperty> name props
     let inline getValueDefault<'a> name defaultVal (props:IProperty list) = getValueDefaultGeneric<'a, IProperty> name defaultVal props
 
@@ -134,6 +142,8 @@ module Interop =
                 //    let oldValue = (oldValue :?> MenuBarElement) 
                 //    let newValue = (newValue :?> MenuBarElement)
                 //    resultProps
+                | Some oldValue when name = "children" ->
+                    resultProps
                 | Some oldValue when oldValue = newValue ->
                     resultProps
                 | Some _ ->

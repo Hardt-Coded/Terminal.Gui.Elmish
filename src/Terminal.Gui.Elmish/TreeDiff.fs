@@ -4,13 +4,33 @@ module Differ =
 
     open Terminal.Gui
     open Terminal.Gui.Elmish.Elements
+    open System.Linq
 
+    //traverse Tree and get the Name of ever child
+    let rec disposeTree (tree:View) =
+        match tree.Subviews.ToArray() with
+        | [||] ->
+            tree.Dispose()
+            System.Diagnostics.Trace.WriteLine ($"{tree.GetType().Name} disposed!")
+            ()
+        | _ ->
+            tree.Subviews
+            |> Seq.iter (fun e -> disposeTree e)
+            ()
+        
+    
     let (|OnlyPropsChanged|_|) (ve1:TerminalElement,ve2:TerminalElement) =
         let cve1 = ve1.children |> List.map (fun e -> e.name) |> List.sort
         let cve2 = ve2.children |> List.map (fun e -> e.name) |> List.sort
-        if cve1 <> cve2 then None else Some ()
+        //let cve1 = getChildrenNames(ve1)
+        //let cve2 = getChildrenNames(ve2)
+        
+        if cve1 = cve2 then Some () else None
 
     let (|ChildsDifferent|_|) (ve1:TerminalElement,ve2:TerminalElement) =
+        //let cve1 = getChildrenNames(ve1)
+        //let cve2 = getChildrenNames(ve2)
+        
         let cve1 = ve1.children |> List.map (fun e -> e.name) |> List.sort
         let cve2 = ve2.children |> List.map (fun e -> e.name) |> List.sort
         if cve1 <> cve2 then Some () else None
@@ -31,7 +51,7 @@ module Differ =
             parent |> Option.iter (fun p -> p.Remove rootTree.element |> ignore)
             rootTree.element.Dispose()
         #if DEBUG
-            System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")
+            System.Diagnostics.Trace.WriteLine ($"{rootTree.name} removed and disposed!")
         #endif
             initializeTree parent newTree
         | OnlyPropsChanged ->
@@ -40,10 +60,11 @@ module Differ =
             else
                 let parent = rootTree.element |> Interop.getParent
                 parent |> Option.iter (fun p -> p.Remove rootTree.element |> ignore)
+                disposeTree rootTree.element
                 rootTree.element.RemoveAll()
                 rootTree.element.Dispose()
                 #if DEBUG
-                System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")
+                System.Diagnostics.Trace.WriteLine ($"{rootTree.name} removed and disposed!")
                 #endif
                 initializeTree parent newTree
 
@@ -58,7 +79,7 @@ module Differ =
                 parent |> Option.iter (fun p -> p.Remove rootTree.element |> ignore)
                 rootTree.element.Dispose()
             #if DEBUG
-                System.Diagnostics.Debug.WriteLine ($"{rootTree.name} removed and disposed!")
+                System.Diagnostics.Trace.WriteLine ($"{rootTree.name} removed and disposed!")
             #endif
                 initializeTree parent newTree
 
@@ -86,7 +107,7 @@ module Differ =
                             let newElem = initializeTree (Some rootTree.element) ne
                             newElem
                         #if DEBUG
-                            System.Diagnostics.Debug.WriteLine ($"child {ne.name} created ()!")
+                            System.Diagnostics.Trace.WriteLine ($"child {ne.name} created ()!")
                         #endif
                 
                     )
@@ -100,7 +121,7 @@ module Differ =
                             re.element |> rootTree.element.Remove |> ignore
                             re.element.Dispose()
                         #if DEBUG
-                            System.Diagnostics.Debug.WriteLine ($"child {re.name} removed and disposed!")
+                            System.Diagnostics.Trace.WriteLine ($"child {re.name} removed and disposed!")
                         #endif
                             ()
                     

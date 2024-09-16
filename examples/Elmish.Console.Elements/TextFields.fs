@@ -63,9 +63,9 @@ let view (model:Model) (dispatch:Msg -> unit) =
         View.textField [
             prop.position.x.absolute 14
             prop.position.y.absolute 5
-            prop.width.filled
+            prop.width.fill 0
             textField.text model.Text
-            textField.onTextChanging (fun t -> dispatch (ChangeText t))
+            textField.textChanging (fun ev -> dispatch (ChangeText ev.NewValue))
         ]
 
         View.label [
@@ -78,10 +78,10 @@ let view (model:Model) (dispatch:Msg -> unit) =
         View.textField [
             prop.position.x.absolute 14
             prop.position.y.absolute 7
-            prop.width.filled
+            prop.width.fill 0
             textField.text  model.SecretText
-            textField.onTextChanging (fun text -> dispatch (ChangeSecretText text))
-            textField.secret
+            textField.textChanging (fun ev -> dispatch (ChangeSecretText ev.NewValue))
+            textField.secret true
         ]
 
         View.label [
@@ -108,7 +108,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.x.absolute 16
             prop.position.y.absolute 13
             timeField.time  model.CurrentTime
-            timeField.onTimeChanged (fun ev -> dispatch <| ChangeTime ev.NewValue)
+            timeField.timeChanged (fun ev -> dispatch <| ChangeTime ev.NewValue)
         ]
 
         View.timeField [
@@ -116,7 +116,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.y.absolute 13
             timeField.isShortFormat true
             timeField.time model.CurrentTime
-            timeField.onTimeChanged (fun ev -> dispatch <| ChangeTime ev.NewValue)
+            timeField.timeChanged (fun ev -> dispatch <| ChangeTime ev.NewValue)
         ]
 
         View.label [
@@ -130,14 +130,14 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.x.absolute 16
             prop.position.y.absolute 15
             dateField.date model.CurrentDate
-            dateField.onDateChanged (fun ev -> dispatch <| ChangeDate ev.NewValue)
+            dateField.dateChanged (fun ev -> dispatch <| ChangeDate ev.NewValue)
         ]
 
         View.dateField [
             prop.position.x.absolute 30
             prop.position.y.absolute 15
             dateField.date model.CurrentDate
-            dateField.onDateChanged (fun ev -> dispatch <| ChangeDate ev.NewValue)
+            dateField.dateChanged (fun ev -> dispatch <| ChangeDate ev.NewValue)
         ]
  
 

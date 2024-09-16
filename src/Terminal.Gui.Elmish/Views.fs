@@ -2,32 +2,36 @@
 
 open Terminal.Gui
 open Terminal.Gui.Elmish.Elements
-open Terminal.Gui.Elmish.Elements2
 
 
 
 type View =
 
-    static member inline page (props:IProperty list) = PageElement(props) :> TerminalElement
+    (*static member inline page (props:IProperty list) = PageElement(props) :> TerminalElement
     static member inline page (children:TerminalElement list) = 
         let props = [ prop.children children ]
-        PageElement(props) :> TerminalElement
+        PageElement(props) :> TerminalElement*)
 
+    static member inline topLevel (props:IProperty list) = ToplevelElement(props) :> TerminalElement
+    static member inline topLevel (children:TerminalElement list) = 
+        let props = [ prop.children children ]
+        ToplevelElement(props) :> TerminalElement
+    
     static member inline window (props:IProperty list) = WindowElement(props) :> TerminalElement
     static member inline window (children:TerminalElement list) = 
         let props = [ prop.children children ]
         WindowElement(props) :> TerminalElement
 
     static member inline label (props:IProperty list) = LabelElement(props) :> TerminalElement
-    static member inline label (x:int, y:int, text: string) = 
+    (*static member inline label (x:int, y:int, text: string) = 
         let props = [ 
             prop.position.x.absolute x
             prop.position.y.absolute y
             label.text text
         ]
-        LabelElement(props) :> TerminalElement
+        LabelElement(props) :> TerminalElement*)
     
-    static member inline button (props:IProperty list) = ButtonElement2(props) :> TerminalElement
+    static member inline button (props:IProperty list) = ButtonElement(props) :> TerminalElement
     
     static member inline checkBox (props:IProperty list) = CheckBoxElement(props) :> TerminalElement
     
@@ -117,17 +121,16 @@ module Dialogs =
     open System
 
     let showWizard (wizard:Wizard) =
-        Application.Top.Add(wizard) |> ignore
         Application.Run(wizard)
-        Application.Top.Remove(wizard) |> ignore
+        wizard.Dispose()
         ()
 
 
     let openFileDialog title =
-        use dia = new OpenDialog(Title=title)           
-        Application.Top.Add(dia) |> ignore
+        use dia = new OpenDialog(Title=title)
         Application.Run(dia)
-        Application.Top.Remove(dia) |> ignore
+        dia.Dispose()
+        //Application.Top.Remove(dia) |> ignore
         if dia.Canceled then
             None
         else

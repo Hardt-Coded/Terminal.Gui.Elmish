@@ -90,12 +90,12 @@ let view (state: Model) (dispatch: Msg -> unit) =
                             menu.prop.children [
                                 menu.menuItem (
                                     "Sub Item 1",
-                                    (fun () -> System.Diagnostics.Debug.WriteLine($"Sub menu 1 triggered"))
+                                    (fun () -> System.Diagnostics.Trace.WriteLine($"Sub menu 1 triggered"))
                                 )
                                 menu.menuItem [
                                     menu.prop.title "Sub Item 2"
                                     menu.item.action (fun () ->
-                                        System.Diagnostics.Debug.WriteLine($"Sub menu 2 triggered")
+                                        System.Diagnostics.Trace.WriteLine($"Sub menu 2 triggered")
                                     )
                                     menu.item.itemstyle.check
                                     menu.item.isChecked true
@@ -162,9 +162,9 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                 prop.position.y.absolute 6
                                 checkBox.text "Checkbox"
                                 if state.IsVisible then
-                                    prop.onMouseEnter (fun e -> System.Diagnostics.Debug.WriteLine($"mouse enter event")
+                                    prop.onMouseEnter (fun e -> System.Diagnostics.Trace.WriteLine($"mouse enter event")
                                     )
-                                checkBox.onToggled (fun t -> System.Diagnostics.Debug.WriteLine($"check toggeld {t}"))
+                                checkBox.onToggled (fun t -> System.Diagnostics.Trace.WriteLine($"check toggeld {t}"))
                                 checkBox.isChecked true
                             ]
 
@@ -174,7 +174,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                 colorPicker.title "Color"
                                 colorPicker.selectedColor Terminal.Gui.Color.BrightCyan
                                 colorPicker.onColorChanged (fun color ->
-                                    System.Diagnostics.Debug.WriteLine($"color changed {color}")
+                                    System.Diagnostics.Trace.WriteLine($"color changed {color}")
                                 )
                             ]
 
@@ -198,7 +198,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                 comboBox.source state.ListItems
                                 comboBox.selectedItem state.SelectedListItem
                                 comboBox.onOpenSelectedItem (fun t ->
-                                    System.Diagnostics.Debug.WriteLine($"open selected item {t.Value}")
+                                    System.Diagnostics.Trace.WriteLine($"open selected item {t.Value}")
                                 )
                                 comboBox.onSelectedItemChanged (fun e -> dispatch <| ListChanged e.Item)
                             ]

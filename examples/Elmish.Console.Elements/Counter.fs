@@ -68,7 +68,7 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.position.x.center
             prop.position.y.absolute 5
             button.text "Up"
-            button.onAccept (fun () -> dispatch Increment)
+            prop.accept (fun ev -> dispatch Increment)
         ] 
 
         View.label [
@@ -88,28 +88,28 @@ let view (model:Model) (dispatch:Msg->unit) =
             prop.position.x.center
             prop.position.y.absolute 7
             button.text "Down"
-            button.onAccept (fun () -> dispatch Decrement)
+            prop.accept (fun ev -> dispatch Decrement)
         ] 
 
         View.button [
             prop.position.x.center
             prop.position.y.absolute 9
             button.text "Start Spinning"
-            button.onAccept (fun () -> dispatch StartSpin)
+            prop.accept (fun ev -> dispatch StartSpin)
         ] 
 
         View.button [
             prop.position.x.center
             prop.position.y.absolute 11
             button.text "Stop Spinning"
-            button.onAccept (fun () -> dispatch StopSpin)
+            prop.accept (fun ev -> dispatch StopSpin)
         ] 
 
         View.button [
             prop.position.x.center
             prop.position.y.absolute 13
             button.text "Reset"
-            button.onAccept (fun () -> dispatch Reset)
+            prop.accept (fun ev -> dispatch Reset)
         ] 
     ]
 

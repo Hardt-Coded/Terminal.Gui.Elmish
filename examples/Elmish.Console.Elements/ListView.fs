@@ -59,16 +59,16 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.y.absolute 4
             prop.width.fill 1
             prop.height.fill 5
-            frameView.title "Please Vote!"
-            frameView.children [
+            prop.title "Please Vote!"
+            prop.children [
                 View.listView [
                     prop.position.x.absolute 0
                     prop.position.y.absolute 0
-                    prop.width.filled
-                    prop.height.filled
+                    prop.width.fill 0
+                    prop.height.fill 0
                     listView.selectedItem (model.VoteResultItems |> List.findIndex (fun (i,_) -> i = model.VoteResult))
                     listView.source (model.VoteResultItems |> List.map snd)
-                    listView.onSelectedItemChanged 
+                    listView.selectedItemChanged 
                         (fun r -> 
                             let v = fst model.VoteResultItems.[r.Item]
                             dispatch (ItemSelected v)

@@ -3,6 +3,8 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
+        <DefineConstants>DEBUG;TRACE;</DefineConstants>
+        <RootNamespace>Terminal.Gui.Elemish.Generator</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
