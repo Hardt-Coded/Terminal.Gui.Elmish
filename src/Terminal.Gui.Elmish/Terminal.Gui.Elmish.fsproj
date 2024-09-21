@@ -14,14 +14,14 @@
     <PackageId>Terminal.Gui.Elmish</PackageId>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Daniel Hardt</Authors>
-    <Company>Daniel Hardt</Company>
+    <Company>Hardt Coded GmbH</Company>
     <Product>Terminal.Gui.Elmish</Product>
     <Description>An elmish wrapper around Miguel de Icaza's 'Gui.cs' https://github.com/migueldeicaza/gui.cs including F# Feliz-like like view DSL.</Description>
     <Copyright>MIT License</Copyright>
-    <PackageProjectUrl>https://github.com/DieselMeister/Terminal.Gui.Elmish</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Hardt-Coded/Terminal.Gui.Elmish</PackageProjectUrl>
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/DieselMeister/Terminal.Gui.Elmish</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Hardt-Coded/Terminal.Gui.Elmish/tree/terminal_gui_v2_alpha</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>fsharp f# gui console ui elmish feliz</PackageTags>
     <PackageReleaseNotes>Alpha of Terminal.Gui v2 (develop.2329)</PackageReleaseNotes>
