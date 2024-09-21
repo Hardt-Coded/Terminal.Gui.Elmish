@@ -29,6 +29,7 @@
     <TargetFramework>net8.0</TargetFramework>
 
     <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Scripts\**" />
@@ -42,6 +43,7 @@
     <Compile Include="Props.fs" />
     <Compile Include="PropsNew.fs" />
     <Compile Include="Views.fs" />
+    <Compile Include="ViewNew.fs" />
     <Compile Include="TreeDiff.fs" />
     <Compile Include="ElmishImplementation\cmd.fs" />
     <Compile Include="ElmishImplementation\prelude.fs" />

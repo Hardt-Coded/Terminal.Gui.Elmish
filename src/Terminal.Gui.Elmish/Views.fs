@@ -1,5 +1,7 @@
 ﻿namespace Terminal.Gui.Elmish
 
+
+(*
 open Terminal.Gui
 open Terminal.Gui.Elmish.Elements
 
@@ -23,13 +25,13 @@ type View =
         WindowElement(props) :> TerminalElement
 
     static member inline label (props:IProperty list) = LabelElement(props) :> TerminalElement
-    (*static member inline label (x:int, y:int, text: string) = 
+    static member inline label (x:int, y:int, text: string) = 
         let props = [ 
             prop.position.x.absolute x
             prop.position.y.absolute y
             label.text text
         ]
-        LabelElement(props) :> TerminalElement*)
+        LabelElement(props) :> TerminalElement
     
     static member inline button (props:IProperty list) = ButtonElement(props) :> TerminalElement
     
@@ -94,6 +96,10 @@ type View =
     static member inline timeField (props:IProperty list) = TimeFieldElement(props) :> TerminalElement
     
     static member inline treeView (props:IProperty list) = TreeViewElement(props) :> TerminalElement
+        
+    static member inline numericUpDownView<'a> (props:IProperty list) = NumericUpDownElement<'a>(props) :> TerminalElement
+    
+    static member inline menuBar (props:IProperty list) = MenuBarElement(props) :> TerminalElement
     
     //static member inline dialog (props:IProperty list) = DialogElement(props) :> TerminalElement
     //static member inline dialog (children:TerminalElement list) = 
@@ -158,5 +164,6 @@ module Dialogs =
         | [] -> ""
         | _ when result < 0 || result > buttons.Length - 1  -> ""
         | _ -> buttons.[result]
+        *)
    
 

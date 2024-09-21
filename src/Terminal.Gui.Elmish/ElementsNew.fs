@@ -10,13 +10,11 @@ namespace Terminal.Gui.Elmish.Elements
 
 open System
 open System.ComponentModel
-open System.Linq.Expressions
 open System.Text
 open System.Linq
 open Terminal.Gui
 open Terminal.Gui.Elmish
-open Terminal.Gui.Elmish.Elements
-open Terminal.Gui.Elmish.EventHelpers
+
 
 [<AbstractClass>]
 type TerminalElement (props:IProperty list) =
@@ -76,7 +74,6 @@ module ViewElement =
         props |> Interop.getValue<bool> "view.needsDisplay" |> Option.iter (fun v -> element.NeedsDisplay <- v )
         props |> Interop.getValue<bool> "view.preserveTrailingSpaces" |> Option.iter (fun v -> element.PreserveTrailingSpaces <- v )
         props |> Interop.getValue<ShadowStyle> "view.shadowStyle" |> Option.iter (fun v -> element.ShadowStyle <- v )
-        props |> Interop.getValue<View> "view.superView" |> Option.iter (fun v -> element.SuperView <- v )
         props |> Interop.getValue<bool> "view.superViewRendersLineCanvas" |> Option.iter (fun v -> element.SuperViewRendersLineCanvas <- v )
         props |> Interop.getValue<TabBehavior option> "view.tabStop" |> Option.iter (fun v -> element.TabStop <- v  |> Option.toNullable)
         props |> Interop.getValue<string> "view.text" |> Option.iter (fun v -> element.Text <- v )
@@ -148,7 +145,6 @@ module ViewElement =
         props |> Interop.getValue<bool> "view.needsDisplay" |> Option.iter (fun _ -> element.NeedsDisplay <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "view.preserveTrailingSpaces" |> Option.iter (fun _ -> element.PreserveTrailingSpaces <- Unchecked.defaultof<_>)
         props |> Interop.getValue<ShadowStyle> "view.shadowStyle" |> Option.iter (fun _ -> element.ShadowStyle <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<View> "view.superView" |> Option.iter (fun _ -> element.SuperView <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "view.superViewRendersLineCanvas" |> Option.iter (fun _ -> element.SuperViewRendersLineCanvas <- Unchecked.defaultof<_>)
         props |> Interop.getValue<TabBehavior option> "view.tabStop" |> Option.iter (fun _ -> element.TabStop <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "view.text" |> Option.iter (fun _ -> element.Text <- Unchecked.defaultof<_>)
@@ -238,8 +234,6 @@ type AdornmentElement(props:IProperty list) =
 
     let setProps (element: Adornment) props =
         // Properties
-        props |> Interop.getValue<View> "adornment.parent" |> Option.iter (fun v -> element.Parent <- v )
-        props |> Interop.getValue<View> "adornment.superView" |> Option.iter (fun v -> element.SuperView <- v )
         props |> Interop.getValue<bool> "adornment.superViewRendersLineCanvas" |> Option.iter (fun v -> element.SuperViewRendersLineCanvas <- v )
         props |> Interop.getValue<Thickness> "adornment.thickness" |> Option.iter (fun v -> element.Thickness <- v )
         props |> Interop.getValue<Rectangle> "adornment.viewport" |> Option.iter (fun v -> element.Viewport <- v )
@@ -248,8 +242,6 @@ type AdornmentElement(props:IProperty list) =
 
     let removeProps (element:Adornment) props =
         // Properties
-        props |> Interop.getValue<View> "adornment.parent" |> Option.iter (fun _ -> element.Parent <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<View> "adornment.superView" |> Option.iter (fun _ -> element.SuperView <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "adornment.superViewRendersLineCanvas" |> Option.iter (fun _ -> element.SuperViewRendersLineCanvas <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Thickness> "adornment.thickness" |> Option.iter (fun _ -> element.Thickness <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Rectangle> "adornment.viewport" |> Option.iter (fun _ -> element.Viewport <- Unchecked.defaultof<_>)
@@ -261,16 +253,18 @@ type AdornmentElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Adornment()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -280,7 +274,7 @@ type AdornmentElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -291,163 +285,7 @@ type AdornmentElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
-
-
-// Border
-type BorderElement(props:IProperty list) =
-    inherit TerminalElement(props)
-
-    let setProps (element: Border) props =
-        // Properties
-        props |> Interop.getValue<ColorScheme> "border.colorScheme" |> Option.iter (fun v -> element.ColorScheme <- v )
-        props |> Interop.getValue<LineStyle> "border.lineStyle" |> Option.iter (fun v -> element.LineStyle <- v )
-        props |> Interop.getValue<BorderSettings> "border.settings" |> Option.iter (fun v -> element.Settings <- v )
-
-    let removeProps (element:Border) props =
-        // Properties
-        props |> Interop.getValue<ColorScheme> "border.colorScheme" |> Option.iter (fun _ -> element.ColorScheme <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<LineStyle> "border.lineStyle" |> Option.iter (fun _ -> element.LineStyle <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<BorderSettings> "border.settings" |> Option.iter (fun _ -> element.Settings <- Unchecked.defaultof<_>)
-
-    override _.name = $"Border"
-
-
-    override this.create parent =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        this.parent <- parent
-        let el = new Border()
-        parent |> Option.iter (fun p -> p.Add el |> ignore)
-        ViewElement.setProps el props
-        setProps el props
-        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
-        this.element <- el
-    
-
-
-    override this.canUpdate prevElement oldProps =
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
-        let canUpdateElement =
-            true
-
-        canUpdateView && canUpdateElement
-    
-
-
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> Border
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement    
-    
-
-
-// Margin
-type MarginElement(props:IProperty list) =
-    inherit TerminalElement(props)
-
-    let setProps (element: Margin) props =
-        // Properties
-        props |> Interop.getValue<ColorScheme> "margin.colorScheme" |> Option.iter (fun v -> element.ColorScheme <- v )
-        props |> Interop.getValue<ShadowStyle> "margin.shadowStyle" |> Option.iter (fun v -> element.ShadowStyle <- v )
-
-    let removeProps (element:Margin) props =
-        // Properties
-        props |> Interop.getValue<ColorScheme> "margin.colorScheme" |> Option.iter (fun _ -> element.ColorScheme <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<ShadowStyle> "margin.shadowStyle" |> Option.iter (fun _ -> element.ShadowStyle <- Unchecked.defaultof<_>)
-
-    override _.name = $"Margin"
-
-
-    override this.create parent =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        this.parent <- parent
-        let el = new Margin()
-        parent |> Option.iter (fun p -> p.Add el |> ignore)
-        ViewElement.setProps el props
-        setProps el props
-        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
-        this.element <- el
-    
-
-
-    override this.canUpdate prevElement oldProps =
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
-        let canUpdateElement =
-            true
-
-        canUpdateView && canUpdateElement
-    
-
-
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> Margin
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement    
-    
-
-
-// Padding
-type PaddingElement(props:IProperty list) =
-    inherit TerminalElement(props)
-
-    let setProps (element: Padding) props =
-        // Properties
-        props |> Interop.getValue<ColorScheme> "padding.colorScheme" |> Option.iter (fun v -> element.ColorScheme <- v )
-
-    let removeProps (element:Padding) props =
-        // Properties
-        props |> Interop.getValue<ColorScheme> "padding.colorScheme" |> Option.iter (fun _ -> element.ColorScheme <- Unchecked.defaultof<_>)
-
-    override _.name = $"Padding"
-
-
-    override this.create parent =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        this.parent <- parent
-        let el = new Padding()
-        parent |> Option.iter (fun p -> p.Add el |> ignore)
-        ViewElement.setProps el props
-        setProps el props
-        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
-        this.element <- el
-    
-
-
-    override this.canUpdate prevElement oldProps =
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
-        let canUpdateElement =
-            true
-
-        canUpdateView && canUpdateElement
-    
-
-
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> Padding
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement    
-    
+        
 
 
 // Bar
@@ -475,16 +313,18 @@ type BarElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Bar()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -494,7 +334,7 @@ type BarElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -505,7 +345,63 @@ type BarElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
+
+
+// Border
+type BorderElement(props:IProperty list) =
+    inherit TerminalElement(props)
+
+    let setProps (element: Border) props =
+        // Properties
+        props |> Interop.getValue<ColorScheme> "border.colorScheme" |> Option.iter (fun v -> element.ColorScheme <- v )
+        props |> Interop.getValue<LineStyle> "border.lineStyle" |> Option.iter (fun v -> element.LineStyle <- v )
+        props |> Interop.getValue<BorderSettings> "border.settings" |> Option.iter (fun v -> element.Settings <- v )
+
+    let removeProps (element:Border) props =
+        // Properties
+        props |> Interop.getValue<ColorScheme> "border.colorScheme" |> Option.iter (fun _ -> element.ColorScheme <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<LineStyle> "border.lineStyle" |> Option.iter (fun _ -> element.LineStyle <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<BorderSettings> "border.settings" |> Option.iter (fun _ -> element.Settings <- Unchecked.defaultof<_>)
+
+    override _.name = $"Border"
+
+
+    override this.create parent =
+        #if DEBUG
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
+        #endif
+        this.parent <- parent
+        
+
+        let el = new Border()
+        parent |> Option.iter (fun p -> p.Add el |> ignore)
+        ViewElement.setProps el props
+        setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+        this.element <- el
+        
+
+
+    override this.canUpdate prevElement oldProps =
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+        
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> Border
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        ViewElement.removeProps prevElement removedProps
+        removeProps element removedProps
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement    
+        
 
 
 // Button
@@ -535,16 +431,18 @@ type ButtonElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Button()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -554,7 +452,7 @@ type ButtonElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -565,7 +463,7 @@ type ButtonElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // CheckBox
@@ -595,16 +493,18 @@ type CheckBoxElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new CheckBox()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -614,7 +514,7 @@ type CheckBoxElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -625,7 +525,7 @@ type CheckBoxElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // ColorPicker
@@ -651,16 +551,18 @@ type ColorPickerElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new ColorPicker()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -670,7 +572,7 @@ type ColorPickerElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -681,7 +583,7 @@ type ColorPickerElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // ColorPicker16
@@ -690,8 +592,8 @@ type ColorPicker16Element(props:IProperty list) =
 
     let setProps (element: ColorPicker16) props =
         // Properties
-        props |> Interop.getValue<int> "colorPicker16.boxHeight" |> Option.iter (fun v -> element.BoxHeight <- v )
-        props |> Interop.getValue<int> "colorPicker16.boxWidth" |> Option.iter (fun v -> element.BoxWidth <- v )
+        props |> Interop.getValue<Int32> "colorPicker16.boxHeight" |> Option.iter (fun v -> element.BoxHeight <- v )
+        props |> Interop.getValue<Int32> "colorPicker16.boxWidth" |> Option.iter (fun v -> element.BoxWidth <- v )
         props |> Interop.getValue<Point> "colorPicker16.cursor" |> Option.iter (fun v -> element.Cursor <- v )
         props |> Interop.getValue<ColorName> "colorPicker16.selectedColor" |> Option.iter (fun v -> element.SelectedColor <- v )
         // Events
@@ -699,8 +601,8 @@ type ColorPicker16Element(props:IProperty list) =
 
     let removeProps (element:ColorPicker16) props =
         // Properties
-        props |> Interop.getValue<int> "colorPicker16.boxHeight" |> Option.iter (fun _ -> element.BoxHeight <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "colorPicker16.boxWidth" |> Option.iter (fun _ -> element.BoxWidth <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "colorPicker16.boxHeight" |> Option.iter (fun _ -> element.BoxHeight <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "colorPicker16.boxWidth" |> Option.iter (fun _ -> element.BoxWidth <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Point> "colorPicker16.cursor" |> Option.iter (fun _ -> element.Cursor <- Unchecked.defaultof<_>)
         props |> Interop.getValue<ColorName> "colorPicker16.selectedColor" |> Option.iter (fun _ -> element.SelectedColor <- Unchecked.defaultof<_>)
         // Events
@@ -711,16 +613,18 @@ type ColorPicker16Element(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new ColorPicker16()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -730,7 +634,7 @@ type ColorPicker16Element(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -741,7 +645,7 @@ type ColorPicker16Element(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // ComboBox
@@ -754,8 +658,8 @@ type ComboBoxElement(props:IProperty list) =
         props |> Interop.getValue<bool> "comboBox.hideDropdownListOnClick" |> Option.iter (fun v -> element.HideDropdownListOnClick <- v )
         props |> Interop.getValue<bool> "comboBox.readOnly" |> Option.iter (fun v -> element.ReadOnly <- v )
         props |> Interop.getValue<string> "comboBox.searchText" |> Option.iter (fun v -> element.SearchText <- v )
-        props |> Interop.getValue<int> "comboBox.selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v )
-        props |> Interop.getValue<IListDataSource> "comboBox.source" |> Option.iter (fun v -> element.Source <- v )
+        props |> Interop.getValue<Int32> "comboBox.selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v )
+        props |> Interop.getValue<string list> "comboBox.source" |> Option.iter (fun v -> element.SetSource (ObservableCollection(v)))
         props |> Interop.getValue<string> "comboBox.text" |> Option.iter (fun v -> element.Text <- v )
         // Events
         props |> Interop.getValue<unit->unit> "comboBox.collapsed" |> Option.iter (fun v -> Interop.setEventHandler <@ element.Collapsed @> (fun _ -> v()) element)
@@ -769,8 +673,8 @@ type ComboBoxElement(props:IProperty list) =
         props |> Interop.getValue<bool> "comboBox.hideDropdownListOnClick" |> Option.iter (fun _ -> element.HideDropdownListOnClick <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "comboBox.readOnly" |> Option.iter (fun _ -> element.ReadOnly <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "comboBox.searchText" |> Option.iter (fun _ -> element.SearchText <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "comboBox.selectedItem" |> Option.iter (fun _ -> element.SelectedItem <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<IListDataSource> "comboBox.source" |> Option.iter (fun _ -> element.Source <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "comboBox.selectedItem" |> Option.iter (fun _ -> element.SelectedItem <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<string list> "comboBox.source" |> Option.iter (fun _ -> element.SetSource Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "comboBox.text" |> Option.iter (fun _ -> element.Text <- Unchecked.defaultof<_>)
         // Events
         props |> Interop.getValue<unit->unit> "comboBox.collapsed" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.Collapsed @> element)
@@ -783,16 +687,18 @@ type ComboBoxElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new ComboBox()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -802,7 +708,7 @@ type ComboBoxElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -813,7 +719,7 @@ type ComboBoxElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // DateField
@@ -823,7 +729,7 @@ type DateFieldElement(props:IProperty list) =
     let setProps (element: DateField) props =
         // Properties
         props |> Interop.getValue<CultureInfo> "dateField.culture" |> Option.iter (fun v -> element.Culture <- v )
-        props |> Interop.getValue<int> "dateField.cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v )
+        props |> Interop.getValue<Int32> "dateField.cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v )
         props |> Interop.getValue<DateTime> "dateField.date" |> Option.iter (fun v -> element.Date <- v )
         // Events
         props |> Interop.getValue<DateTimeEventArgs<DateTime>->unit> "dateField.dateChanged" |> Option.iter (fun v -> Interop.setEventHandler <@ element.DateChanged @> v element)
@@ -831,7 +737,7 @@ type DateFieldElement(props:IProperty list) =
     let removeProps (element:DateField) props =
         // Properties
         props |> Interop.getValue<CultureInfo> "dateField.culture" |> Option.iter (fun _ -> element.Culture <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "dateField.cursorPosition" |> Option.iter (fun _ -> element.CursorPosition <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "dateField.cursorPosition" |> Option.iter (fun _ -> element.CursorPosition <- Unchecked.defaultof<_>)
         props |> Interop.getValue<DateTime> "dateField.date" |> Option.iter (fun _ -> element.Date <- Unchecked.defaultof<_>)
         // Events
         props |> Interop.getValue<DateTimeEventArgs<DateTime>->unit> "dateField.dateChanged" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.DateChanged @> element)
@@ -841,16 +747,18 @@ type DateFieldElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new DateField()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -860,7 +768,7 @@ type DateFieldElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -871,7 +779,7 @@ type DateFieldElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // DatePicker
@@ -893,16 +801,18 @@ type DatePickerElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new DatePicker()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -912,7 +822,7 @@ type DatePickerElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -923,7 +833,7 @@ type DatePickerElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // Dialog
@@ -947,16 +857,18 @@ type DialogElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Dialog()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -966,7 +878,7 @@ type DialogElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -977,7 +889,7 @@ type DialogElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // FileDialog
@@ -1013,16 +925,18 @@ type FileDialogElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new FileDialog()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1032,7 +946,7 @@ type FileDialogElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1043,7 +957,7 @@ type FileDialogElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // FrameView
@@ -1063,16 +977,18 @@ type FrameViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new FrameView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1082,7 +998,7 @@ type FrameViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1093,57 +1009,7 @@ type FrameViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
-
-
-// LegendAnnotation
-type LegendAnnotationElement(props:IProperty list) =
-    inherit TerminalElement(props)
-
-    let setProps (element: LegendAnnotation) props =
-        // No properties or events LegendAnnotation
-        ()
-
-    let removeProps (element:LegendAnnotation) props =
-        // No properties or events LegendAnnotation
-        ()
-
-    override _.name = $"LegendAnnotation"
-
-
-    override this.create parent =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        this.parent <- parent
-        let el = new LegendAnnotation()
-        parent |> Option.iter (fun p -> p.Add el |> ignore)
-        ViewElement.setProps el props
-        setProps el props
-        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
-        this.element <- el
-    
-
-
-    override this.canUpdate prevElement oldProps =
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
-        let canUpdateElement =
-            true
-
-        canUpdateView && canUpdateElement
-    
-
-
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> LegendAnnotation
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement    
-    
+        
 
 
 // GraphView
@@ -1156,8 +1022,8 @@ type GraphViewElement(props:IProperty list) =
         props |> Interop.getValue<VerticalAxis> "graphView.axisY" |> Option.iter (fun v -> element.AxisY <- v )
         props |> Interop.getValue<PointF> "graphView.cellSize" |> Option.iter (fun v -> element.CellSize <- v )
         props |> Interop.getValue<Attribute option> "graphView.graphColor" |> Option.iter (fun v -> element.GraphColor <- v  |> Option.toNullable)
-        props |> Interop.getValue<UInt32> "graphView.marginBottom" |> Option.iter (fun v -> element.MarginBottom <- v )
-        props |> Interop.getValue<UInt32> "graphView.marginLeft" |> Option.iter (fun v -> element.MarginLeft <- v )
+        props |> Interop.getValue<int> "graphView.marginBottom" |> Option.iter (fun v -> element.MarginBottom <- (v |> uint32))
+        props |> Interop.getValue<int> "graphView.marginLeft" |> Option.iter (fun v -> element.MarginLeft <- (v |> uint32))
         props |> Interop.getValue<PointF> "graphView.scrollOffset" |> Option.iter (fun v -> element.ScrollOffset <- v )
 
     let removeProps (element:GraphView) props =
@@ -1166,8 +1032,8 @@ type GraphViewElement(props:IProperty list) =
         props |> Interop.getValue<VerticalAxis> "graphView.axisY" |> Option.iter (fun _ -> element.AxisY <- Unchecked.defaultof<_>)
         props |> Interop.getValue<PointF> "graphView.cellSize" |> Option.iter (fun _ -> element.CellSize <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Attribute option> "graphView.graphColor" |> Option.iter (fun _ -> element.GraphColor <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<UInt32> "graphView.marginBottom" |> Option.iter (fun _ -> element.MarginBottom <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<UInt32> "graphView.marginLeft" |> Option.iter (fun _ -> element.MarginLeft <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<int> "graphView.marginBottom" |> Option.iter (fun _ -> element.MarginBottom <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<int> "graphView.marginLeft" |> Option.iter (fun _ -> element.MarginLeft <- Unchecked.defaultof<_>)
         props |> Interop.getValue<PointF> "graphView.scrollOffset" |> Option.iter (fun _ -> element.ScrollOffset <- Unchecked.defaultof<_>)
 
     override _.name = $"GraphView"
@@ -1175,16 +1041,18 @@ type GraphViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new GraphView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1194,7 +1062,7 @@ type GraphViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1205,7 +1073,7 @@ type GraphViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // HexView
@@ -1235,16 +1103,18 @@ type HexViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new HexView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1254,7 +1124,7 @@ type HexViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1265,7 +1135,7 @@ type HexViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // Label
@@ -1287,16 +1157,18 @@ type LabelElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Label()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1306,7 +1178,7 @@ type LabelElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1317,7 +1189,59 @@ type LabelElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
+
+
+// LegendAnnotation
+type LegendAnnotationElement(props:IProperty list) =
+    inherit TerminalElement(props)
+
+    let setProps (element: LegendAnnotation) props =
+        // No properties or events LegendAnnotation
+        ()
+
+    let removeProps (element:LegendAnnotation) props =
+        // No properties or events LegendAnnotation
+        ()
+
+    override _.name = $"LegendAnnotation"
+
+
+    override this.create parent =
+        #if DEBUG
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
+        #endif
+        this.parent <- parent
+        
+
+        let el = new LegendAnnotation()
+        parent |> Option.iter (fun p -> p.Add el |> ignore)
+        ViewElement.setProps el props
+        setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+        this.element <- el
+        
+
+
+    override this.canUpdate prevElement oldProps =
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+        
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> LegendAnnotation
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        ViewElement.removeProps prevElement removedProps
+        removeProps element removedProps
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement    
+        
 
 
 // Line
@@ -1343,16 +1267,18 @@ type LineElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Line()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1362,7 +1288,7 @@ type LineElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1373,7 +1299,7 @@ type LineElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // LineView
@@ -1399,16 +1325,18 @@ type LineViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new LineView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1418,7 +1346,7 @@ type LineViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1429,7 +1357,7 @@ type LineViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // ListView
@@ -1440,10 +1368,10 @@ type ListViewElement(props:IProperty list) =
         // Properties
         props |> Interop.getValue<bool> "listView.allowsMarking" |> Option.iter (fun v -> element.AllowsMarking <- v )
         props |> Interop.getValue<bool> "listView.allowsMultipleSelection" |> Option.iter (fun v -> element.AllowsMultipleSelection <- v )
-        props |> Interop.getValue<int> "listView.leftItem" |> Option.iter (fun v -> element.LeftItem <- v )
-        props |> Interop.getValue<int> "listView.selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v )
-        props |> Interop.getValue<IListDataSource> "listView.source" |> Option.iter (fun v -> element.Source <- v )
-        props |> Interop.getValue<int> "listView.topItem" |> Option.iter (fun v -> element.TopItem <- v )
+        props |> Interop.getValue<Int32> "listView.leftItem" |> Option.iter (fun v -> element.LeftItem <- v )
+        props |> Interop.getValue<Int32> "listView.selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v )
+        props |> Interop.getValue<string list> "listView.source" |> Option.iter (fun v -> element.SetSource (ObservableCollection(v)))
+        props |> Interop.getValue<Int32> "listView.topItem" |> Option.iter (fun v -> element.TopItem <- v )
         // Events
         props |> Interop.getValue<NotifyCollectionChangedEventArgs->unit> "listView.collectionChanged" |> Option.iter (fun v -> Interop.setEventHandler <@ element.CollectionChanged @> v element)
         props |> Interop.getValue<ListViewItemEventArgs->unit> "listView.openSelectedItem" |> Option.iter (fun v -> Interop.setEventHandler <@ element.OpenSelectedItem @> v element)
@@ -1454,10 +1382,10 @@ type ListViewElement(props:IProperty list) =
         // Properties
         props |> Interop.getValue<bool> "listView.allowsMarking" |> Option.iter (fun _ -> element.AllowsMarking <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "listView.allowsMultipleSelection" |> Option.iter (fun _ -> element.AllowsMultipleSelection <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "listView.leftItem" |> Option.iter (fun _ -> element.LeftItem <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "listView.selectedItem" |> Option.iter (fun _ -> element.SelectedItem <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<IListDataSource> "listView.source" |> Option.iter (fun _ -> element.Source <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "listView.topItem" |> Option.iter (fun _ -> element.TopItem <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "listView.leftItem" |> Option.iter (fun _ -> element.LeftItem <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "listView.selectedItem" |> Option.iter (fun _ -> element.SelectedItem <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<string list> "listView.source" |> Option.iter (fun _ -> element.SetSource Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "listView.topItem" |> Option.iter (fun _ -> element.TopItem <- Unchecked.defaultof<_>)
         // Events
         props |> Interop.getValue<NotifyCollectionChangedEventArgs->unit> "listView.collectionChanged" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.CollectionChanged @> element)
         props |> Interop.getValue<ListViewItemEventArgs->unit> "listView.openSelectedItem" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.OpenSelectedItem @> element)
@@ -1469,16 +1397,18 @@ type ListViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new ListView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1488,7 +1418,7 @@ type ListViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1499,7 +1429,61 @@ type ListViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
+
+
+// Margin
+type MarginElement(props:IProperty list) =
+    inherit TerminalElement(props)
+
+    let setProps (element: Margin) props =
+        // Properties
+        props |> Interop.getValue<ColorScheme> "margin.colorScheme" |> Option.iter (fun v -> element.ColorScheme <- v )
+        props |> Interop.getValue<ShadowStyle> "margin.shadowStyle" |> Option.iter (fun v -> element.ShadowStyle <- v )
+
+    let removeProps (element:Margin) props =
+        // Properties
+        props |> Interop.getValue<ColorScheme> "margin.colorScheme" |> Option.iter (fun _ -> element.ColorScheme <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<ShadowStyle> "margin.shadowStyle" |> Option.iter (fun _ -> element.ShadowStyle <- Unchecked.defaultof<_>)
+
+    override _.name = $"Margin"
+
+
+    override this.create parent =
+        #if DEBUG
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
+        #endif
+        this.parent <- parent
+        
+
+        let el = new Margin()
+        parent |> Option.iter (fun p -> p.Add el |> ignore)
+        ViewElement.setProps el props
+        setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+        this.element <- el
+        
+
+
+    override this.canUpdate prevElement oldProps =
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+        
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> Margin
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        ViewElement.removeProps prevElement removedProps
+        removeProps element removedProps
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement    
+        
 
 
 // MenuBar
@@ -1509,7 +1493,7 @@ type MenuBarElement(props:IProperty list) =
     let setProps (element: MenuBar) props =
         // Properties
         props |> Interop.getValue<Key> "menuBar.key" |> Option.iter (fun v -> element.Key <- v )
-        props |> Interop.getValue<MenuBarItem[]> "menuBar.menus" |> Option.iter (fun v -> element.Menus <- v )
+        props |> Interop.getValue<MenuBarItem list> "menuBar.menus" |> Option.iter (fun v -> element.Menus <- v |> List.toArray)
         props |> Interop.getValue<LineStyle> "menuBar.menusBorderStyle" |> Option.iter (fun v -> element.MenusBorderStyle <- v )
         props |> Interop.getValue<bool> "menuBar.useKeysUpDownAsKeysLeftRight" |> Option.iter (fun v -> element.UseKeysUpDownAsKeysLeftRight <- v )
         props |> Interop.getValue<bool> "menuBar.useSubMenusSingleFrame" |> Option.iter (fun v -> element.UseSubMenusSingleFrame <- v )
@@ -1523,7 +1507,7 @@ type MenuBarElement(props:IProperty list) =
     let removeProps (element:MenuBar) props =
         // Properties
         props |> Interop.getValue<Key> "menuBar.key" |> Option.iter (fun _ -> element.Key <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<MenuBarItem[]> "menuBar.menus" |> Option.iter (fun _ -> element.Menus <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<MenuBarItem list> "menuBar.menus" |> Option.iter (fun _ -> element.Menus <- Unchecked.defaultof<_>)
         props |> Interop.getValue<LineStyle> "menuBar.menusBorderStyle" |> Option.iter (fun _ -> element.MenusBorderStyle <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "menuBar.useKeysUpDownAsKeysLeftRight" |> Option.iter (fun _ -> element.UseKeysUpDownAsKeysLeftRight <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "menuBar.useSubMenusSingleFrame" |> Option.iter (fun _ -> element.UseSubMenusSingleFrame <- Unchecked.defaultof<_>)
@@ -1539,16 +1523,18 @@ type MenuBarElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new MenuBar()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1558,7 +1544,7 @@ type MenuBarElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1569,7 +1555,7 @@ type MenuBarElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // MenuBarv2
@@ -1589,16 +1575,18 @@ type MenuBarv2Element(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new MenuBarv2()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1608,7 +1596,7 @@ type MenuBarv2Element(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1619,7 +1607,7 @@ type MenuBarv2Element(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // Menuv2
@@ -1639,16 +1627,18 @@ type Menuv2Element(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Menuv2()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1658,7 +1648,7 @@ type Menuv2Element(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1669,7 +1659,7 @@ type Menuv2Element(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // NumericUpDown<'a>
@@ -1703,16 +1693,18 @@ type NumericUpDownElement<'a>(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new NumericUpDown<'a>()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1722,7 +1714,7 @@ type NumericUpDownElement<'a>(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1733,58 +1725,12 @@ type NumericUpDownElement<'a>(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // NumericUpDown
 type NumericUpDownElement(props:IProperty list) =
-    inherit TerminalElement(props)
-
-    let setProps (element: NumericUpDown) props =
-        // No properties or events NumericUpDown
-        ()
-
-    let removeProps (element:NumericUpDown) props =
-        // No properties or events NumericUpDown
-        ()
-
-    override _.name = $"NumericUpDown"
-
-
-    override this.create parent =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        this.parent <- parent
-        let el = new NumericUpDown()
-        parent |> Option.iter (fun p -> p.Add el |> ignore)
-        ViewElement.setProps el props
-        setProps el props
-        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
-        this.element <- el
-    
-
-
-    override this.canUpdate prevElement oldProps =
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
-        let canUpdateElement =
-            true
-
-        canUpdateView && canUpdateElement
-    
-
-
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> NumericUpDown
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement    
-    
-
+    inherit NumericUpDownElement<int>(props)
 
 // OpenDialog
 type OpenDialogElement(props:IProperty list) =
@@ -1803,16 +1749,18 @@ type OpenDialogElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new OpenDialog()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1822,7 +1770,7 @@ type OpenDialogElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1833,7 +1781,59 @@ type OpenDialogElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
+
+
+// Padding
+type PaddingElement(props:IProperty list) =
+    inherit TerminalElement(props)
+
+    let setProps (element: Padding) props =
+        // Properties
+        props |> Interop.getValue<ColorScheme> "padding.colorScheme" |> Option.iter (fun v -> element.ColorScheme <- v )
+
+    let removeProps (element:Padding) props =
+        // Properties
+        props |> Interop.getValue<ColorScheme> "padding.colorScheme" |> Option.iter (fun _ -> element.ColorScheme <- Unchecked.defaultof<_>)
+
+    override _.name = $"Padding"
+
+
+    override this.create parent =
+        #if DEBUG
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
+        #endif
+        this.parent <- parent
+        
+
+        let el = new Padding()
+        parent |> Option.iter (fun p -> p.Add el |> ignore)
+        ViewElement.setProps el props
+        setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+        this.element <- el
+        
+
+
+    override this.canUpdate prevElement oldProps =
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+        
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> Padding
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        ViewElement.removeProps prevElement removedProps
+        removeProps element removedProps
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement    
+        
 
 
 // ProgressBar
@@ -1863,16 +1863,18 @@ type ProgressBarElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new ProgressBar()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1882,7 +1884,7 @@ type ProgressBarElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1893,7 +1895,7 @@ type ProgressBarElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // RadioGroup
@@ -1902,10 +1904,10 @@ type RadioGroupElement(props:IProperty list) =
 
     let setProps (element: RadioGroup) props =
         // Properties
-        props |> Interop.getValue<int> "radioGroup.horizontalSpace" |> Option.iter (fun v -> element.HorizontalSpace <- v )
+        props |> Interop.getValue<Int32> "radioGroup.horizontalSpace" |> Option.iter (fun v -> element.HorizontalSpace <- v )
         props |> Interop.getValue<Orientation> "radioGroup.orientation" |> Option.iter (fun v -> element.Orientation <- v )
         props |> Interop.getValue<string list> "radioGroup.radioLabels" |> Option.iter (fun v -> element.RadioLabels <- v |> List.toArray)
-        props |> Interop.getValue<int> "radioGroup.selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v )
+        props |> Interop.getValue<Int32> "radioGroup.selectedItem" |> Option.iter (fun v -> element.SelectedItem <- v )
         // Events
         props |> Interop.getValue<Orientation->unit> "radioGroup.orientationChanged" |> Option.iter (fun v -> Interop.setEventHandler <@ element.OrientationChanged @> (fun arg -> v arg.CurrentValue) element)
         props |> Interop.getValue<CancelEventArgs<Orientation>->unit> "radioGroup.orientationChanging" |> Option.iter (fun v -> Interop.setEventHandler <@ element.OrientationChanging @> v element)
@@ -1913,10 +1915,10 @@ type RadioGroupElement(props:IProperty list) =
 
     let removeProps (element:RadioGroup) props =
         // Properties
-        props |> Interop.getValue<int> "radioGroup.horizontalSpace" |> Option.iter (fun _ -> element.HorizontalSpace <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "radioGroup.horizontalSpace" |> Option.iter (fun _ -> element.HorizontalSpace <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Orientation> "radioGroup.orientation" |> Option.iter (fun _ -> element.Orientation <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string list> "radioGroup.radioLabels" |> Option.iter (fun _ -> element.RadioLabels <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "radioGroup.selectedItem" |> Option.iter (fun _ -> element.SelectedItem <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "radioGroup.selectedItem" |> Option.iter (fun _ -> element.SelectedItem <- Unchecked.defaultof<_>)
         // Events
         props |> Interop.getValue<Orientation->unit> "radioGroup.orientationChanged" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.OrientationChanged @> element)
         props |> Interop.getValue<CancelEventArgs<Orientation>->unit> "radioGroup.orientationChanging" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.OrientationChanging @> element)
@@ -1927,16 +1929,18 @@ type RadioGroupElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new RadioGroup()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1946,7 +1950,7 @@ type RadioGroupElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -1957,7 +1961,7 @@ type RadioGroupElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // SaveDialog
@@ -1977,16 +1981,18 @@ type SaveDialogElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new SaveDialog()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -1996,7 +2002,7 @@ type SaveDialogElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2007,7 +2013,7 @@ type SaveDialogElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // ScrollBarView
@@ -2020,9 +2026,9 @@ type ScrollBarViewElement(props:IProperty list) =
         props |> Interop.getValue<bool> "scrollBarView.isVertical" |> Option.iter (fun v -> element.IsVertical <- v )
         props |> Interop.getValue<bool> "scrollBarView.keepContentAlwaysInViewport" |> Option.iter (fun v -> element.KeepContentAlwaysInViewport <- v )
         props |> Interop.getValue<ScrollBarView> "scrollBarView.otherScrollBarView" |> Option.iter (fun v -> element.OtherScrollBarView <- v )
-        props |> Interop.getValue<int> "scrollBarView.position" |> Option.iter (fun v -> element.Position <- v )
+        props |> Interop.getValue<Int32> "scrollBarView.position" |> Option.iter (fun v -> element.Position <- v )
         props |> Interop.getValue<bool> "scrollBarView.showScrollIndicator" |> Option.iter (fun v -> element.ShowScrollIndicator <- v )
-        props |> Interop.getValue<int> "scrollBarView.size" |> Option.iter (fun v -> element.Size <- v )
+        props |> Interop.getValue<Int32> "scrollBarView.size" |> Option.iter (fun v -> element.Size <- v )
         // Events
         props |> Interop.getValue<unit->unit> "scrollBarView.changedPosition" |> Option.iter (fun v -> Interop.setEventHandler <@ element.ChangedPosition @> (fun _ -> v()) element)
 
@@ -2032,9 +2038,9 @@ type ScrollBarViewElement(props:IProperty list) =
         props |> Interop.getValue<bool> "scrollBarView.isVertical" |> Option.iter (fun _ -> element.IsVertical <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "scrollBarView.keepContentAlwaysInViewport" |> Option.iter (fun _ -> element.KeepContentAlwaysInViewport <- Unchecked.defaultof<_>)
         props |> Interop.getValue<ScrollBarView> "scrollBarView.otherScrollBarView" |> Option.iter (fun _ -> element.OtherScrollBarView <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "scrollBarView.position" |> Option.iter (fun _ -> element.Position <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "scrollBarView.position" |> Option.iter (fun _ -> element.Position <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "scrollBarView.showScrollIndicator" |> Option.iter (fun _ -> element.ShowScrollIndicator <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "scrollBarView.size" |> Option.iter (fun _ -> element.Size <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "scrollBarView.size" |> Option.iter (fun _ -> element.Size <- Unchecked.defaultof<_>)
         // Events
         props |> Interop.getValue<unit->unit> "scrollBarView.changedPosition" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.ChangedPosition @> element)
 
@@ -2043,16 +2049,18 @@ type ScrollBarViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new ScrollBarView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2062,7 +2070,7 @@ type ScrollBarViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2073,7 +2081,7 @@ type ScrollBarViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // ScrollView
@@ -2101,16 +2109,18 @@ type ScrollViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new ScrollView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2120,7 +2130,7 @@ type ScrollViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2131,7 +2141,7 @@ type ScrollViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // Shortcut
@@ -2143,11 +2153,10 @@ type ShortcutElement(props:IProperty list) =
         props |> Interop.getValue<Action> "shortcut.action" |> Option.iter (fun v -> element.Action <- v )
         props |> Interop.getValue<AlignmentModes> "shortcut.alignmentModes" |> Option.iter (fun v -> element.AlignmentModes <- v )
         props |> Interop.getValue<ColorScheme> "shortcut.colorScheme" |> Option.iter (fun v -> element.ColorScheme <- v )
-        props |> Interop.getValue<View> "shortcut.commandView" |> Option.iter (fun v -> element.CommandView <- v )
         props |> Interop.getValue<string> "shortcut.helpText" |> Option.iter (fun v -> element.HelpText <- v )
         props |> Interop.getValue<Key> "shortcut.key" |> Option.iter (fun v -> element.Key <- v )
         props |> Interop.getValue<KeyBindingScope> "shortcut.keyBindingScope" |> Option.iter (fun v -> element.KeyBindingScope <- v )
-        props |> Interop.getValue<int> "shortcut.minimumKeyTextSize" |> Option.iter (fun v -> element.MinimumKeyTextSize <- v )
+        props |> Interop.getValue<Int32> "shortcut.minimumKeyTextSize" |> Option.iter (fun v -> element.MinimumKeyTextSize <- v )
         props |> Interop.getValue<Orientation> "shortcut.orientation" |> Option.iter (fun v -> element.Orientation <- v )
         props |> Interop.getValue<string> "shortcut.text" |> Option.iter (fun v -> element.Text <- v )
         // Events
@@ -2159,11 +2168,10 @@ type ShortcutElement(props:IProperty list) =
         props |> Interop.getValue<Action> "shortcut.action" |> Option.iter (fun _ -> element.Action <- Unchecked.defaultof<_>)
         props |> Interop.getValue<AlignmentModes> "shortcut.alignmentModes" |> Option.iter (fun _ -> element.AlignmentModes <- Unchecked.defaultof<_>)
         props |> Interop.getValue<ColorScheme> "shortcut.colorScheme" |> Option.iter (fun _ -> element.ColorScheme <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<View> "shortcut.commandView" |> Option.iter (fun _ -> element.CommandView <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "shortcut.helpText" |> Option.iter (fun _ -> element.HelpText <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Key> "shortcut.key" |> Option.iter (fun _ -> element.Key <- Unchecked.defaultof<_>)
         props |> Interop.getValue<KeyBindingScope> "shortcut.keyBindingScope" |> Option.iter (fun _ -> element.KeyBindingScope <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "shortcut.minimumKeyTextSize" |> Option.iter (fun _ -> element.MinimumKeyTextSize <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "shortcut.minimumKeyTextSize" |> Option.iter (fun _ -> element.MinimumKeyTextSize <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Orientation> "shortcut.orientation" |> Option.iter (fun _ -> element.Orientation <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "shortcut.text" |> Option.iter (fun _ -> element.Text <- Unchecked.defaultof<_>)
         // Events
@@ -2175,16 +2183,18 @@ type ShortcutElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Shortcut()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2194,7 +2204,7 @@ type ShortcutElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2205,57 +2215,7 @@ type ShortcutElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
-
-
-// Slider
-type SliderElement(props:IProperty list) =
-    inherit TerminalElement(props)
-
-    let setProps (element: Slider) props =
-        // No properties or events Slider
-        ()
-
-    let removeProps (element:Slider) props =
-        // No properties or events Slider
-        ()
-
-    override _.name = $"Slider"
-
-
-    override this.create parent =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        this.parent <- parent
-        let el = new Slider()
-        parent |> Option.iter (fun p -> p.Add el |> ignore)
-        ViewElement.setProps el props
-        setProps el props
-        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
-        this.element <- el
-    
-
-
-    override this.canUpdate prevElement oldProps =
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
-        let canUpdateElement =
-            true
-
-        canUpdateView && canUpdateElement
-    
-
-
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> Slider
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement    
-    
+        
 
 
 // Slider<'a>
@@ -2265,9 +2225,9 @@ type SliderElement<'a>(props:IProperty list) =
     let setProps (element: Slider<'a>) props =
         // Properties
         props |> Interop.getValue<bool> "slider`1.allowEmpty" |> Option.iter (fun v -> element.AllowEmpty <- v )
-        props |> Interop.getValue<int> "slider`1.focusedOption" |> Option.iter (fun v -> element.FocusedOption <- v )
+        props |> Interop.getValue<Int32> "slider`1.focusedOption" |> Option.iter (fun v -> element.FocusedOption <- v )
         props |> Interop.getValue<Orientation> "slider`1.legendsOrientation" |> Option.iter (fun v -> element.LegendsOrientation <- v )
-        props |> Interop.getValue<int> "slider`1.minimumInnerSpacing" |> Option.iter (fun v -> element.MinimumInnerSpacing <- v )
+        props |> Interop.getValue<Int32> "slider`1.minimumInnerSpacing" |> Option.iter (fun v -> element.MinimumInnerSpacing <- v )
         props |> Interop.getValue<SliderOption<'a> list> "slider`1.options" |> Option.iter (fun v -> element.Options <- v.ToList())
         props |> Interop.getValue<Orientation> "slider`1.orientation" |> Option.iter (fun v -> element.Orientation <- v )
         props |> Interop.getValue<bool> "slider`1.rangeAllowSingle" |> Option.iter (fun v -> element.RangeAllowSingle <- v )
@@ -2286,9 +2246,9 @@ type SliderElement<'a>(props:IProperty list) =
     let removeProps (element:Slider<'a>) props =
         // Properties
         props |> Interop.getValue<bool> "slider`1.allowEmpty" |> Option.iter (fun _ -> element.AllowEmpty <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "slider`1.focusedOption" |> Option.iter (fun _ -> element.FocusedOption <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "slider`1.focusedOption" |> Option.iter (fun _ -> element.FocusedOption <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Orientation> "slider`1.legendsOrientation" |> Option.iter (fun _ -> element.LegendsOrientation <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "slider`1.minimumInnerSpacing" |> Option.iter (fun _ -> element.MinimumInnerSpacing <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "slider`1.minimumInnerSpacing" |> Option.iter (fun _ -> element.MinimumInnerSpacing <- Unchecked.defaultof<_>)
         props |> Interop.getValue<SliderOption<'a> list> "slider`1.options" |> Option.iter (fun _ -> element.Options <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Orientation> "slider`1.orientation" |> Option.iter (fun _ -> element.Orientation <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "slider`1.rangeAllowSingle" |> Option.iter (fun _ -> element.RangeAllowSingle <- Unchecked.defaultof<_>)
@@ -2309,16 +2269,18 @@ type SliderElement<'a>(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Slider<'a>()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2328,7 +2290,7 @@ type SliderElement<'a>(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2339,7 +2301,59 @@ type SliderElement<'a>(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
+
+
+// Slider
+type SliderElement(props:IProperty list) =
+    inherit TerminalElement(props)
+
+    let setProps (element: Slider) props =
+        // No properties or events Slider
+        ()
+
+    let removeProps (element:Slider) props =
+        // No properties or events Slider
+        ()
+
+    override _.name = $"Slider"
+
+
+    override this.create parent =
+        #if DEBUG
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
+        #endif
+        this.parent <- parent
+        
+
+        let el = new Slider()
+        parent |> Option.iter (fun p -> p.Add el |> ignore)
+        ViewElement.setProps el props
+        setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+        this.element <- el
+        
+
+
+    override this.canUpdate prevElement oldProps =
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+        
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> Slider
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        ViewElement.removeProps prevElement removedProps
+        removeProps element removedProps
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement    
+        
 
 
 // SpinnerView
@@ -2351,7 +2365,7 @@ type SpinnerViewElement(props:IProperty list) =
         props |> Interop.getValue<bool> "spinnerView.autoSpin" |> Option.iter (fun v -> element.AutoSpin <- v )
         props |> Interop.getValue<string list> "spinnerView.sequence" |> Option.iter (fun v -> element.Sequence <- v |> List.toArray)
         props |> Interop.getValue<bool> "spinnerView.spinBounce" |> Option.iter (fun v -> element.SpinBounce <- v )
-        props |> Interop.getValue<int> "spinnerView.spinDelay" |> Option.iter (fun v -> element.SpinDelay <- v )
+        props |> Interop.getValue<Int32> "spinnerView.spinDelay" |> Option.iter (fun v -> element.SpinDelay <- v )
         props |> Interop.getValue<bool> "spinnerView.spinReverse" |> Option.iter (fun v -> element.SpinReverse <- v )
         props |> Interop.getValue<SpinnerStyle> "spinnerView.style" |> Option.iter (fun v -> element.Style <- v )
 
@@ -2360,7 +2374,7 @@ type SpinnerViewElement(props:IProperty list) =
         props |> Interop.getValue<bool> "spinnerView.autoSpin" |> Option.iter (fun _ -> element.AutoSpin <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string list> "spinnerView.sequence" |> Option.iter (fun _ -> element.Sequence <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "spinnerView.spinBounce" |> Option.iter (fun _ -> element.SpinBounce <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "spinnerView.spinDelay" |> Option.iter (fun _ -> element.SpinDelay <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "spinnerView.spinDelay" |> Option.iter (fun _ -> element.SpinDelay <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "spinnerView.spinReverse" |> Option.iter (fun _ -> element.SpinReverse <- Unchecked.defaultof<_>)
         props |> Interop.getValue<SpinnerStyle> "spinnerView.style" |> Option.iter (fun _ -> element.Style <- Unchecked.defaultof<_>)
 
@@ -2369,16 +2383,18 @@ type SpinnerViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new SpinnerView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2388,7 +2404,7 @@ type SpinnerViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2399,7 +2415,7 @@ type SpinnerViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // StatusBar
@@ -2419,16 +2435,18 @@ type StatusBarElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new StatusBar()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2438,7 +2456,7 @@ type StatusBarElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2449,7 +2467,7 @@ type StatusBarElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // Tab
@@ -2459,28 +2477,36 @@ type TabElement(props:IProperty list) =
     let setProps (element: Tab) props =
         // Properties
         props |> Interop.getValue<string> "tab.displayText" |> Option.iter (fun v -> element.DisplayText <- v )
-        props |> Interop.getValue<View> "tab.view" |> Option.iter (fun v -> element.View <- v )
+
+        props
+        |> Interop.getValue<TerminalElement> "tab.view"
+        |> Option.iter (fun v -> 
+            v.create (Some element)
+            element.View <- v.element
+        )
 
     let removeProps (element:Tab) props =
         // Properties
         props |> Interop.getValue<string> "tab.displayText" |> Option.iter (fun _ -> element.DisplayText <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<View> "tab.view" |> Option.iter (fun _ -> element.View <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<TerminalElement> "tab.view" |> Option.iter (fun _ -> element.View <- Unchecked.defaultof<_>)
 
     override _.name = $"Tab"
 
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Tab()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2490,7 +2516,7 @@ type TabElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2501,7 +2527,82 @@ type TabElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
+
+
+// TabView
+type TabViewElement(props:IProperty list) =
+    inherit TerminalElement(props)
+
+    let setProps (element: TabView) props =
+        // Properties
+        props |> Interop.getValue<int> "tabView.maxTabTextWidth" |> Option.iter (fun v -> element.MaxTabTextWidth <- (v |> uint32))
+        props |> Interop.getValue<Tab> "tabView.selectedTab" |> Option.iter (fun v -> element.SelectedTab <- v )
+        props |> Interop.getValue<TabStyle> "tabView.style" |> Option.iter (fun v -> element.Style <- v )
+        props |> Interop.getValue<Int32> "tabView.tabScrollOffset" |> Option.iter (fun v -> element.TabScrollOffset <- v )
+        // Events
+        props |> Interop.getValue<TabChangedEventArgs->unit> "tabView.selectedTabChanged" |> Option.iter (fun v -> Interop.setEventHandler <@ element.SelectedTabChanged @> v element)
+        props |> Interop.getValue<TabMouseEventArgs->unit> "tabView.tabClicked" |> Option.iter (fun v -> Interop.setEventHandler <@ element.TabClicked @> v element)
+
+            // Additional properties
+        props |> Interop.getValue<TerminalElement list> "tabView.tabs" |> Option.iter (fun v ->
+            v
+            |> List.iter (fun tabItems ->
+                tabItems.create (Some element)
+                element.AddTab ((tabItems.element :?> Tab), false)
+                
+                )
+            )
+            
+
+    let removeProps (element:TabView) props =
+        // Properties
+        props |> Interop.getValue<int> "tabView.maxTabTextWidth" |> Option.iter (fun _ -> element.MaxTabTextWidth <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Tab> "tabView.selectedTab" |> Option.iter (fun _ -> element.SelectedTab <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<TabStyle> "tabView.style" |> Option.iter (fun _ -> element.Style <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "tabView.tabScrollOffset" |> Option.iter (fun _ -> element.TabScrollOffset <- Unchecked.defaultof<_>)
+        // Events
+        props |> Interop.getValue<TabChangedEventArgs->unit> "tabView.selectedTabChanged" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.SelectedTabChanged @> element)
+        props |> Interop.getValue<TabMouseEventArgs->unit> "tabView.tabClicked" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.TabClicked @> element)
+
+    override _.name = $"TabView"
+
+
+    override this.create parent =
+        #if DEBUG
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
+        #endif
+        this.parent <- parent
+        
+
+        let el = new TabView()
+        parent |> Option.iter (fun p -> p.Add el |> ignore)
+        ViewElement.setProps el props
+        setProps el props
+        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
+        this.element <- el
+        
+
+
+    override this.canUpdate prevElement oldProps =
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
+        let canUpdateElement =
+            true
+
+        canUpdateView && canUpdateElement
+        
+
+
+    override this.update prevElement oldProps = 
+        let element = prevElement :?> TabView
+        let changedProps,removedProps = Interop.filterProps oldProps props
+        ViewElement.removeProps prevElement removedProps
+        removeProps element removedProps
+        ViewElement.setProps prevElement changedProps
+        setProps element changedProps
+        this.element <- prevElement    
+        
 
 
 // TableView
@@ -2512,15 +2613,15 @@ type TableViewElement(props:IProperty list) =
         // Properties
         props |> Interop.getValue<KeyCode> "tableView.cellActivationKey" |> Option.iter (fun v -> element.CellActivationKey <- v )
         props |> Interop.getValue<CollectionNavigatorBase> "tableView.collectionNavigator" |> Option.iter (fun v -> element.CollectionNavigator <- v )
-        props |> Interop.getValue<int> "tableView.columnOffset" |> Option.iter (fun v -> element.ColumnOffset <- v )
+        props |> Interop.getValue<Int32> "tableView.columnOffset" |> Option.iter (fun v -> element.ColumnOffset <- v )
         props |> Interop.getValue<bool> "tableView.fullRowSelect" |> Option.iter (fun v -> element.FullRowSelect <- v )
-        props |> Interop.getValue<int> "tableView.maxCellWidth" |> Option.iter (fun v -> element.MaxCellWidth <- v )
-        props |> Interop.getValue<int> "tableView.minCellWidth" |> Option.iter (fun v -> element.MinCellWidth <- v )
+        props |> Interop.getValue<Int32> "tableView.maxCellWidth" |> Option.iter (fun v -> element.MaxCellWidth <- v )
+        props |> Interop.getValue<Int32> "tableView.minCellWidth" |> Option.iter (fun v -> element.MinCellWidth <- v )
         props |> Interop.getValue<bool> "tableView.multiSelect" |> Option.iter (fun v -> element.MultiSelect <- v )
         props |> Interop.getValue<string> "tableView.nullSymbol" |> Option.iter (fun v -> element.NullSymbol <- v )
-        props |> Interop.getValue<int> "tableView.rowOffset" |> Option.iter (fun v -> element.RowOffset <- v )
-        props |> Interop.getValue<int> "tableView.selectedColumn" |> Option.iter (fun v -> element.SelectedColumn <- v )
-        props |> Interop.getValue<int> "tableView.selectedRow" |> Option.iter (fun v -> element.SelectedRow <- v )
+        props |> Interop.getValue<Int32> "tableView.rowOffset" |> Option.iter (fun v -> element.RowOffset <- v )
+        props |> Interop.getValue<Int32> "tableView.selectedColumn" |> Option.iter (fun v -> element.SelectedColumn <- v )
+        props |> Interop.getValue<Int32> "tableView.selectedRow" |> Option.iter (fun v -> element.SelectedRow <- v )
         props |> Interop.getValue<Char> "tableView.separatorSymbol" |> Option.iter (fun v -> element.SeparatorSymbol <- v )
         props |> Interop.getValue<TableStyle> "tableView.style" |> Option.iter (fun v -> element.Style <- v )
         props |> Interop.getValue<ITableSource> "tableView.table" |> Option.iter (fun v -> element.Table <- v )
@@ -2533,15 +2634,15 @@ type TableViewElement(props:IProperty list) =
         // Properties
         props |> Interop.getValue<KeyCode> "tableView.cellActivationKey" |> Option.iter (fun _ -> element.CellActivationKey <- Unchecked.defaultof<_>)
         props |> Interop.getValue<CollectionNavigatorBase> "tableView.collectionNavigator" |> Option.iter (fun _ -> element.CollectionNavigator <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "tableView.columnOffset" |> Option.iter (fun _ -> element.ColumnOffset <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "tableView.columnOffset" |> Option.iter (fun _ -> element.ColumnOffset <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "tableView.fullRowSelect" |> Option.iter (fun _ -> element.FullRowSelect <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "tableView.maxCellWidth" |> Option.iter (fun _ -> element.MaxCellWidth <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "tableView.minCellWidth" |> Option.iter (fun _ -> element.MinCellWidth <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "tableView.maxCellWidth" |> Option.iter (fun _ -> element.MaxCellWidth <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "tableView.minCellWidth" |> Option.iter (fun _ -> element.MinCellWidth <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "tableView.multiSelect" |> Option.iter (fun _ -> element.MultiSelect <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "tableView.nullSymbol" |> Option.iter (fun _ -> element.NullSymbol <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "tableView.rowOffset" |> Option.iter (fun _ -> element.RowOffset <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "tableView.selectedColumn" |> Option.iter (fun _ -> element.SelectedColumn <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "tableView.selectedRow" |> Option.iter (fun _ -> element.SelectedRow <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "tableView.rowOffset" |> Option.iter (fun _ -> element.RowOffset <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "tableView.selectedColumn" |> Option.iter (fun _ -> element.SelectedColumn <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "tableView.selectedRow" |> Option.iter (fun _ -> element.SelectedRow <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Char> "tableView.separatorSymbol" |> Option.iter (fun _ -> element.SeparatorSymbol <- Unchecked.defaultof<_>)
         props |> Interop.getValue<TableStyle> "tableView.style" |> Option.iter (fun _ -> element.Style <- Unchecked.defaultof<_>)
         props |> Interop.getValue<ITableSource> "tableView.table" |> Option.iter (fun _ -> element.Table <- Unchecked.defaultof<_>)
@@ -2555,16 +2656,18 @@ type TableViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new TableView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2574,7 +2677,7 @@ type TableViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2585,69 +2688,7 @@ type TableViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
-
-
-// TabView
-type TabViewElement(props:IProperty list) =
-    inherit TerminalElement(props)
-
-    let setProps (element: TabView) props =
-        // Properties
-        props |> Interop.getValue<UInt32> "tabView.maxTabTextWidth" |> Option.iter (fun v -> element.MaxTabTextWidth <- v )
-        props |> Interop.getValue<Tab> "tabView.selectedTab" |> Option.iter (fun v -> element.SelectedTab <- v )
-        props |> Interop.getValue<TabStyle> "tabView.style" |> Option.iter (fun v -> element.Style <- v )
-        props |> Interop.getValue<int> "tabView.tabScrollOffset" |> Option.iter (fun v -> element.TabScrollOffset <- v )
-        // Events
-        props |> Interop.getValue<TabChangedEventArgs->unit> "tabView.selectedTabChanged" |> Option.iter (fun v -> Interop.setEventHandler <@ element.SelectedTabChanged @> v element)
-        props |> Interop.getValue<TabMouseEventArgs->unit> "tabView.tabClicked" |> Option.iter (fun v -> Interop.setEventHandler <@ element.TabClicked @> v element)
-
-    let removeProps (element:TabView) props =
-        // Properties
-        props |> Interop.getValue<UInt32> "tabView.maxTabTextWidth" |> Option.iter (fun _ -> element.MaxTabTextWidth <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<Tab> "tabView.selectedTab" |> Option.iter (fun _ -> element.SelectedTab <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<TabStyle> "tabView.style" |> Option.iter (fun _ -> element.Style <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "tabView.tabScrollOffset" |> Option.iter (fun _ -> element.TabScrollOffset <- Unchecked.defaultof<_>)
-        // Events
-        props |> Interop.getValue<TabChangedEventArgs->unit> "tabView.selectedTabChanged" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.SelectedTabChanged @> element)
-        props |> Interop.getValue<TabMouseEventArgs->unit> "tabView.tabClicked" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.TabClicked @> element)
-
-    override _.name = $"TabView"
-
-
-    override this.create parent =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        this.parent <- parent
-        let el = new TabView()
-        parent |> Option.iter (fun p -> p.Add el |> ignore)
-        ViewElement.setProps el props
-        setProps el props
-        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
-        this.element <- el
-    
-
-
-    override this.canUpdate prevElement oldProps =
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
-        let canUpdateElement =
-            true
-
-        canUpdateView && canUpdateElement
-    
-
-
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> TabView
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement    
-    
+        
 
 
 // TextField
@@ -2659,10 +2700,10 @@ type TextFieldElement(props:IProperty list) =
         props |> Interop.getValue<IAutocomplete> "textField.autocomplete" |> Option.iter (fun v -> element.Autocomplete <- v )
         props |> Interop.getValue<string> "textField.caption" |> Option.iter (fun v -> element.Caption <- v )
         props |> Interop.getValue<Color> "textField.captionColor" |> Option.iter (fun v -> element.CaptionColor <- v )
-        props |> Interop.getValue<int> "textField.cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v )
+        props |> Interop.getValue<Int32> "textField.cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v )
         props |> Interop.getValue<bool> "textField.readOnly" |> Option.iter (fun v -> element.ReadOnly <- v )
         props |> Interop.getValue<bool> "textField.secret" |> Option.iter (fun v -> element.Secret <- v )
-        props |> Interop.getValue<int> "textField.selectedStart" |> Option.iter (fun v -> element.SelectedStart <- v )
+        props |> Interop.getValue<Int32> "textField.selectedStart" |> Option.iter (fun v -> element.SelectedStart <- v )
         props |> Interop.getValue<string> "textField.text" |> Option.iter (fun v -> element.Text <- v )
         props |> Interop.getValue<bool> "textField.used" |> Option.iter (fun v -> element.Used <- v )
         // Events
@@ -2673,10 +2714,10 @@ type TextFieldElement(props:IProperty list) =
         props |> Interop.getValue<IAutocomplete> "textField.autocomplete" |> Option.iter (fun _ -> element.Autocomplete <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "textField.caption" |> Option.iter (fun _ -> element.Caption <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Color> "textField.captionColor" |> Option.iter (fun _ -> element.CaptionColor <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "textField.cursorPosition" |> Option.iter (fun _ -> element.CursorPosition <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "textField.cursorPosition" |> Option.iter (fun _ -> element.CursorPosition <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textField.readOnly" |> Option.iter (fun _ -> element.ReadOnly <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textField.secret" |> Option.iter (fun _ -> element.Secret <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "textField.selectedStart" |> Option.iter (fun _ -> element.SelectedStart <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "textField.selectedStart" |> Option.iter (fun _ -> element.SelectedStart <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "textField.text" |> Option.iter (fun _ -> element.Text <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textField.used" |> Option.iter (fun _ -> element.Used <- Unchecked.defaultof<_>)
         // Events
@@ -2687,16 +2728,18 @@ type TextFieldElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new TextField()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2706,7 +2749,7 @@ type TextFieldElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2717,7 +2760,7 @@ type TextFieldElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // TextValidateField
@@ -2739,16 +2782,18 @@ type TextValidateFieldElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new TextValidateField()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2758,7 +2803,7 @@ type TextValidateFieldElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2769,7 +2814,7 @@ type TextValidateFieldElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // TextView
@@ -2783,15 +2828,15 @@ type TextViewElement(props:IProperty list) =
         props |> Interop.getValue<Point> "textView.cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v )
         props |> Interop.getValue<bool> "textView.inheritsPreviousColorScheme" |> Option.iter (fun v -> element.InheritsPreviousColorScheme <- v )
         props |> Interop.getValue<bool> "textView.isDirty" |> Option.iter (fun v -> element.IsDirty <- v )
-        props |> Interop.getValue<int> "textView.leftColumn" |> Option.iter (fun v -> element.LeftColumn <- v )
+        props |> Interop.getValue<Int32> "textView.leftColumn" |> Option.iter (fun v -> element.LeftColumn <- v )
         props |> Interop.getValue<bool> "textView.multiline" |> Option.iter (fun v -> element.Multiline <- v )
         props |> Interop.getValue<bool> "textView.readOnly" |> Option.iter (fun v -> element.ReadOnly <- v )
         props |> Interop.getValue<bool> "textView.selecting" |> Option.iter (fun v -> element.Selecting <- v )
-        props |> Interop.getValue<int> "textView.selectionStartColumn" |> Option.iter (fun v -> element.SelectionStartColumn <- v )
-        props |> Interop.getValue<int> "textView.selectionStartRow" |> Option.iter (fun v -> element.SelectionStartRow <- v )
-        props |> Interop.getValue<int> "textView.tabWidth" |> Option.iter (fun v -> element.TabWidth <- v )
+        props |> Interop.getValue<Int32> "textView.selectionStartColumn" |> Option.iter (fun v -> element.SelectionStartColumn <- v )
+        props |> Interop.getValue<Int32> "textView.selectionStartRow" |> Option.iter (fun v -> element.SelectionStartRow <- v )
+        props |> Interop.getValue<Int32> "textView.tabWidth" |> Option.iter (fun v -> element.TabWidth <- v )
         props |> Interop.getValue<string> "textView.text" |> Option.iter (fun v -> element.Text <- v )
-        props |> Interop.getValue<int> "textView.topRow" |> Option.iter (fun v -> element.TopRow <- v )
+        props |> Interop.getValue<Int32> "textView.topRow" |> Option.iter (fun v -> element.TopRow <- v )
         props |> Interop.getValue<bool> "textView.used" |> Option.iter (fun v -> element.Used <- v )
         props |> Interop.getValue<bool> "textView.wordWrap" |> Option.iter (fun v -> element.WordWrap <- v )
         // Events
@@ -2802,9 +2847,9 @@ type TextViewElement(props:IProperty list) =
         props |> Interop.getValue<RuneCellEventArgs->unit> "textView.drawUsedColor" |> Option.iter (fun v -> Interop.setEventHandler <@ element.DrawUsedColor @> v element)
         props |> Interop.getValue<PointEventArgs->unit> "textView.unwrappedCursorPosition" |> Option.iter (fun v -> Interop.setEventHandler <@ element.UnwrappedCursorPosition @> v element)
 
-        // Additional properties
+            // Additional properties
         props |> Interop.getValue<string->unit> "textView.textChanged" |> Option.iter (fun v -> Interop.setEventHandler <@ element.ContentsChanged @> (fun _ -> v element.Text) element)
-        
+            
 
     let removeProps (element:TextView) props =
         // Properties
@@ -2813,15 +2858,15 @@ type TextViewElement(props:IProperty list) =
         props |> Interop.getValue<Point> "textView.cursorPosition" |> Option.iter (fun _ -> element.CursorPosition <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textView.inheritsPreviousColorScheme" |> Option.iter (fun _ -> element.InheritsPreviousColorScheme <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textView.isDirty" |> Option.iter (fun _ -> element.IsDirty <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "textView.leftColumn" |> Option.iter (fun _ -> element.LeftColumn <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "textView.leftColumn" |> Option.iter (fun _ -> element.LeftColumn <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textView.multiline" |> Option.iter (fun _ -> element.Multiline <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textView.readOnly" |> Option.iter (fun _ -> element.ReadOnly <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textView.selecting" |> Option.iter (fun _ -> element.Selecting <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "textView.selectionStartColumn" |> Option.iter (fun _ -> element.SelectionStartColumn <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "textView.selectionStartRow" |> Option.iter (fun _ -> element.SelectionStartRow <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "textView.tabWidth" |> Option.iter (fun _ -> element.TabWidth <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "textView.selectionStartColumn" |> Option.iter (fun _ -> element.SelectionStartColumn <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "textView.selectionStartRow" |> Option.iter (fun _ -> element.SelectionStartRow <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "textView.tabWidth" |> Option.iter (fun _ -> element.TabWidth <- Unchecked.defaultof<_>)
         props |> Interop.getValue<string> "textView.text" |> Option.iter (fun _ -> element.Text <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "textView.topRow" |> Option.iter (fun _ -> element.TopRow <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "textView.topRow" |> Option.iter (fun _ -> element.TopRow <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textView.used" |> Option.iter (fun _ -> element.Used <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "textView.wordWrap" |> Option.iter (fun _ -> element.WordWrap <- Unchecked.defaultof<_>)
         // Events
@@ -2832,25 +2877,27 @@ type TextViewElement(props:IProperty list) =
         props |> Interop.getValue<RuneCellEventArgs->unit> "textView.drawUsedColor" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.DrawUsedColor @> element)
         props |> Interop.getValue<PointEventArgs->unit> "textView.unwrappedCursorPosition" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.UnwrappedCursorPosition @> element)
 
-        // Additional properties
+            // Additional properties
         props |> Interop.getValue<string->unit> "textView.textChanged" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.ContentsChanged @> element)
-        
+            
 
     override _.name = $"TextView"
 
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new TextView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2860,7 +2907,7 @@ type TextViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2871,7 +2918,7 @@ type TextViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // TileView
@@ -2899,16 +2946,18 @@ type TileViewElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new TileView()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2918,7 +2967,7 @@ type TileViewElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2929,7 +2978,7 @@ type TileViewElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // TimeField
@@ -2938,7 +2987,7 @@ type TimeFieldElement(props:IProperty list) =
 
     let setProps (element: TimeField) props =
         // Properties
-        props |> Interop.getValue<int> "timeField.cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v )
+        props |> Interop.getValue<Int32> "timeField.cursorPosition" |> Option.iter (fun v -> element.CursorPosition <- v )
         props |> Interop.getValue<bool> "timeField.isShortFormat" |> Option.iter (fun v -> element.IsShortFormat <- v )
         props |> Interop.getValue<TimeSpan> "timeField.time" |> Option.iter (fun v -> element.Time <- v )
         // Events
@@ -2946,7 +2995,7 @@ type TimeFieldElement(props:IProperty list) =
 
     let removeProps (element:TimeField) props =
         // Properties
-        props |> Interop.getValue<int> "timeField.cursorPosition" |> Option.iter (fun _ -> element.CursorPosition <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "timeField.cursorPosition" |> Option.iter (fun _ -> element.CursorPosition <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "timeField.isShortFormat" |> Option.iter (fun _ -> element.IsShortFormat <- Unchecked.defaultof<_>)
         props |> Interop.getValue<TimeSpan> "timeField.time" |> Option.iter (fun _ -> element.Time <- Unchecked.defaultof<_>)
         // Events
@@ -2957,16 +3006,18 @@ type TimeFieldElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new TimeField()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -2976,7 +3027,7 @@ type TimeFieldElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -2987,7 +3038,7 @@ type TimeFieldElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // Toplevel
@@ -3037,16 +3088,18 @@ type ToplevelElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Toplevel()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -3056,7 +3109,7 @@ type ToplevelElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -3067,57 +3120,7 @@ type ToplevelElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
-
-
-// TreeView
-type TreeViewElement(props:IProperty list) =
-    inherit TerminalElement(props)
-
-    let setProps (element: TreeView) props =
-        // No properties or events TreeView
-        ()
-
-    let removeProps (element:TreeView) props =
-        // No properties or events TreeView
-        ()
-
-    override _.name = $"TreeView"
-
-
-    override this.create parent =
-        #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
-        #endif
-        this.parent <- parent
-        let el = new TreeView()
-        parent |> Option.iter (fun p -> p.Add el |> ignore)
-        ViewElement.setProps el props
-        setProps el props
-        props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
-        this.element <- el
-    
-
-
-    override this.canUpdate prevElement oldProps =
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
-        let canUpdateElement =
-            true
-
-        canUpdateView && canUpdateElement
-    
-
-
-    override this.update prevElement oldProps = 
-        let element = prevElement :?> TreeView
-        let changedProps,removedProps = Interop.filterProps oldProps props
-        ViewElement.removeProps prevElement removedProps
-        removeProps element removedProps
-        ViewElement.setProps prevElement changedProps
-        setProps element changedProps
-        this.element <- prevElement    
-    
+        
 
 
 // TreeView<'a when 'a : not struct>
@@ -3129,12 +3132,12 @@ type TreeViewElement<'a when 'a : not struct>(props:IProperty list) =
         props |> Interop.getValue<bool> "treeView`1.allowLetterBasedNavigation" |> Option.iter (fun v -> element.AllowLetterBasedNavigation <- v )
         props |> Interop.getValue<AspectGetterDelegate<'a>> "treeView`1.aspectGetter" |> Option.iter (fun v -> element.AspectGetter <- v )
         props |> Interop.getValue<Func<'a,ColorScheme>> "treeView`1.colorGetter" |> Option.iter (fun v -> element.ColorGetter <- v )
-        props |> Interop.getValue<int> "treeView`1.maxDepth" |> Option.iter (fun v -> element.MaxDepth <- v )
+        props |> Interop.getValue<Int32> "treeView`1.maxDepth" |> Option.iter (fun v -> element.MaxDepth <- v )
         props |> Interop.getValue<bool> "treeView`1.multiSelect" |> Option.iter (fun v -> element.MultiSelect <- v )
         props |> Interop.getValue<MouseFlags option> "treeView`1.objectActivationButton" |> Option.iter (fun v -> element.ObjectActivationButton <- v  |> Option.toNullable)
         props |> Interop.getValue<KeyCode> "treeView`1.objectActivationKey" |> Option.iter (fun v -> element.ObjectActivationKey <- v )
-        props |> Interop.getValue<int> "treeView`1.scrollOffsetHorizontal" |> Option.iter (fun v -> element.ScrollOffsetHorizontal <- v )
-        props |> Interop.getValue<int> "treeView`1.scrollOffsetVertical" |> Option.iter (fun v -> element.ScrollOffsetVertical <- v )
+        props |> Interop.getValue<Int32> "treeView`1.scrollOffsetHorizontal" |> Option.iter (fun v -> element.ScrollOffsetHorizontal <- v )
+        props |> Interop.getValue<Int32> "treeView`1.scrollOffsetVertical" |> Option.iter (fun v -> element.ScrollOffsetVertical <- v )
         props |> Interop.getValue<'a> "treeView`1.selectedObject" |> Option.iter (fun v -> element.SelectedObject <- v )
         props |> Interop.getValue<TreeStyle> "treeView`1.style" |> Option.iter (fun v -> element.Style <- v )
         props |> Interop.getValue<ITreeBuilder<'a>> "treeView`1.treeBuilder" |> Option.iter (fun v -> element.TreeBuilder <- v )
@@ -3148,12 +3151,12 @@ type TreeViewElement<'a when 'a : not struct>(props:IProperty list) =
         props |> Interop.getValue<bool> "treeView`1.allowLetterBasedNavigation" |> Option.iter (fun _ -> element.AllowLetterBasedNavigation <- Unchecked.defaultof<_>)
         props |> Interop.getValue<AspectGetterDelegate<'a>> "treeView`1.aspectGetter" |> Option.iter (fun _ -> element.AspectGetter <- Unchecked.defaultof<_>)
         props |> Interop.getValue<Func<'a,ColorScheme>> "treeView`1.colorGetter" |> Option.iter (fun _ -> element.ColorGetter <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "treeView`1.maxDepth" |> Option.iter (fun _ -> element.MaxDepth <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "treeView`1.maxDepth" |> Option.iter (fun _ -> element.MaxDepth <- Unchecked.defaultof<_>)
         props |> Interop.getValue<bool> "treeView`1.multiSelect" |> Option.iter (fun _ -> element.MultiSelect <- Unchecked.defaultof<_>)
         props |> Interop.getValue<MouseFlags option> "treeView`1.objectActivationButton" |> Option.iter (fun _ -> element.ObjectActivationButton <- Unchecked.defaultof<_>)
         props |> Interop.getValue<KeyCode> "treeView`1.objectActivationKey" |> Option.iter (fun _ -> element.ObjectActivationKey <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "treeView`1.scrollOffsetHorizontal" |> Option.iter (fun _ -> element.ScrollOffsetHorizontal <- Unchecked.defaultof<_>)
-        props |> Interop.getValue<int> "treeView`1.scrollOffsetVertical" |> Option.iter (fun _ -> element.ScrollOffsetVertical <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "treeView`1.scrollOffsetHorizontal" |> Option.iter (fun _ -> element.ScrollOffsetHorizontal <- Unchecked.defaultof<_>)
+        props |> Interop.getValue<Int32> "treeView`1.scrollOffsetVertical" |> Option.iter (fun _ -> element.ScrollOffsetVertical <- Unchecked.defaultof<_>)
         props |> Interop.getValue<'a> "treeView`1.selectedObject" |> Option.iter (fun _ -> element.SelectedObject <- Unchecked.defaultof<_>)
         props |> Interop.getValue<TreeStyle> "treeView`1.style" |> Option.iter (fun _ -> element.Style <- Unchecked.defaultof<_>)
         props |> Interop.getValue<ITreeBuilder<'a>> "treeView`1.treeBuilder" |> Option.iter (fun _ -> element.TreeBuilder <- Unchecked.defaultof<_>)
@@ -3167,16 +3170,18 @@ type TreeViewElement<'a when 'a : not struct>(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new TreeView<'a>()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -3186,7 +3191,7 @@ type TreeViewElement<'a when 'a : not struct>(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -3197,8 +3202,12 @@ type TreeViewElement<'a when 'a : not struct>(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
+
+// TreeView
+type TreeViewElement(props:IProperty list) =
+    inherit TreeViewElement<ITreeNode>(props)
 
 // Window
 type WindowElement(props:IProperty list) =
@@ -3217,16 +3226,18 @@ type WindowElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Window()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -3236,7 +3247,7 @@ type WindowElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -3247,7 +3258,7 @@ type WindowElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // Wizard
@@ -3283,16 +3294,18 @@ type WizardElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new Wizard()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -3302,7 +3315,7 @@ type WizardElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -3313,7 +3326,7 @@ type WizardElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 
 // WizardStep
@@ -3337,16 +3350,18 @@ type WizardStepElement(props:IProperty list) =
 
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{this.name} created!")
+        Diagnostics.Trace.WriteLine $"{this.name} created!"
         #endif
         this.parent <- parent
+        
+
         let el = new WizardStep()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    
+        
 
 
     override this.canUpdate prevElement oldProps =
@@ -3356,7 +3371,7 @@ type WizardStepElement(props:IProperty list) =
             true
 
         canUpdateView && canUpdateElement
-    
+        
 
 
     override this.update prevElement oldProps = 
@@ -3367,6 +3382,6 @@ type WizardStepElement(props:IProperty list) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    
+        
 
 

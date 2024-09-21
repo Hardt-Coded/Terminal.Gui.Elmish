@@ -11,6 +11,8 @@ let getInheritedTypes (baseType: Type) =
     |> Array.filter (fun t -> t.IsSubclassOf(baseType))
     // remove internal
     |> Array.filter (fun t -> t.IsPublic)
+    // sort, but type name with `1 should be before the type without `1
+    |> Array.sortBy (fun t -> $"{t.Name}1".Replace("`1", "0"))
 
 // Example usage
 let inheritedTypes = getInheritedTypes typeof<View>
@@ -22,18 +24,32 @@ let getPropertiesNotInherited (t: Type) =
     // filter out properties, which have a private setter
     |> Array.filter (fun p -> p.CanWrite)
     |> Array.filter (fun p -> p.SetMethod |> isNull |> not && p.SetMethod.IsPublic)
+    |> Array.filter (fun p ->
+        match p.Name with
+        | "SuperView" -> false
+        | "CommandView" -> false
+        | "Parent" -> false
+        | _ -> true
+        )
     // remove properties with init
     |> Array.filter (fun p ->
         let setMethodReturnParameterModifiers = p.SetMethod.ReturnParameter.GetRequiredCustomModifiers()
         setMethodReturnParameterModifiers |> Seq.exists (fun t -> t = (typeof<System.Runtime.CompilerServices.IsExternalInit>)) |> not
     )
     
-    |> Array.map (fun p -> (p.Name, p.PropertyType.Name, p.PropertyType.GetGenericArguments()))
+    |> Array.map (fun p -> (p.Name, p.PropertyType, p.PropertyType.GetGenericArguments()))
 
 let getProperties (t: Type) =
     t.GetProperties(BindingFlags.Public ||| BindingFlags.Instance)
     |> Array.filter (fun p -> p.CanWrite)
     |> Array.filter (fun p -> p.SetMethod |> isNull |> not && p.SetMethod.IsPublic)
+    |> Array.filter (fun p ->
+        match p.Name with
+        | "SuperView" -> false
+        | "CommandView" -> false
+        | "Parent" -> false
+        | _ -> true
+        )
     // remove virtual properties
     //|> Array.filter (fun p -> p.SetMethod.IsVirtual |> not)
     // remove properties with init
@@ -43,7 +59,7 @@ let getProperties (t: Type) =
     )
     |> Array.map (fun p ->
         let name = p.Name    
-        (name, p.PropertyType.Name, p.PropertyType.GetGenericArguments())
+        (name, p.PropertyType, p.PropertyType.GetGenericArguments())
     )
     
 // get all events but not the inherited ones
@@ -51,7 +67,7 @@ let getEventsNotInherited (t: Type) =
     t.GetEvents(BindingFlags.DeclaredOnly ||| BindingFlags.Public ||| BindingFlags.Instance)
     |> Array.map (fun e ->
         // return name, type and generic sub type of eventhandler
-        e.Name, e.EventHandlerType.Name, e.EventHandlerType.GetGenericArguments()
+        e.Name, e.EventHandlerType, e.EventHandlerType.GetGenericArguments()
     )
 
     
@@ -62,7 +78,7 @@ let getEvents (t: Type) =
     |> Array.map (fun e ->
         // return name, type and generic sub type of eventhandler
         let name = e.Name
-        e.Name, e.EventHandlerType.Name, e.EventHandlerType.GetGenericArguments()
+        e.Name, e.EventHandlerType, e.EventHandlerType.GetGenericArguments()
     )    
 
 let getAllNamespaces (types:Type array) =
@@ -78,17 +94,17 @@ let toCamelCase (s: string) =
     
 
   
-let rec mapTypeAndSubTypeProperties t (subtypes:Type array) =
-    match t, subtypes with
+let rec mapTypeAndSubTypeProperties (t: Type) (subtypes:Type array) =
+    match t.Name, subtypes with
     | "T", _ -> "'a"
     | "IList`1", [| st |] 
     | "List`1", [| st |] 
     | "IEnumerable`1", [| st |] ->
         let subprops = st.GetGenericArguments()
-        $"{mapTypeAndSubTypeProperties st.Name subprops} list"
+        $"{mapTypeAndSubTypeProperties st subprops} list"
     | "ITreeBuilder`1", [| st |] ->
         let subprops = st.GetGenericArguments()
-        $"ITreeBuilder<{mapTypeAndSubTypeProperties st.Name subprops}>"
+        $"ITreeBuilder<{mapTypeAndSubTypeProperties st subprops}>"
     | "Stack`1", [| st |] -> $"Stack<{st}>"
     | "IReadOnlyList`1", [| st |] -> $"{st} list"
     | "IReadOnlyCollection`1", [| st |] -> $"{st} list"
@@ -99,48 +115,58 @@ let rec mapTypeAndSubTypeProperties t (subtypes:Type array) =
     | "Func`2", [| st1 ; st2 |] ->
         let subprops1 = st1.GetGenericArguments()
         let subprops2 = st2.GetGenericArguments()
-        $"Func<{mapTypeAndSubTypeProperties st1.Name subprops1},{mapTypeAndSubTypeProperties st2.Name subprops2}>"
+        $"Func<{mapTypeAndSubTypeProperties st1 subprops1},{mapTypeAndSubTypeProperties st2 subprops2}>"
     | "Nullable`1", [| st |] ->
         let subprops = st.GetGenericArguments()
-        $"{mapTypeAndSubTypeProperties st.Name subprops} option"
+        $"{mapTypeAndSubTypeProperties st subprops} option"
     | "EventArgs`1", [| st |] -> 
         let subprops = st.GetGenericArguments()
-        $"{mapTypeAndSubTypeProperties st.Name subprops}"
+        $"{mapTypeAndSubTypeProperties st subprops}"
     | "CancelEventArgs`1", [| st |] -> 
         let subprops = st.GetGenericArguments()
-        $"CancelEventArgs<{mapTypeAndSubTypeProperties st.Name subprops}>"
+        $"CancelEventArgs<{mapTypeAndSubTypeProperties st subprops}>"
     | "DateTimeEventArgs`1", [| st |] -> 
         let subprops = st.GetGenericArguments()
-        $"DateTimeEventArgs<{mapTypeAndSubTypeProperties st.Name subprops}>"
+        $"DateTimeEventArgs<{mapTypeAndSubTypeProperties st subprops}>"
     | "DrawTreeViewLineEventArgs`1", [| st |] -> 
         let subprops = st.GetGenericArguments()
-        $"DrawTreeViewLineEventArgs<{mapTypeAndSubTypeProperties st.Name subprops}>"
+        $"DrawTreeViewLineEventArgs<{mapTypeAndSubTypeProperties st subprops}>"
     | "ObjectActivatedEventArgs`1", [| st |] -> 
         let subprops = st.GetGenericArguments()
-        $"ObjectActivatedEventArgs<{mapTypeAndSubTypeProperties st.Name subprops}>"
+        $"ObjectActivatedEventArgs<{mapTypeAndSubTypeProperties st subprops}>"
     | "SelectionChangedEventArgs`1", [| st |] -> 
         let subprops = st.GetGenericArguments()
-        $"SelectionChangedEventArgs<{mapTypeAndSubTypeProperties st.Name subprops}>"
+        $"SelectionChangedEventArgs<{mapTypeAndSubTypeProperties st subprops}>"
         
     | "NotifyCollectionChangedEventHandler", [| st |] -> 
         let subprops = st.GetGenericArguments()
-        $"SelectionChangedEventArgs<{mapTypeAndSubTypeProperties st.Name subprops}>"
+        $"SelectionChangedEventArgs<{mapTypeAndSubTypeProperties st subprops}>"
         
     | "AspectGetterDelegate`1", [| st |] -> 
         let subprops = st.GetGenericArguments()
-        $"AspectGetterDelegate<{mapTypeAndSubTypeProperties st.Name subprops}>"
+        $"AspectGetterDelegate<{mapTypeAndSubTypeProperties st subprops}>"
         
+    | "IListDataSource", [| |] -> $"string list"
     | "String", [| |] -> $"string"
     | "Boolean", [| |] -> $"bool"
-    | "Int32", [| |] -> $"int"
+    | "UInt32", [| |] -> $"int"
     | "System.Int64", [| |] -> $"long"
+    | "System.UInt32", [| |] -> $"int"
     | "System.Byte", [| |] -> $"byte"
     | "String[]", [| |] -> $"string list"
-    | _ -> $"{t}"
+    | "View", [| |] -> $"TerminalElement"
+    | _ when t.IsArray && t.GetElementType().IsSubclassOf(typeof<View>) ->
+        $"{t.GetElementType().Name} list"
+    | _ when t.IsArray && t.GetElementType().IsSubclassOf(typeof<MenuItem>) ->
+        $"{t.GetElementType().Name} list"
+    | _ when t.IsArray ->
+        $"{t.GetElementType().Name} list"
     
+    | _ -> $"{t.Name}"
     
-let mapTypeAndSubTypeEvents t (subtypes:Type array) =
-    match t, subtypes with
+
+let mapTypeAndSubTypeEvents (t:Type) (subtypes:Type array) =
+    match t.Name, subtypes with
     | "EventHandler", [| |] -> $"unit->unit", "v"
     | "EventArgs", [|  |] -> $"unit->unit", "v"
     | "EventHandler`1", [| st |] ->
@@ -149,12 +175,12 @@ let mapTypeAndSubTypeEvents t (subtypes:Type array) =
             match subtypes |> Array.tryHead with
             | Some st1 when st1.Name = "EventArgs`1" -> "(fun arg -> v arg.CurrentValue)"
             | _ -> "v"
-        $"{mapTypeAndSubTypeProperties st.Name subprops}->unit", mapFunction
+        $"{mapTypeAndSubTypeProperties st subprops}->unit", mapFunction
     | "NotifyCollectionChangedEventHandler", [| |] -> "NotifyCollectionChangedEventArgs->unit","v"
     | "SplitterEventHandler", [| |] -> "SplitterEventArgs->unit","v"
-    | _ -> $"{t}", "v"    
+    | _ -> $"{t.Name}", "v"    
 
-let getPropertyProps (properties: (string * string * Type array) array) =
+let getPropertyProps (properties: (string * Type * Type array) array) =
     properties
     |> Array.sortBy (fun (name,_,_) -> name)
     |> Array.map (fun (name,typ,subtypes) ->
@@ -162,12 +188,12 @@ let getPropertyProps (properties: (string * string * Type array) array) =
             Name = name
             CamelName = if name = "Type" then "``type``" else toCamelCase name
             Type = mapTypeAndSubTypeProperties typ subtypes
-            OrigType = typ
+            OrigType = typ.Name
         |}
     )
 
 
-let getEventProps (events: (string * string * Type array) array) =
+let getEventProps (events: (string * Type * Type array) array) =
     events
     |> Array.sortBy (fun (name,_,_) -> name)
     |> Array.map (fun (name,typ,subtypes) ->
@@ -349,10 +375,12 @@ module prop =
                 printfn $"""
     static member inline textChanged (handler:string->unit) = Interop.mkprop "textView.textChanged" handler
             """
-            if view.Name = "ListView" then
+            if view.Name = "TabView" then
                 printfn $"""
-    static member inline source (value:string list) = Interop.mkprop "listView.source" (new ListWrapper<string>(ObservableCollection<string>(value)))
-                """
+    static member inline tabs (value:TerminalElement list) = Interop.mkprop "tabView.tabs" value
+            """
+            
+            
                 
             
     else
@@ -431,7 +459,20 @@ let printElementSetProps (printfn:string->unit) (t:Type) =
                 | "IList`1"
                 | "List`1" ->
                     printfn $"""        props |> Interop.getValue<{e.Type}> "{toCamelCase t.Name}.{e.CamelName}" |> Option.iter (fun v -> element.{e.Name} <- v.ToList())"""
-                | "String[]" ->
+                | "UInt32" ->
+                    printfn $"""        props |> Interop.getValue<{e.Type}> "{toCamelCase t.Name}.{e.CamelName}" |> Option.iter (fun v -> element.{e.Name} <- (v |> uint32))"""
+                | "IListDataSource" ->
+                    printfn $"""        props |> Interop.getValue<string list> "{toCamelCase t.Name}.{e.CamelName}" |> Option.iter (fun v -> element.SetSource (ObservableCollection(v)))"""
+                | "View" ->
+                    printfn $"""
+        props
+        |> Interop.getValue<TerminalElement> "{toCamelCase t.Name}.{e.CamelName}"
+        |> Option.iter (fun v -> 
+            v.create (Some element)
+            element.View <- v.element
+        )"""
+                | "String[]" 
+                | "MenuBarItem[]" ->
                     printfn $"""        props |> Interop.getValue<{e.Type}> "{toCamelCase t.Name}.{e.CamelName}" |> Option.iter (fun v -> element.{e.Name} <- v |> List.toArray)"""
                 | _ ->
                     printfn $"""        props |> Interop.getValue<{e.Type}> "{toCamelCase t.Name}.{e.CamelName}" |> Option.iter (fun v -> element.{e.Name} <- v {(if e.Type.Contains(" option") then " |> Option.toNullable" else "")})"""
@@ -481,7 +522,11 @@ let printElementRemoveProps (printfn:string->unit) (t:Type) =
             |> getPropertyProps
             |> Array.sortBy (fun e -> e.Name)
             |> Array.iter (fun e ->
-                printfn $"        props |> Interop.getValue<{e.Type}> \"{toCamelCase t.Name}.{e.CamelName}\" |> Option.iter (fun _ -> element.{e.Name} <- Unchecked.defaultof<_>)"
+                match e.OrigType with
+                | "IListDataSource" ->
+                    printfn $"        props |> Interop.getValue<{e.Type}> \"{toCamelCase t.Name}.{e.CamelName}\" |> Option.iter (fun _ -> element.SetSource Unchecked.defaultof<_>)"
+                | _ ->
+                    printfn $"        props |> Interop.getValue<{e.Type}> \"{toCamelCase t.Name}.{e.CamelName}\" |> Option.iter (fun _ -> element.{e.Name} <- Unchecked.defaultof<_>)"
             )
     
         if events.Length>0 then
@@ -565,43 +610,66 @@ let printElement (printfn:string->unit) (t:Type) =
     
     let name = $"""{name}{(if isGeneric then "<'a>" else "")}"""
     
-    printfn $"    inherit TerminalElement(props)"
-    printfn ""
-    printfn $"""    let setProps (element: {name}) props ="""
-    printElementSetProps printfn t
-    // additional props
-    if name = "TextView" then
-        printfn $"""
-        // Additional properties
+    match name with
+    |"TreeView" ->
+        printfn $"    inherit {name}Element<ITreeNode>(props)"
+        printfn ""
+    |"NumericUpDown" ->
+        printfn $"    inherit {name}Element<int>(props)"
+        printfn ""
+    | _ ->
+        printfn $"    inherit TerminalElement(props)"
+        printfn ""
+        printfn $"""    let setProps (element: {name}) props ="""
+        printElementSetProps printfn t
+        // additional props
+        if name = "TextView" then
+            printfn $"""
+            // Additional properties
         props |> Interop.getValue<string->unit> "textView.textChanged" |> Option.iter (fun v -> Interop.setEventHandler <@ element.ContentsChanged @> (fun _ -> v element.Text) element)
-        """
-    printfn ""
-    printfn $"""    let removeProps (element:{name}) props ="""
-    printElementRemoveProps printfn t
-    // additional props
-    if name = "TextView" then
-        printfn $"""
-        // Additional properties
+            """
+        if name = "TabView" then
+            printfn $"""
+            // Additional properties
+        props |> Interop.getValue<TerminalElement list> "tabView.tabs" |> Option.iter (fun v ->
+            v
+            |> List.iter (fun tabItems ->
+                tabItems.create (Some element)
+                element.AddTab ((tabItems.element :?> Tab), false)
+                
+                )
+            )
+            """
+        
+        printfn ""
+        printfn $"""    let removeProps (element:{name}) props ="""
+        printElementRemoveProps printfn t
+        // additional props
+        if name = "TextView" then
+            printfn $"""
+            // Additional properties
         props |> Interop.getValue<string->unit> "textView.textChanged" |> Option.iter (fun _ -> Interop.removeEventHandler <@ element.ContentsChanged @> element)
-        """
-    printfn ""
-    printfn $"    override _.name = $\"{name}\""
-    printfn ""
-    printfn $"""
+            """
+        printfn ""
+        printfn $"    override _.name = $\"{name}\""
+        printfn ""
+        printfn $"""
     override this.create parent =
         #if DEBUG
-        Diagnostics.Debug.WriteLine ($"{{this.name}} created!")
+        Diagnostics.Trace.WriteLine $"{{this.name}} created!"
         #endif
         this.parent <- parent
+        """
+        printfn $"""
         let el = new {name}()
         parent |> Option.iter (fun p -> p.Add el |> ignore)
         ViewElement.setProps el props
         setProps el props
         props |> Interop.getValue<View->unit> "ref" |> Option.iter (fun v -> v el)
         this.element <- el
-    """
-    printfn ""
-    printfn """
+        """
+        printfn ""
+        printfn """
     override this.canUpdate prevElement oldProps =
         let changedProps,removedProps = Interop.filterProps oldProps props
         let canUpdateView = ViewElement.canUpdate prevElement changedProps removedProps
@@ -609,9 +677,9 @@ let printElement (printfn:string->unit) (t:Type) =
             true
 
         canUpdateView && canUpdateElement
-    """
-    printfn ""
-    printfn $"""
+        """
+        printfn ""
+        printfn $"""
     override this.update prevElement oldProps = 
         let element = prevElement :?> {name}
         let changedProps,removedProps = Interop.filterProps oldProps props
@@ -620,9 +688,9 @@ let printElement (printfn:string->unit) (t:Type) =
         ViewElement.setProps prevElement changedProps
         setProps element changedProps
         this.element <- prevElement    
-    """
-    printfn ""
-    printfn ""
+        """
+        printfn ""
+        printfn ""
 
 
 
@@ -641,13 +709,11 @@ namespace Terminal.Gui.Elmish.Elements
 
 open System
 open System.ComponentModel
-open System.Linq.Expressions
 open System.Text
 open System.Linq
 open Terminal.Gui
 open Terminal.Gui.Elmish
-open Terminal.Gui.Elmish.Elements
-open Terminal.Gui.Elmish.EventHelpers
+
 
 [<AbstractClass>]
 type TerminalElement (props:IProperty list) =
@@ -687,20 +753,128 @@ if true then
 
 
 
+// ######################### View.fs ############################
+let printViewType (printfn:string->unit) =
+    inheritedTypes
+    |> Array.sortBy (fun e -> e.Name)
+    |> Array.map (fun e ->
+        match e.Name with
+        x when x.Contains("`1") ->
+            e.Name.Replace("`1", ""), true
+        | _ -> e.Name, false
+    )
+    |> Array.iter (fun (name, isGeneric)  ->
+        let generic, notStruct =
+            if isGeneric then
+                match name with
+                | "TreeView" -> "<'a>","<'a when 'a : not struct>"
+                | _ -> "<'a>","<'a>"
+            else
+                "",""
+        printfn $"""    /// <seealso cref="Terminal.Gui.{name}"/>"""
+        printfn $"""    static member inline {toCamelCase name}{notStruct} (props:IProperty list) = {name}Element{generic}(props) :> TerminalElement"""
+        printfn $"""    static member inline {toCamelCase name}{notStruct} (children:TerminalElement list) = 
+        let props = [ prop.children children ]
+        {name}Element{generic}(props) :> TerminalElement"""
+        printfn $"""    static member inline {toCamelCase name}{notStruct} (x:int, y:int, title: string) = 
+        let props = [ 
+            prop.position.x.absolute x
+            prop.position.y.absolute y
+            prop.title title
+        ]
+        {name}Element{generic}(props) :> TerminalElement"""
+        printfn ""
+    )
+     
+
+
+
+let generateViewFs (printfn:string->unit) =    
+    printfn ""
+    printfn "(*"
+    printfn "#######################################"
+    printfn "#            View.fs                  #"
+    printfn "#######################################"
+    printfn "*)"
+    printfn ""
+    printfn """
+namespace Terminal.Gui.Elmish
 
 open System
+open System.ComponentModel
+open System.Linq.Expressions
+open System.Text
+open System.Linq
 open Terminal.Gui
-typeof<Label>
-    .GetProperties(BindingFlags.DeclaredOnly ||| BindingFlags.Public ||| BindingFlags.Instance)
-    // filter out properties, which have a private setter
-    |> Array.filter (fun p -> p.CanWrite)
-    |> Array.filter (fun p -> p.SetMethod |> isNull |> not && p.SetMethod.IsPublic)
-    // remove properties with init
-    |> Array.filter (fun p ->
-        let setMethodReturnParameterModifiers = p.SetMethod.ReturnParameter.GetRequiredCustomModifiers()
-        setMethodReturnParameterModifiers |> Seq.exists (fun t -> t = (typeof<System.Runtime.CompilerServices.IsExternalInit>)) |> not
-    )
+open Terminal.Gui.Elmish
+open Terminal.Gui.Elmish.Elements
+open Terminal.Gui.Elmish.EventHelpers
+    """
     
-    |> Array.map (fun p -> (p.Name, p.PropertyType.Name, p.PropertyType.GetGenericArguments()))
-    
+    printfn "type View ="
+    printfn """
+    static member inline topLevel (props:IProperty list) = ToplevelElement(props) :> TerminalElement
+    static member inline topLevel (children:TerminalElement list) = 
+        let props = [ prop.children children ]
+        ToplevelElement(props) :> TerminalElement
 
+    """
+    
+    printViewType printfn
+    
+    printfn ""
+    printfn """
+module Dialogs =
+    open System
+
+    let showWizard (wizard:Wizard) =
+        Application.Run(wizard)
+        wizard.Dispose()
+        ()
+
+
+    let openFileDialog title =
+        use dia = new OpenDialog(Title=title)
+        Application.Run(dia)
+        dia.Dispose()
+        //Application.Top.Remove(dia) |> ignore
+        if dia.Canceled then
+            None
+        else
+            let file = 
+                dia.FilePaths
+                |> Seq.tryHead
+                |> Option.bind (fun s ->
+                    if String.IsNullOrEmpty(s) then None 
+                    else Some s
+                )
+            file
+
+
+    let messageBox (width:int) height title text (buttons:string list) =
+        let result = MessageBox.Query(width,height,title,text,buttons |> List.toArray)
+        match buttons with
+        | [] -> ""
+        | _ when result < 0 || result > buttons.Length - 1  -> ""
+        | _ -> buttons.[result]
+
+
+    let errorBox (width:int) height title text (buttons:string list) =
+        let result = MessageBox.ErrorQuery(width,height,title,text,buttons |> List.toArray)
+        match buttons with
+        | [] -> ""
+        | _ when result < 0 || result > buttons.Length - 1  -> ""
+        | _ -> buttons.[result]
+
+
+    """
+    
+    
+if true then
+    let file = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\Terminal.Gui.Elmish\ViewNew.fs")
+    // empty file
+    File.WriteAllText(file, "")
+    let st = new StreamWriter(file)
+    generateViewFs (fun p -> st.WriteLine p)
+    st.Flush()
+    st.Close()

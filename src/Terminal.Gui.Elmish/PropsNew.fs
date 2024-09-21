@@ -45,7 +45,6 @@ type prop =
     static member inline needsDisplay (value:bool) = Interop.mkprop "view.needsDisplay" value
     static member inline preserveTrailingSpaces (value:bool) = Interop.mkprop "view.preserveTrailingSpaces" value
     static member inline shadowStyle (value:ShadowStyle) = Interop.mkprop "view.shadowStyle" value
-    static member inline superView (value:View) = Interop.mkprop "view.superView" value
     static member inline superViewRendersLineCanvas (value:bool) = Interop.mkprop "view.superViewRendersLineCanvas" value
     static member inline tabStop (value:TabBehavior option) = Interop.mkprop "view.tabStop" value
     static member inline text (value:string) = Interop.mkprop "view.text" value
@@ -187,31 +186,11 @@ module prop =
 // Adornment
 type adornment =
     // Properties
-    static member inline parent (value:View) = Interop.mkprop "adornment.parent" value
-    static member inline superView (value:View) = Interop.mkprop "adornment.superView" value
     static member inline superViewRendersLineCanvas (value:bool) = Interop.mkprop "adornment.superViewRendersLineCanvas" value
     static member inline thickness (value:Thickness) = Interop.mkprop "adornment.thickness" value
     static member inline viewport (value:Rectangle) = Interop.mkprop "adornment.viewport" value
     // Events
     static member inline thicknessChanged (handler:unit->unit) = Interop.mkprop "adornment.thicknessChanged" handler
-
-// Border
-type border =
-    // Properties
-    static member inline colorScheme (value:ColorScheme) = Interop.mkprop "border.colorScheme" value
-    static member inline lineStyle (value:LineStyle) = Interop.mkprop "border.lineStyle" value
-    static member inline settings (value:BorderSettings) = Interop.mkprop "border.settings" value
-
-// Margin
-type margin =
-    // Properties
-    static member inline colorScheme (value:ColorScheme) = Interop.mkprop "margin.colorScheme" value
-    static member inline shadowStyle (value:ShadowStyle) = Interop.mkprop "margin.shadowStyle" value
-
-// Padding
-type padding =
-    // Properties
-    static member inline colorScheme (value:ColorScheme) = Interop.mkprop "padding.colorScheme" value
 
 // Bar
 type bar =
@@ -221,6 +200,13 @@ type bar =
     // Events
     static member inline orientationChanged (handler:Orientation->unit) = Interop.mkprop "bar.orientationChanged" handler
     static member inline orientationChanging (handler:CancelEventArgs<Orientation>->unit) = Interop.mkprop "bar.orientationChanging" handler
+
+// Border
+type border =
+    // Properties
+    static member inline colorScheme (value:ColorScheme) = Interop.mkprop "border.colorScheme" value
+    static member inline lineStyle (value:LineStyle) = Interop.mkprop "border.lineStyle" value
+    static member inline settings (value:BorderSettings) = Interop.mkprop "border.settings" value
 
 // Button
 type button =
@@ -256,8 +242,8 @@ type colorPicker =
 // ColorPicker16
 type colorPicker16 =
     // Properties
-    static member inline boxHeight (value:int) = Interop.mkprop "colorPicker16.boxHeight" value
-    static member inline boxWidth (value:int) = Interop.mkprop "colorPicker16.boxWidth" value
+    static member inline boxHeight (value:Int32) = Interop.mkprop "colorPicker16.boxHeight" value
+    static member inline boxWidth (value:Int32) = Interop.mkprop "colorPicker16.boxWidth" value
     static member inline cursor (value:Point) = Interop.mkprop "colorPicker16.cursor" value
     static member inline selectedColor (value:ColorName) = Interop.mkprop "colorPicker16.selectedColor" value
     // Events
@@ -270,8 +256,8 @@ type comboBox =
     static member inline hideDropdownListOnClick (value:bool) = Interop.mkprop "comboBox.hideDropdownListOnClick" value
     static member inline readOnly (value:bool) = Interop.mkprop "comboBox.readOnly" value
     static member inline searchText (value:string) = Interop.mkprop "comboBox.searchText" value
-    static member inline selectedItem (value:int) = Interop.mkprop "comboBox.selectedItem" value
-    static member inline source (value:IListDataSource) = Interop.mkprop "comboBox.source" value
+    static member inline selectedItem (value:Int32) = Interop.mkprop "comboBox.selectedItem" value
+    static member inline source (value:string list) = Interop.mkprop "comboBox.source" value
     static member inline text (value:string) = Interop.mkprop "comboBox.text" value
     // Events
     static member inline collapsed (handler:unit->unit) = Interop.mkprop "comboBox.collapsed" handler
@@ -283,7 +269,7 @@ type comboBox =
 type dateField =
     // Properties
     static member inline culture (value:CultureInfo) = Interop.mkprop "dateField.culture" value
-    static member inline cursorPosition (value:int) = Interop.mkprop "dateField.cursorPosition" value
+    static member inline cursorPosition (value:Int32) = Interop.mkprop "dateField.cursorPosition" value
     static member inline date (value:DateTime) = Interop.mkprop "dateField.date" value
     // Events
     static member inline dateChanged (handler:DateTimeEventArgs<DateTime>->unit) = Interop.mkprop "dateField.dateChanged" handler
@@ -317,9 +303,6 @@ type fileDialog =
 // FrameView
 // No properties or events FrameView
 
-// LegendAnnotation
-// No properties or events LegendAnnotation
-
 // GraphView
 type graphView =
     // Properties
@@ -327,8 +310,8 @@ type graphView =
     static member inline axisY (value:VerticalAxis) = Interop.mkprop "graphView.axisY" value
     static member inline cellSize (value:PointF) = Interop.mkprop "graphView.cellSize" value
     static member inline graphColor (value:Attribute option) = Interop.mkprop "graphView.graphColor" value
-    static member inline marginBottom (value:UInt32) = Interop.mkprop "graphView.marginBottom" value
-    static member inline marginLeft (value:UInt32) = Interop.mkprop "graphView.marginLeft" value
+    static member inline marginBottom (value:int) = Interop.mkprop "graphView.marginBottom" value
+    static member inline marginLeft (value:int) = Interop.mkprop "graphView.marginLeft" value
     static member inline scrollOffset (value:PointF) = Interop.mkprop "graphView.scrollOffset" value
 
 // HexView
@@ -346,6 +329,9 @@ type label =
     // Properties
     static member inline hotKeySpecifier (value:Rune) = Interop.mkprop "label.hotKeySpecifier" value
     static member inline text (value:string) = Interop.mkprop "label.text" value
+
+// LegendAnnotation
+// No properties or events LegendAnnotation
 
 // Line
 type line =
@@ -368,24 +354,27 @@ type listView =
     // Properties
     static member inline allowsMarking (value:bool) = Interop.mkprop "listView.allowsMarking" value
     static member inline allowsMultipleSelection (value:bool) = Interop.mkprop "listView.allowsMultipleSelection" value
-    static member inline leftItem (value:int) = Interop.mkprop "listView.leftItem" value
-    static member inline selectedItem (value:int) = Interop.mkprop "listView.selectedItem" value
-    static member inline source (value:IListDataSource) = Interop.mkprop "listView.source" value
-    static member inline topItem (value:int) = Interop.mkprop "listView.topItem" value
+    static member inline leftItem (value:Int32) = Interop.mkprop "listView.leftItem" value
+    static member inline selectedItem (value:Int32) = Interop.mkprop "listView.selectedItem" value
+    static member inline source (value:string list) = Interop.mkprop "listView.source" value
+    static member inline topItem (value:Int32) = Interop.mkprop "listView.topItem" value
     // Events
     static member inline collectionChanged (handler:NotifyCollectionChangedEventArgs->unit) = Interop.mkprop "listView.collectionChanged" handler
     static member inline openSelectedItem (handler:ListViewItemEventArgs->unit) = Interop.mkprop "listView.openSelectedItem" handler
     static member inline rowRender (handler:ListViewRowEventArgs->unit) = Interop.mkprop "listView.rowRender" handler
     static member inline selectedItemChanged (handler:ListViewItemEventArgs->unit) = Interop.mkprop "listView.selectedItemChanged" handler
 
-    static member inline source (value:string list) = Interop.mkprop "listView.source" (new ListWrapper<string>(ObservableCollection<string>(value)))
-                
+// Margin
+type margin =
+    // Properties
+    static member inline colorScheme (value:ColorScheme) = Interop.mkprop "margin.colorScheme" value
+    static member inline shadowStyle (value:ShadowStyle) = Interop.mkprop "margin.shadowStyle" value
 
 // MenuBar
 type menuBar =
     // Properties
     static member inline key (value:Key) = Interop.mkprop "menuBar.key" value
-    static member inline menus (value:MenuBarItem[]) = Interop.mkprop "menuBar.menus" value
+    static member inline menus (value:MenuBarItem list) = Interop.mkprop "menuBar.menus" value
     static member inline menusBorderStyle (value:LineStyle) = Interop.mkprop "menuBar.menusBorderStyle" value
     static member inline useKeysUpDownAsKeysLeftRight (value:bool) = Interop.mkprop "menuBar.useKeysUpDownAsKeysLeftRight" value
     static member inline useSubMenusSingleFrame (value:bool) = Interop.mkprop "menuBar.useSubMenusSingleFrame" value
@@ -422,6 +411,11 @@ type openDialog =
     // Properties
     static member inline openMode (value:OpenMode) = Interop.mkprop "openDialog.openMode" value
 
+// Padding
+type padding =
+    // Properties
+    static member inline colorScheme (value:ColorScheme) = Interop.mkprop "padding.colorScheme" value
+
 // ProgressBar
 type progressBar =
     // Properties
@@ -435,10 +429,10 @@ type progressBar =
 // RadioGroup
 type radioGroup =
     // Properties
-    static member inline horizontalSpace (value:int) = Interop.mkprop "radioGroup.horizontalSpace" value
+    static member inline horizontalSpace (value:Int32) = Interop.mkprop "radioGroup.horizontalSpace" value
     static member inline orientation (value:Orientation) = Interop.mkprop "radioGroup.orientation" value
     static member inline radioLabels (value:string list) = Interop.mkprop "radioGroup.radioLabels" value
-    static member inline selectedItem (value:int) = Interop.mkprop "radioGroup.selectedItem" value
+    static member inline selectedItem (value:Int32) = Interop.mkprop "radioGroup.selectedItem" value
     // Events
     static member inline orientationChanged (handler:Orientation->unit) = Interop.mkprop "radioGroup.orientationChanged" handler
     static member inline orientationChanging (handler:CancelEventArgs<Orientation>->unit) = Interop.mkprop "radioGroup.orientationChanging" handler
@@ -454,9 +448,9 @@ type scrollBarView =
     static member inline isVertical (value:bool) = Interop.mkprop "scrollBarView.isVertical" value
     static member inline keepContentAlwaysInViewport (value:bool) = Interop.mkprop "scrollBarView.keepContentAlwaysInViewport" value
     static member inline otherScrollBarView (value:ScrollBarView) = Interop.mkprop "scrollBarView.otherScrollBarView" value
-    static member inline position (value:int) = Interop.mkprop "scrollBarView.position" value
+    static member inline position (value:Int32) = Interop.mkprop "scrollBarView.position" value
     static member inline showScrollIndicator (value:bool) = Interop.mkprop "scrollBarView.showScrollIndicator" value
-    static member inline size (value:int) = Interop.mkprop "scrollBarView.size" value
+    static member inline size (value:Int32) = Interop.mkprop "scrollBarView.size" value
     // Events
     static member inline changedPosition (handler:unit->unit) = Interop.mkprop "scrollBarView.changedPosition" handler
 
@@ -475,27 +469,23 @@ type shortcut =
     static member inline action (value:Action) = Interop.mkprop "shortcut.action" value
     static member inline alignmentModes (value:AlignmentModes) = Interop.mkprop "shortcut.alignmentModes" value
     static member inline colorScheme (value:ColorScheme) = Interop.mkprop "shortcut.colorScheme" value
-    static member inline commandView (value:View) = Interop.mkprop "shortcut.commandView" value
     static member inline helpText (value:string) = Interop.mkprop "shortcut.helpText" value
     static member inline key (value:Key) = Interop.mkprop "shortcut.key" value
     static member inline keyBindingScope (value:KeyBindingScope) = Interop.mkprop "shortcut.keyBindingScope" value
-    static member inline minimumKeyTextSize (value:int) = Interop.mkprop "shortcut.minimumKeyTextSize" value
+    static member inline minimumKeyTextSize (value:Int32) = Interop.mkprop "shortcut.minimumKeyTextSize" value
     static member inline orientation (value:Orientation) = Interop.mkprop "shortcut.orientation" value
     static member inline text (value:string) = Interop.mkprop "shortcut.text" value
     // Events
     static member inline orientationChanged (handler:Orientation->unit) = Interop.mkprop "shortcut.orientationChanged" handler
     static member inline orientationChanging (handler:CancelEventArgs<Orientation>->unit) = Interop.mkprop "shortcut.orientationChanging" handler
 
-// Slider
-// No properties or events Slider
-
 // Slider`1
 type slider<'a> =
     // Properties
     static member inline allowEmpty (value:bool) = Interop.mkprop "slider`1.allowEmpty" value
-    static member inline focusedOption (value:int) = Interop.mkprop "slider`1.focusedOption" value
+    static member inline focusedOption (value:Int32) = Interop.mkprop "slider`1.focusedOption" value
     static member inline legendsOrientation (value:Orientation) = Interop.mkprop "slider`1.legendsOrientation" value
-    static member inline minimumInnerSpacing (value:int) = Interop.mkprop "slider`1.minimumInnerSpacing" value
+    static member inline minimumInnerSpacing (value:Int32) = Interop.mkprop "slider`1.minimumInnerSpacing" value
     static member inline options (value:SliderOption<'a> list) = Interop.mkprop "slider`1.options" value
     static member inline orientation (value:Orientation) = Interop.mkprop "slider`1.orientation" value
     static member inline rangeAllowSingle (value:bool) = Interop.mkprop "slider`1.rangeAllowSingle" value
@@ -511,13 +501,16 @@ type slider<'a> =
     static member inline orientationChanged (handler:Orientation->unit) = Interop.mkprop "slider`1.orientationChanged" handler
     static member inline orientationChanging (handler:CancelEventArgs<Orientation>->unit) = Interop.mkprop "slider`1.orientationChanging" handler
 
+// Slider
+// No properties or events Slider
+
 // SpinnerView
 type spinnerView =
     // Properties
     static member inline autoSpin (value:bool) = Interop.mkprop "spinnerView.autoSpin" value
     static member inline sequence (value:string list) = Interop.mkprop "spinnerView.sequence" value
     static member inline spinBounce (value:bool) = Interop.mkprop "spinnerView.spinBounce" value
-    static member inline spinDelay (value:int) = Interop.mkprop "spinnerView.spinDelay" value
+    static member inline spinDelay (value:Int32) = Interop.mkprop "spinnerView.spinDelay" value
     static member inline spinReverse (value:bool) = Interop.mkprop "spinnerView.spinReverse" value
     static member inline style (value:SpinnerStyle) = Interop.mkprop "spinnerView.style" value
 
@@ -528,22 +521,36 @@ type spinnerView =
 type tab =
     // Properties
     static member inline displayText (value:string) = Interop.mkprop "tab.displayText" value
-    static member inline view (value:View) = Interop.mkprop "tab.view" value
+    static member inline view (value:TerminalElement) = Interop.mkprop "tab.view" value
+
+// TabView
+type tabView =
+    // Properties
+    static member inline maxTabTextWidth (value:int) = Interop.mkprop "tabView.maxTabTextWidth" value
+    static member inline selectedTab (value:Tab) = Interop.mkprop "tabView.selectedTab" value
+    static member inline style (value:TabStyle) = Interop.mkprop "tabView.style" value
+    static member inline tabScrollOffset (value:Int32) = Interop.mkprop "tabView.tabScrollOffset" value
+    // Events
+    static member inline selectedTabChanged (handler:TabChangedEventArgs->unit) = Interop.mkprop "tabView.selectedTabChanged" handler
+    static member inline tabClicked (handler:TabMouseEventArgs->unit) = Interop.mkprop "tabView.tabClicked" handler
+
+    static member inline tabs (value:TerminalElement list) = Interop.mkprop "tabView.tabs" value
+            
 
 // TableView
 type tableView =
     // Properties
     static member inline cellActivationKey (value:KeyCode) = Interop.mkprop "tableView.cellActivationKey" value
     static member inline collectionNavigator (value:CollectionNavigatorBase) = Interop.mkprop "tableView.collectionNavigator" value
-    static member inline columnOffset (value:int) = Interop.mkprop "tableView.columnOffset" value
+    static member inline columnOffset (value:Int32) = Interop.mkprop "tableView.columnOffset" value
     static member inline fullRowSelect (value:bool) = Interop.mkprop "tableView.fullRowSelect" value
-    static member inline maxCellWidth (value:int) = Interop.mkprop "tableView.maxCellWidth" value
-    static member inline minCellWidth (value:int) = Interop.mkprop "tableView.minCellWidth" value
+    static member inline maxCellWidth (value:Int32) = Interop.mkprop "tableView.maxCellWidth" value
+    static member inline minCellWidth (value:Int32) = Interop.mkprop "tableView.minCellWidth" value
     static member inline multiSelect (value:bool) = Interop.mkprop "tableView.multiSelect" value
     static member inline nullSymbol (value:string) = Interop.mkprop "tableView.nullSymbol" value
-    static member inline rowOffset (value:int) = Interop.mkprop "tableView.rowOffset" value
-    static member inline selectedColumn (value:int) = Interop.mkprop "tableView.selectedColumn" value
-    static member inline selectedRow (value:int) = Interop.mkprop "tableView.selectedRow" value
+    static member inline rowOffset (value:Int32) = Interop.mkprop "tableView.rowOffset" value
+    static member inline selectedColumn (value:Int32) = Interop.mkprop "tableView.selectedColumn" value
+    static member inline selectedRow (value:Int32) = Interop.mkprop "tableView.selectedRow" value
     static member inline separatorSymbol (value:Char) = Interop.mkprop "tableView.separatorSymbol" value
     static member inline style (value:TableStyle) = Interop.mkprop "tableView.style" value
     static member inline table (value:ITableSource) = Interop.mkprop "tableView.table" value
@@ -552,27 +559,16 @@ type tableView =
     static member inline cellToggled (handler:CellToggledEventArgs->unit) = Interop.mkprop "tableView.cellToggled" handler
     static member inline selectedCellChanged (handler:SelectedCellChangedEventArgs->unit) = Interop.mkprop "tableView.selectedCellChanged" handler
 
-// TabView
-type tabView =
-    // Properties
-    static member inline maxTabTextWidth (value:UInt32) = Interop.mkprop "tabView.maxTabTextWidth" value
-    static member inline selectedTab (value:Tab) = Interop.mkprop "tabView.selectedTab" value
-    static member inline style (value:TabStyle) = Interop.mkprop "tabView.style" value
-    static member inline tabScrollOffset (value:int) = Interop.mkprop "tabView.tabScrollOffset" value
-    // Events
-    static member inline selectedTabChanged (handler:TabChangedEventArgs->unit) = Interop.mkprop "tabView.selectedTabChanged" handler
-    static member inline tabClicked (handler:TabMouseEventArgs->unit) = Interop.mkprop "tabView.tabClicked" handler
-
 // TextField
 type textField =
     // Properties
     static member inline autocomplete (value:IAutocomplete) = Interop.mkprop "textField.autocomplete" value
     static member inline caption (value:string) = Interop.mkprop "textField.caption" value
     static member inline captionColor (value:Color) = Interop.mkprop "textField.captionColor" value
-    static member inline cursorPosition (value:int) = Interop.mkprop "textField.cursorPosition" value
+    static member inline cursorPosition (value:Int32) = Interop.mkprop "textField.cursorPosition" value
     static member inline readOnly (value:bool) = Interop.mkprop "textField.readOnly" value
     static member inline secret (value:bool) = Interop.mkprop "textField.secret" value
-    static member inline selectedStart (value:int) = Interop.mkprop "textField.selectedStart" value
+    static member inline selectedStart (value:Int32) = Interop.mkprop "textField.selectedStart" value
     static member inline text (value:string) = Interop.mkprop "textField.text" value
     static member inline used (value:bool) = Interop.mkprop "textField.used" value
     // Events
@@ -592,15 +588,15 @@ type textView =
     static member inline cursorPosition (value:Point) = Interop.mkprop "textView.cursorPosition" value
     static member inline inheritsPreviousColorScheme (value:bool) = Interop.mkprop "textView.inheritsPreviousColorScheme" value
     static member inline isDirty (value:bool) = Interop.mkprop "textView.isDirty" value
-    static member inline leftColumn (value:int) = Interop.mkprop "textView.leftColumn" value
+    static member inline leftColumn (value:Int32) = Interop.mkprop "textView.leftColumn" value
     static member inline multiline (value:bool) = Interop.mkprop "textView.multiline" value
     static member inline readOnly (value:bool) = Interop.mkprop "textView.readOnly" value
     static member inline selecting (value:bool) = Interop.mkprop "textView.selecting" value
-    static member inline selectionStartColumn (value:int) = Interop.mkprop "textView.selectionStartColumn" value
-    static member inline selectionStartRow (value:int) = Interop.mkprop "textView.selectionStartRow" value
-    static member inline tabWidth (value:int) = Interop.mkprop "textView.tabWidth" value
+    static member inline selectionStartColumn (value:Int32) = Interop.mkprop "textView.selectionStartColumn" value
+    static member inline selectionStartRow (value:Int32) = Interop.mkprop "textView.selectionStartRow" value
+    static member inline tabWidth (value:Int32) = Interop.mkprop "textView.tabWidth" value
     static member inline text (value:string) = Interop.mkprop "textView.text" value
-    static member inline topRow (value:int) = Interop.mkprop "textView.topRow" value
+    static member inline topRow (value:Int32) = Interop.mkprop "textView.topRow" value
     static member inline used (value:bool) = Interop.mkprop "textView.used" value
     static member inline wordWrap (value:bool) = Interop.mkprop "textView.wordWrap" value
     // Events
@@ -626,7 +622,7 @@ type tileView =
 // TimeField
 type timeField =
     // Properties
-    static member inline cursorPosition (value:int) = Interop.mkprop "timeField.cursorPosition" value
+    static member inline cursorPosition (value:Int32) = Interop.mkprop "timeField.cursorPosition" value
     static member inline isShortFormat (value:bool) = Interop.mkprop "timeField.isShortFormat" value
     static member inline time (value:TimeSpan) = Interop.mkprop "timeField.time" value
     // Events
@@ -652,21 +648,18 @@ type toplevel =
     static member inline sizeChanging (handler:SizeChangedEventArgs->unit) = Interop.mkprop "toplevel.sizeChanging" handler
     static member inline unloaded (handler:unit->unit) = Interop.mkprop "toplevel.unloaded" handler
 
-// TreeView
-// No properties or events TreeView
-
 // TreeView`1
 type treeView<'a when 'a : not struct> =
     // Properties
     static member inline allowLetterBasedNavigation (value:bool) = Interop.mkprop "treeView`1.allowLetterBasedNavigation" value
     static member inline aspectGetter (value:AspectGetterDelegate<'a>) = Interop.mkprop "treeView`1.aspectGetter" value
     static member inline colorGetter (value:Func<'a,ColorScheme>) = Interop.mkprop "treeView`1.colorGetter" value
-    static member inline maxDepth (value:int) = Interop.mkprop "treeView`1.maxDepth" value
+    static member inline maxDepth (value:Int32) = Interop.mkprop "treeView`1.maxDepth" value
     static member inline multiSelect (value:bool) = Interop.mkprop "treeView`1.multiSelect" value
     static member inline objectActivationButton (value:MouseFlags option) = Interop.mkprop "treeView`1.objectActivationButton" value
     static member inline objectActivationKey (value:KeyCode) = Interop.mkprop "treeView`1.objectActivationKey" value
-    static member inline scrollOffsetHorizontal (value:int) = Interop.mkprop "treeView`1.scrollOffsetHorizontal" value
-    static member inline scrollOffsetVertical (value:int) = Interop.mkprop "treeView`1.scrollOffsetVertical" value
+    static member inline scrollOffsetHorizontal (value:Int32) = Interop.mkprop "treeView`1.scrollOffsetHorizontal" value
+    static member inline scrollOffsetVertical (value:Int32) = Interop.mkprop "treeView`1.scrollOffsetVertical" value
     static member inline selectedObject (value:'a) = Interop.mkprop "treeView`1.selectedObject" value
     static member inline style (value:TreeStyle) = Interop.mkprop "treeView`1.style" value
     static member inline treeBuilder (value:ITreeBuilder<'a>) = Interop.mkprop "treeView`1.treeBuilder" value
@@ -674,6 +667,9 @@ type treeView<'a when 'a : not struct> =
     static member inline drawLine (handler:DrawTreeViewLineEventArgs<'a>->unit) = Interop.mkprop "treeView`1.drawLine" handler
     static member inline objectActivated (handler:ObjectActivatedEventArgs<'a>->unit) = Interop.mkprop "treeView`1.objectActivated" handler
     static member inline selectionChanged (handler:SelectionChangedEventArgs<'a>->unit) = Interop.mkprop "treeView`1.selectionChanged" handler
+
+// TreeView
+// No properties or events TreeView
 
 // Window
 // No properties or events Window

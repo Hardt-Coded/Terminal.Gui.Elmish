@@ -9,6 +9,7 @@
     <Compile Include="Counter.fs" />
     <Compile Include="TextFields.fs" />
     <Compile Include="RadioCheck.fs" />
+    <Compile Include="Combo.fs" />
     <Compile Include="TextView.fs" />
     <Compile Include="ListView.fs" />
     <Compile Include="ScrollView.fs" />

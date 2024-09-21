@@ -7,12 +7,14 @@ open Terminal.Gui.Elmish
 type Model = {
     Text:string
     SecretText:string
+    Number: int
     CurrentTime:TimeSpan
     CurrentDate:DateTime
 }
 
 type Msg =
     | ChangeText of string
+    | ChangeNumber of int
     | ChangeSecretText of string
     | ChangeTime of TimeSpan
     | ChangeDate of DateTime
@@ -24,6 +26,7 @@ let init () : Model * Cmd<Msg> =
         SecretText = "Secret"
         CurrentTime = TimeSpan(9,1,35)
         CurrentDate = DateTime.Today
+        Number = 0
     }
     model, Cmd.none
 
@@ -32,6 +35,8 @@ let update (msg:Msg) (model:Model) =
     match msg with
     | ChangeText txt ->
         {model with Text = txt}, Cmd.none
+    | ChangeNumber num ->
+        {model with Number = num}, Cmd.none
     | ChangeSecretText txt ->
         {model with SecretText = txt}, Cmd.none
     | ChangeTime time ->
@@ -55,14 +60,14 @@ let view (model:Model) (dispatch:Msg -> unit) =
 
         View.label [
             prop.position.x.absolute 1
-            prop.position.y.absolute 5
+            prop.position.y.absolute 3
             prop.width.fill 14
             label.text "Text:"
         ]
 
         View.textField [
             prop.position.x.absolute 14
-            prop.position.y.absolute 5
+            prop.position.y.absolute 3
             prop.width.fill 0
             textField.text model.Text
             textField.textChanging (fun ev -> dispatch (ChangeText ev.NewValue))
@@ -70,18 +75,36 @@ let view (model:Model) (dispatch:Msg -> unit) =
 
         View.label [
             prop.position.x.absolute 1
-            prop.position.y.absolute 7
+            prop.position.y.absolute 5
             prop.width.fill 14
             label.text "Secret Text:"
         ]
 
         View.textField [
             prop.position.x.absolute 14
-            prop.position.y.absolute 7
+            prop.position.y.absolute 5
             prop.width.fill 0
             textField.text  model.SecretText
             textField.textChanging (fun ev -> dispatch (ChangeSecretText ev.NewValue))
             textField.secret true
+        ]
+        
+        
+        View.numericUpDown<int> [
+            prop.position.x.absolute 1
+            prop.position.y.absolute 7
+            prop.width.fill 14
+            numericUpDown<_>.value model.Number
+            numericUpDown<_>.valueChanged (fun num -> dispatch <| ChangeNumber num )
+        ]
+        
+        
+        View.numericUpDown [
+            prop.position.x.absolute 10
+            prop.position.y.absolute 7
+            prop.width.fill 14
+            numericUpDown<_>.value model.Number
+            numericUpDown<_>.valueChanged (fun num -> dispatch <| ChangeNumber num )
         ]
 
         View.label [
@@ -146,5 +169,7 @@ let view (model:Model) (dispatch:Msg -> unit) =
             prop.position.y.absolute 17
             label.text $"The DateTime (time and date Field) says: {model.CurrentDate.Add(model.CurrentTime):``ddd, yyyy-MM-dd HH:mm:ss``}"
         ]
+        
+        View.label (1,19, $"The Number is: {model.Number}")
 
     ]

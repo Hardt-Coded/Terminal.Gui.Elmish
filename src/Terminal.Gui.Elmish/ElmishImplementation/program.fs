@@ -225,8 +225,10 @@ module Program =
                 //Application.Begin(te) |> ignore
                 
                 Application.Run(te) |> ignore
+                te.Dispose()
+                Application.Shutdown()
             | _ ->
-                failwith("first element must be a page!")
+                failwith("first element must be a toplevel!")
 
     /// Start the dispatch loop with `unit` for the init() function.
     let run (program: Program<unit, 'model, 'msg, 'view>) = runWith () program
@@ -236,7 +238,9 @@ module Program =
         System.Console.Clear()
         System.Environment.Exit(errorcode)
 
-    let quit() = quitWithErrorCode 0
+    let quit() =
+        Application.Shutdown()
+        quitWithErrorCode 0
         
 
     

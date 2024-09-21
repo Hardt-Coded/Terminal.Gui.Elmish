@@ -9,6 +9,7 @@ type Pages =
     | Counter
     | TextFields
     | RadioCheck
+    | Combo
     | TextView
     | ListView
     | ScrollView
@@ -22,6 +23,7 @@ type Model = {
     CounterModel:Counter.Model option
     TextFieldsModel:TextFields.Model option
     RadioCheckModel:RadioCheck.Model option
+    ComboModel:Combo.Model option
     TextViewModel:TextView.Model option
     ListViewModel:ListView.Model option
     ScrollViewModel:ScrollView.Model option
@@ -38,6 +40,7 @@ type Msg =
     | CounterMsg of Counter.Msg
     | TextFieldsMsg of TextFields.Msg
     | RadioCheckMsg of RadioCheck.Msg
+    | ComboMsg of Combo.Msg
     | TextViewMsg of TextView.Msg
     | ListViewMsg of ListView.Msg
     | ScrollViewMsg of ScrollView.Msg
@@ -64,6 +67,7 @@ let init () =
         CounterModel = None
         TextFieldsModel = None
         RadioCheckModel = None
+        ComboModel = None
         TextViewModel = None
         ListViewModel = None
         ScrollViewModel = None
@@ -105,6 +109,16 @@ let update (msg:Msg) (model:Model) =
                 let cmd =
                     c |> Cmd.map RadioCheckMsg
                 {model with RadioCheckModel = Some m; Page = RadioCheck}, cmd
+            | _ ->
+                {model with Page = page}, Cmd.none
+
+        | Combo ->
+            match model.RadioCheckModel with
+            | None ->
+                let m,c = Combo.init()
+                let cmd =
+                    c |> Cmd.map ComboMsg
+                {model with ComboModel =  Some m; Page = Combo}, cmd
             | _ ->
                 {model with Page = page}, Cmd.none
 
@@ -159,6 +173,7 @@ let update (msg:Msg) (model:Model) =
     | ExitApp ->
         Program.quit()
         model, Cmd.none
+        
     | CounterMsg cmsg ->
         match model.CounterModel with
         | None ->
@@ -189,6 +204,16 @@ let update (msg:Msg) (model:Model) =
             let cmd =
                 c |> Cmd.map RadioCheckMsg
             {model with RadioCheckModel = Some m}, cmd
+
+    | ComboMsg msg ->
+        match model.ComboModel with
+        | None ->
+            model, Cmd.none
+        | Some cmodel ->
+            let m,c = Combo.update msg cmodel
+            let cmd =
+                c |> Cmd.map ComboMsg
+            { model with ComboModel =  Some m}, cmd
 
     | TextViewMsg tfmsg ->
            match model.TextViewModel with
@@ -276,7 +301,25 @@ let view (model:Model) (dispatch:Msg->unit) =
         ]*)
     View.topLevel [
         prop.children [
-        
+            View.menuBar [
+                menuBar.menus [
+                    MenuBarItem("Test", [|
+                        MenuItem ("Start","", (fun () -> dispatch (ChangePage Start)))
+                        MenuItem ("Counter","", (fun () -> dispatch (ChangePage Counter)))
+                        MenuItem ("TextFields","", (fun () -> dispatch (ChangePage TextFields)))
+                        MenuItem ("RadioCheck","", (fun () -> dispatch (ChangePage RadioCheck)))
+                        MenuItem ("Combo","", (fun () -> dispatch (ChangePage Combo)))
+                        MenuItem ("TextView","", (fun () -> dispatch (ChangePage TextView)))
+                        MenuItem ("ListView","", (fun () -> dispatch (ChangePage ListView)))
+                        MenuItem ("ScrollView","", (fun () -> dispatch (ChangePage ScrollView)))
+                        MenuItem ("MessageBoxes","", (fun () -> dispatch (ChangePage MessageBoxes)))
+                        MenuItem ("Wizard","", (fun () -> dispatch (ChangePage Wizard)))
+                        MenuItem ("TabView","", (fun () -> dispatch (ChangePage TabView)))
+                        MenuItem("Exit","", fun () -> dispatch ExitApp)
+                    |])
+                ]
+            ]
+            
             View.window [
                 prop.position.x.absolute 0
                 prop.position.y.absolute 0
@@ -284,7 +327,7 @@ let view (model:Model) (dispatch:Msg->unit) =
                 prop.height.fill 0
                 prop.title $"Elmish Console Demo - {model.CurrentLocalTime:``yyyy-MM-dd HH:mm:ss.ms``}"
                 prop.children [
-
+                    
                     View.window [
                         prop.position.x.absolute 0
                         prop.position.y.absolute 0
@@ -316,42 +359,49 @@ let view (model:Model) (dispatch:Msg->unit) =
                                 prop.position.y.absolute 4
                                 button.text "Radio and Check"
                                 prop.accept (fun ev -> dispatch (ChangePage RadioCheck))
-                            ] 
-
+                            ]
+                            
                             View.button [
                                 prop.position.x.absolute 1
                                 prop.position.y.absolute 5
+                                button.text "Combo und Co"
+                                prop.accept (fun ev -> dispatch (ChangePage Combo))
+                            ]
+
+                            View.button [
+                                prop.position.x.absolute 1
+                                prop.position.y.absolute 6
                                 button.text "Text File View"
                                 prop.accept (fun ev -> dispatch (ChangePage TextView))
                             ] 
 
                             View.button [
                                 prop.position.x.absolute 1
-                                prop.position.y.absolute 6
+                                prop.position.y.absolute 7
                                 button.text "List View"
                                 prop.accept (fun ev -> dispatch (ChangePage ListView))
                             ]                
                             View.button [
                                 prop.position.x.absolute 1
-                                prop.position.y.absolute 7
+                                prop.position.y.absolute 8
                                 button.text "Scroll View"
                                 prop.accept (fun ev -> dispatch (ChangePage ScrollView))
                             ] 
                             View.button [
                                 prop.position.x.absolute 1
-                                prop.position.y.absolute 8
+                                prop.position.y.absolute 9
                                 button.text "Message Boxes"
                                 prop.accept (fun ev -> dispatch (ChangePage MessageBoxes))
                             ] 
                             View.button [
                                 prop.position.x.absolute 1
-                                prop.position.y.absolute 9
+                                prop.position.y.absolute 10
                                 button.text "Wizard"
                                 prop.accept (fun ev -> dispatch (ChangePage Wizard))
                             ]
                             View.button [
                                 prop.position.x.absolute 1
-                                prop.position.y.absolute 10
+                                prop.position.y.absolute 11
                                 button.text "Tab View"
                                 prop.accept (fun ev -> dispatch(ChangePage TabView))
                             ]
@@ -383,6 +433,11 @@ let view (model:Model) (dispatch:Msg->unit) =
                                 | None -> ()
                                 | Some rcmodel ->
                                     yield! RadioCheck.view rcmodel (RadioCheckMsg >> dispatch)
+                            | Combo ->
+                                match model.ComboModel with
+                                | None -> ()
+                                | Some cmodel ->
+                                yield! Combo.view cmodel (ComboMsg >> dispatch)
                             | TextView ->
                                 match model.TextViewModel with
                                 | None -> ()
