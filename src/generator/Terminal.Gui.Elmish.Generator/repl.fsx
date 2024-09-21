@@ -400,8 +400,7 @@ let printNamepaces (printfn:string->unit) =
     printfn "open System.Collections.Generic"
     printfn "open System.Collections.Specialized"
     printfn "open System.Globalization"
-    printfn "open Terminal.Gui.Elmish"
-    printfn "open Terminal.Gui.Elmish.Elements"
+    printfn "open Terminal.Gui.Elmish"    
     printfn "open Terminal.Gui.TextValidateProviders"
     namespaces |> Array.filter (fun ns -> String.IsNullOrWhiteSpace ns |> not)|> Array.iter (fun ns -> printfn $"open {ns}")
 
@@ -417,7 +416,9 @@ let generatePropsFs (printfn:string->unit) =
     printfn "*)"
     printfn ""
     printfn "namespace Terminal.Gui.Elmish"
+    printfn ""
     printNamepaces printfn
+    printfn "open Terminal.Gui.Elmish.Elements"
     // print props
     printViewProps printfn typeof<View>
     inheritedTypes
@@ -426,7 +427,7 @@ let generatePropsFs (printfn:string->unit) =
 
 
 if true then
-    let file = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\Terminal.Gui.Elmish\PropsNew.fs")
+    let file = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\Terminal.Gui.Elmish\Props.fs")
     // empty file
     File.WriteAllText(file, "")
     let st = new StreamWriter(file)
@@ -743,7 +744,7 @@ type TerminalElement (props:IProperty list) =
     
     
 if true then
-    let file = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\Terminal.Gui.Elmish\ElementsNew.fs")
+    let file = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\Terminal.Gui.Elmish\Elements.fs")
     // empty file
     File.WriteAllText(file, "")
     let st = new StreamWriter(file)
@@ -871,7 +872,7 @@ module Dialogs =
     
     
 if true then
-    let file = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\Terminal.Gui.Elmish\ViewNew.fs")
+    let file = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\Terminal.Gui.Elmish\Views.fs")
     // empty file
     File.WriteAllText(file, "")
     let st = new StreamWriter(file)
